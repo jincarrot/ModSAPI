@@ -1,0 +1,589 @@
+# -*- coding: utf-8 -*-
+# from typing import Union, Dict, List
+from mod.common.minecraftEnum import EntityComponentType
+
+from Dimension import *
+from Effect import *
+import sys
+from ..Interfaces.BlockOptions import *
+from ..Interfaces.AnimeOptions import *
+from ..Interfaces.EntityOptions import *
+from ..Interfaces.TeleprotOptions import *
+import mod.server.extraServerApi as serverApi
+import mod.client.extraClientApi as clientApi
+
+SComp = serverApi.GetEngineCompFactory()
+CComp = clientApi.GetEngineCompFactory()
+
+
+class Entity(object):
+    """
+    Represents the state of an entity (a mob, the player, or other moving objects like mine carts) in the world.
+    """
+
+    def __init__(self, entityId):
+        self.__id = entityId
+
+    def __str__(self):
+        data = {
+            "id": self.id,
+            "dimension": str(self.dimension),
+            "isClimbing": self.isClimbing,
+            "isFalling": self.isFalling,
+            "isInWater": self.isInWater,
+            "isOnGround": self.isOnGround,
+            "isSleeping": self.isSleeping,
+            "isSneaking": self.isSneaking,
+            "isSprinting": self.isSprinting,
+            "isSwimming": self.isSwimming,
+            "location": str(self.location),
+            "nameTag": self.nameTag,
+            "typeId": self.typeId
+        }
+        return "<Entity> %s" % data
+
+    @property
+    def id(self):
+        # type: () -> str
+        """
+        Unique identifier of the entity.
+        This identifier is intended to be consistent across loads of a world instance.
+        No meaning should be inferred from the value and structure of this unique identifier - do not parse or interpret it.
+        This property is accessible even if Entity.isValid is false.
+        """
+        return self.__id
+
+    @property
+    def dimension(self):
+        # type: () -> Dimension
+        """
+        Dimension that the entity is currently within.
+        """
+        dim = Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
+        return dim
+
+    @property
+    def isClimbing(self):
+        # type: () -> bool
+        """
+        Whether the entity is touching a climbable block. For example, a player next to a ladder or a spider next to a stone wall.
+        """
+        data = SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_wall_climbing")['value']
+        if data:
+            return True
+        return False
+
+    @property
+    def isFalling(self):
+        # type: () -> bool
+        """
+        Whether the entity has a fall distance greater than 0, or greater than 1 while gliding.
+        """
+        if SComp.CreateEntityDefinitions(self.__id).GetEntityFallDistance():
+            return True
+        return False
+
+    @property
+    def isInWater(self):
+        # type: () -> bool
+        """
+        Whether any part of the entity is inside a water block.
+        """
+        if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_in_water")['value']:
+            return True
+        return False
+
+    @property
+    def isOnGround(self):
+        # type: () -> bool
+        """
+        Whether the entity is on top of a solid block.
+        This property may behave in unexpected ways.
+        This property will always be true when an Entity is first spawned, and if the Entity has no gravity this property may be incorrect.
+        """
+        if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_on_ground")['value']:
+            return True
+        return False
+
+    @property
+    def isSleeping(self):
+        # type: () -> bool
+        """
+        If true, the entity is currently sleeping.
+        """
+        if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_sleeping")['value']:
+            return True
+        return False
+
+    @property
+    def isSneaking(self):
+        # type: () -> bool
+        """
+        Whether the entity is sneaking - that is, moving more slowly and more quietly.
+        """
+        if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_sneaking")['value']:
+            return True
+        return False
+
+    @property
+    def isSprinting(self):
+        # type: () -> bool
+        """
+        Whether the entity is sprinting. For example, a player using the sprint action, an ocelot running away or a pig boosting with Carrot on a Stick.
+        """
+        if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_sprinting")['value']:
+            return True
+        return False
+
+    @property
+    def isSwimming(self):
+        # type: () -> bool
+        """
+        Whether the entity is in the swimming state. For example, a player using the swim action or a fish in water.
+        """
+        if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_swimming")['value']:
+            return True
+        return False
+
+    @property
+    def location(self):
+        # type: () -> Vector3
+        """
+        Current location of the entity.
+        """
+        pos = SComp.CreatePos(self.__id).GetPos()
+        loc = Vector3({"x": pos[0], "y": pos[1], "z": pos[2]})
+        return loc
+
+    @property
+    def nameTag(self):
+        # type: () -> str
+        """
+        Given name of the entity.
+        """
+        return SComp.CreateName(self.__id).GetName()
+
+    @nameTag.setter
+    def nameTag(self, name):
+        # type: (str) -> None
+        """
+        Given name of the entity.
+        """
+        SComp.CreateName(self.__id).SetName(name)
+
+    @property
+    def scoreboardIdentity(self):
+        return 0
+
+    @property
+    def typeId(self):
+        # type: () -> str
+        """
+        Identifier of the type of the entity - for example, 'minecraft:skeleton'.
+        This property is accessible even if @minecraft/server.Entity.isValid is false.
+        """
+        return SComp.CreateEngineType(self.__id).GetEngineTypeStr()
+
+    def addEffect(self, effectType, duration, options=EntityEffectOptions):
+        # type: (Union[str, EffectType], int, dict) -> Effect
+        """
+        Adds or updates an effect, like poison, to the entity.
+        """
+        effectType = effectType if type(effectType).__name__ == 'str' else effectType.getName()
+        options = EntityEffectOptions(options)
+        SComp.CreateEffect(self.__id).AddEffectToEntity(effectType, duration / 20 + 1, options.amplifier, options.showParticle)
+
+        def stop():
+            if SComp.CreateGame(self.__id).IsEntityAlive(self.__id):
+                SComp.CreateEffect(self.__id).RemoveEffectFromEntity(effectType)
+
+        SComp.CreateGame(serverApi.GetLevelId()).AddTimer(duration / 20.0, stop)
+        return Effect(effectType, duration, options.amplifier)
+
+    def addTag(self, tag):
+        # type: (str) -> bool
+        """
+        Adds a specified tag to an entity.
+        """
+        return SComp.CreateTag(self.__id).AddEntityTag(tag)
+
+    def applyDamage(self, amount, options=None):
+        # type: (int, dict) -> bool
+        """
+        Applies a set of damage to an entity.
+        """
+        cause = options['cause']
+        if not cause and options['damagingProjectile']:
+            cause = 'projectile'
+            options = EntityApplyDamageByProjectileOptions(options)
+        else:
+            cause = 'none'
+            options = EntityApplyDamageOptions(options)
+        return SComp.CreateHurt(self.__id).Hurt(amount, cause, options.damagingEntity.id, options.damagingProjectile.id, False)
+
+    def applyImpulse(self, vector):
+        # type: (Vector3) -> None
+        """
+        Applies impulse vector to the current velocity of the entity.
+        """
+        SComp.CreateActorMotion(self.__id).SetMotion((vector.x, vector.y, vector.z))
+
+    def applyKnockback(self, horizontalForce, verticalStrength):
+        # type: (Union[dict, VectorXZ], float) -> None
+        """
+        Applies impulse vector to the current velocity of the entity.
+        """
+        vector = VectorXZ(horizontalForce)
+        SComp.CreateAction(self.__id).SetMobKnockback(vector.x, vector.z, 1.0, verticalStrength)
+
+    def clearDynamicProperties(self):
+        # type: () -> None
+        """
+        Clears all dynamic properties that have been set on this entity.
+        """
+        DataComp = SComp.CreateExtraData(self.__id)
+        data = DataComp.GetWholeExtraData()
+        for key in data.keys():
+            DataComp.CleanExtraData(key)
+        DataComp.SaveExtraData()
+
+    def clearVelocity(self):
+        # type: () -> None
+        """
+        Sets the current velocity of the Entity to zero. Note that this method may not have an impact on Players.
+        """
+        SComp.CreateActorMotion(self.__id).SetMotion((0, 0, 0))
+
+    def extinguishFire(self, useEffects=True):
+        # type: (bool) -> bool
+        """
+        Extinguishes the fire if the entity is on fire.
+        Note that you can call getComponent('minecraft:onfire') and, if present, the entity is on fire.
+        @params
+        useEffects?: boolean = true
+        Whether to show any visual effects connected to the extinguishing.
+        """
+        if SComp.CreateAttr(self.__id).IsEntityOnFire():
+            if useEffects:
+                pos = SComp.CreatePos(self.__id).GetPos()
+                SComp.CreateCommand(self.__id).SetCommand("setblock %s %s %s powder_snow" % (pos[0], pos[1], pos[2]))
+                return True
+            else:
+                SComp.CreateAttr(self.__id).SetEntityOnFire(0, 0)
+                return True
+        else:
+            return False
+
+    def getBlockFromViewDirection(self, options=BlockRaycastOptions):
+        # type: (dict) -> BlockRaycastHit
+        """
+        Returns the first intersecting block from the direction that this entity is looking at.
+        """
+
+    def getComponent(self, componentId):
+        # type: (str) -> EntityComponent
+        """
+        Gets a component (that represents additional capabilities) for an entity.
+        """
+
+    def getComponents(self):
+        # type: () -> List[EntityComponent]
+        """
+        Returns all components that are both present on this entity and supported by the API.
+        """
+
+    def getDynamicProperty(self, identifier):
+        # type: (str) -> Any
+        """
+        Returns a property value.
+        """
+        DataComp = SComp.CreateExtraData(self.__id)
+        return DataComp.GetExtraData(identifier)
+
+    def getDynamicPropertyIds(self):
+        # type: () -> List[str]
+        """
+        Returns the available set of dynamic property identifiers that have been used on this entity.
+        """
+        DataComp = SComp.CreateExtraData(self.__id)
+        data = DataComp.GetWholeExtraData()
+        return data.keys()
+
+    def getDynamicPropertyTotalByteCount(self):
+        # type: () -> int
+        """
+        Returns the total size, in bytes, of all the dynamic properties that are currently stored for this entity.
+        This includes the size of both the key and the value.
+        This can be useful for diagnosing performance warning signs -
+        if, for example, an entity has many megabytes of associated dynamic properties, it may be slow to load on various devices.
+        """
+        DataComp = SComp.CreateExtraData(self.__id)
+        data = DataComp.GetWholeExtraData()
+        count = 0
+        for key in data.keys():
+            count += len(key)
+            value = data[key]
+            if type(value).__name__ == 'str':
+                count += len(value)
+            else:
+                count += 8
+        return count
+
+    def getEffect(self, effectType):
+        # type: (Union[str, EffectType]) -> Effect
+        """
+        Returns the effect for the specified EffectType on the entity,
+        undefined if the effect is not present, or throws an error if the effect does not exist.
+        """
+        effectType = effectType if type(effectType).__name__ == 'str' else effectType.getName()
+        if SComp.CreateEffect(self.__id).HasEffect(effectType):
+            datas = SComp.CreateEffect(self.__id).GetAllEffects()
+            data = None
+            for d in datas:
+                if d['effectName'] == effectType:
+                    data = d
+                    break
+            effect = Effect(effectType, int(data['duration_f'] * 20), data['amplifier'])
+            return effect
+
+    def getEffects(self):
+        # type: () -> List[Effect]
+        """
+        Returns a set of effects applied to this entity.
+        """
+        datas = SComp.CreateEffect(self.__id).GetAllEffects()
+        effects = []
+        for data in datas:
+            effects.append(Effect(data['effectName'], int(data['duration_f'] * 20), data['amplifier']))
+        return effects
+
+    def getEntitiesFromViewDirection(self, options=EntityRaycastOptions):
+        # type: (dict) -> EntityRaycastHit
+        """
+        Gets the entities that this entity is looking at by performing a ray cast from the view of this entity.
+        """
+
+    def getHeadLocation(self):
+        # type: () -> Vector3
+        """
+        Returns the current location of the head component of this entity.
+        """
+        data = SComp.CreateCollisionBox(self.__id).GetSize()
+        pos = SComp.CreatePos(self.__id).GetFootPos()
+        location = Vector3({"x": pos[0], "y": pos[1] + data[1] * 0.85, "z": pos[2]})
+        return location
+
+    def getRotation(self):
+        # type: () -> Vector2
+        """
+        Returns the current rotation component of this entity.
+        """
+        rot = SComp.CreateRot(self.__id).GetRot()
+        return Vector2({"x": rot[0], "y": rot[1]})
+
+    def getTags(self):
+        # type: () -> List[str]
+        """
+        Returns all tags associated with the entity.
+        """
+        return SComp.CreateTag(self.__id).GetEntityTags()
+
+    def getVelocity(self):
+        # type: () -> Vector3
+        """
+        Returns the current velocity vector of the entity.
+        """
+        v = SComp.CreateActorMotion(self.__id).GetMotion()
+        return Vector3({"x": v[0], 'y': v[1], 'z': v[2]})
+
+    def getProperty(self, identifier):
+        # type: (str) -> Any
+        """
+        Gets an entity Property value.
+        If the property was set using the setProperty function within the same tick, the updated value will not be reflected until the subsequent tick.
+        """
+        data = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()['properties']
+        if data:
+            tar = data[identifier]
+            """
+            1-bool 4-long 5-float 8-string
+            """
+            if tar['__type__'] == 1:
+                return True if tar['__value__'] else False
+            else:
+                return tar['__value__']
+        else:
+            return None
+
+    def getViewDirection(self):
+        # type: () -> Vector3
+        """
+        Returns the current view direction of the entity.
+        """
+        rot = SComp.CreateRot(self.__id).GetRot()
+        direction = serverApi.GetDirFromRot(rot)
+        return Vector3({"x": direction[0], "y": direction[1], "z": direction[2]})
+
+    def hasComponent(self, componentId):
+        # type: (str) -> bool
+        """
+        Returns true if the specified component is present on this entity.
+        """
+        componentId = componentId.split("minecraft:")[0].lower()
+        return SComp.CreateEntityComponent(self.__id).HasComponent(getattr(EntityComponentType, componentId)) or False
+
+    def hasTag(self, tag):
+        # type: (str) -> bool
+        """
+        Returns whether an entity has a particular tag.
+        """
+        return SComp.CreateTag(self.__id).EntityHasTag(tag)
+
+    def kill(self):
+        # type: () -> bool
+        """
+        Kills this entity. The entity will drop loot as normal.
+        Returns boolean - Returns true if entity can be killed (even if it is already dead), otherwise it returns false.
+        """
+        return SComp.CreateGame(serverApi.GetLevelId()).KillEntity(self.__id)
+
+    def matches(self, options=EntityQueryOptions):
+        # type: (dict) -> bool
+        """
+        Matches the entity against the passed in options.
+        Uses the location of the entity for matching if the location is not specified in the passed in EntityQueryOptions.
+        """
+        options = EntityQueryOptions(options)
+        if options.selfCheck():
+            if len(options.check([self.__id])):
+                return True
+        return False
+
+    def playAnimation(self, animationName, options=PlayAnimationOptions):
+        # type: (str, dict) -> None
+        """
+        Cause the entity to play the given animation.
+        """
+
+    def remove(self):
+        # type: () -> None
+        """
+        Immediately removes the entity from the world.
+        The removed entity will not perform a death animation or drop loot upon removal.
+        """
+        serverApi.GetSystem("SAPI", "world").DestroyEntity(self.__id)
+
+    def removeEffect(self, effectType):
+        # type: (Union[str, EffectType]) -> bool
+        """
+        Removes the specified EffectType on the entity, or returns false if the effect is not present.
+        """
+        effectType = effectType if type(effectType).__name__ == 'str' else effectType.getName()
+        return SComp.CreateEffect(self.__id).RemoveEffectFromEntity(effectType)
+
+    def removeTag(self, tag):
+        # type: (str) -> bool
+        """
+        Removes a specified tag from an entity.
+        """
+        return SComp.CreateTag(self.__id).RemoveEntityTag(tag)
+
+    def resetProperty(self, identifier):
+        # type: (str) -> Any
+        """
+        Resets an Entity Property back to its default value, as specified in the Entity's definition.
+        This property change is not applied until the next tick.
+        """
+        world = serverApi.GetSystem("SAPI", "world")
+        # 获取原nbt
+        nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
+        # 检测是否存在该值
+        if 'properties' in nbt and identifier in nbt['properties']:
+            # 生成临时实体便于获取默认值
+            tempLoc = self.location
+            tempLoc = (tempLoc.x, tempLoc.y + 100, tempLoc.z)
+            tempDim = SComp.CreateDimension(self.__id).GetEntityDimensionId()
+            tempEntity = world.CreateEngineEntityByTypeStr(self.typeId, tempLoc, (0, 0), tempDim)
+            tempEntity = Entity(tempEntity)
+            # 获取默认值并存入原数据
+            value = tempEntity.getProperty(identifier)
+            nbt['properties'][identifier]['__value__'] = value if type(value).__name__ != 'bool' else int(value)
+            world.DestroyEntity(self.__id)
+            tempEntity.remove()
+            self.__id = world.CreateEngineEntityByNBT(nbt)
+            return value
+
+    def runCommand(self, commandString):
+        # type: (str) -> None
+        """
+        Runs a synchronous command on the entity.
+        """
+        SComp.CreateCommand(self.__id).SetCommand(commandString)
+        return None
+
+    def setDynamicProperty(self, identifier, value):
+        # type: (str, Any) -> None
+        """
+        Sets a specified property to a value.
+        """
+        DataComp = SComp.CreateExtraData(self.__id)
+        DataComp.SetExtraData(identifier, value)
+        DataComp.SaveExtraData()
+
+    def setOnFire(self, seconds, useEffects=True):
+        # type: (int, bool) -> bool
+        """
+        Sets an entity on fire (if it is not in water or rain).
+        Note that you can call getComponent('minecraft:onfire') and, if present, the entity is on fire.
+        """
+        return SComp.CreateAttr(self.__id).SetEntityOnFire(seconds)
+
+    def setProperty(self, identifier, value):
+        # type: (str, Any) -> None
+        """
+        Sets an Entity Property to the provided value.
+        This property change is not applied until the next tick.
+        """
+        nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
+        if 'properties' in nbt and identifier in nbt['properties']:
+            nbt['properties'][identifier]['__value__'] = value
+            self.remove()
+            self.__id = serverApi.GetSystem("SAPI", "world").CreateEngineEntityByNBT(nbt)
+
+    def setRotation(self, rotation):
+        # type: (Union[str, Vector2]) -> None
+        """
+        Sets the main rotation of the entity.
+        """
+        rotation = Vector2({rotation}) if type(rotation).__name__ == 'dict' else rotation
+        SComp.CreateRot(self.__id).SetRot((rotation.x, rotation.y))
+
+    def teleport(self, location, teleportOptions=TeleportOptions):
+        # type: (Vector3, dict) -> None
+        """
+        Teleports the selected entity to a new location
+        """
+
+    def triggerEvent(self, eventName):
+        # type: (str) -> None
+        """
+        Triggers an entity type event.
+        For every entity, a number of events are defined in an entities' definition for key entity behaviors;
+        for example, creepers have a minecraft:start_exploding type event.
+        """
+        SComp.CreateEntityEvent(self.__id).TriggerCustomEvent(self.__id, eventName)
+
+    def tryTeleport(self, location, teleportOptions=TeleportOptions):
+        # type: (Union[dict, Vector3], dict) -> bool
+        """
+        Attempts to try a teleport, but may not complete the teleport operation (for example, if there are blocks at the destination.)
+        """
+
+
+class Player(Entity):
+    """
+    Represents a player within the world.
+    """
+
+    def __init__(self, playerId):
+        super(Entity, self).__init__()
