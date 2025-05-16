@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# from typing import List, Dict, Union
-
-from ..Classes.Entity import *
+from typing import List, Dict, Union
 from Vector import *
 from ..Enumerations import *
+from ..Classes.Entity import *
 import math
 import mod.server.extraServerApi as serverApi
 

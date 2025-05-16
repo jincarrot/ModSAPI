@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-# from typing import Union, Dict, List
+from typing import Any, Union, Dict, List
 from mod.common.minecraftEnum import EntityComponentType
 
 from Dimension import *
 from Effect import *
-import sys
 from ..Interfaces.BlockOptions import *
 from ..Interfaces.AnimeOptions import *
 from ..Interfaces.EntityOptions import *
-from ..Interfaces.TeleprotOptions import *
+from ..Interfaces.TeleportOptions import *
+from ..Interfaces.Raycasts import *
+from EntityComponents import *
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
@@ -185,12 +186,12 @@ class Entity(object):
         return SComp.CreateEngineType(self.__id).GetEngineTypeStr()
 
     def addEffect(self, effectType, duration, options=EntityEffectOptions):
-        # type: (Union[str, EffectType], int, dict) -> Effect
+        # type: (Union[str, EffectType], int, Union[EntityEffectOptions, dict]) -> Effect
         """
         Adds or updates an effect, like poison, to the entity.
         """
         effectType = effectType if type(effectType).__name__ == 'str' else effectType.getName()
-        options = EntityEffectOptions(options)
+        options = EntityEffectOptions(options) if type(options).__name__ == 'dict' else options
         SComp.CreateEffect(self.__id).AddEffectToEntity(effectType, duration / 20 + 1, options.amplifier, options.showParticle)
 
         def stop():
@@ -208,24 +209,34 @@ class Entity(object):
         return SComp.CreateTag(self.__id).AddEntityTag(tag)
 
     def applyDamage(self, amount, options=None):
-        # type: (int, dict) -> bool
+        # type: (int, Union[dict, EntityApplyDamageByProjectileOptions, EntityApplyDamageOptions]) -> bool
         """
         Applies a set of damage to an entity.
         """
-        cause = options['cause']
-        if not cause and options['damagingProjectile']:
-            cause = 'projectile'
-            options = EntityApplyDamageByProjectileOptions(options)
+        if options and type(options).__name__ == 'dict':
+            cause = options['cause'] if type(options).__name__ == 'dict' else None
+            if not cause and options['damagingProjectile']:
+                cause = 'projectile'
+                options = EntityApplyDamageByProjectileOptions(options)
+                return SComp.CreateHurt(self.__id).Hurt(amount, cause, options.damagingEntity.id, options.damagingProjectile.id, False)
+            else:
+                options = EntityApplyDamageOptions(options)
+                return SComp.CreateHurt(self.__id).Hurt(amount, options.cause, options.damagingEntity.id, None, False)
+        elif not options:
+            cause = "none"
+            return SComp.CreateHurt(self.__id).Hurt(amount, cause, None, None, False)
         else:
-            cause = 'none'
-            options = EntityApplyDamageOptions(options)
-        return SComp.CreateHurt(self.__id).Hurt(amount, cause, options.damagingEntity.id, options.damagingProjectile.id, False)
+            if hasattr(options, 'damagingProjectile'):
+                return SComp.CreateHurt(self.__id).Hurt(amount, 'projectile', options.damagingEntity.id, options.damagingProjectile.id, False)
+            elif hasattr(options, 'cause'):
+                return SComp.CreateHurt(self.__id).Hurt(amount, options.cause, options.damagingEntity.id, None, False)
 
     def applyImpulse(self, vector):
-        # type: (Vector3) -> None
+        # type: (Union[Vector3, dict]) -> None
         """
         Applies impulse vector to the current velocity of the entity.
         """
+        vector = Vector3(vector) if type(vector).__name__ == 'dict' else vector
         SComp.CreateActorMotion(self.__id).SetMotion((vector.x, vector.y, vector.z))
 
     def applyKnockback(self, horizontalForce, verticalStrength):
@@ -233,7 +244,7 @@ class Entity(object):
         """
         Applies impulse vector to the current velocity of the entity.
         """
-        vector = VectorXZ(horizontalForce)
+        vector = VectorXZ(horizontalForce) if type(horizontalForce).__name__ == 'dict' else horizontalForce
         SComp.CreateAction(self.__id).SetMobKnockback(vector.x, vector.z, 1.0, verticalStrength)
 
     def clearDynamicProperties(self):
