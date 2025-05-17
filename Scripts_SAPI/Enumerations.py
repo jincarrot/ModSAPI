@@ -43,3 +43,17 @@ class EntityDamageCause(object):
     thorns = 'thorns',
     void = 'void',
     wither = 'wither'
+
+
+class LiquidType(object):
+    "Represents the type of liquid that can be placed on a block or flow dynamoically in the world"
+    Water = 'Water'
+
+
+class ItemLockMode(object):
+    """
+    Describes how an an item can be moved within a container.
+    """
+    none = "none",
+    inventory = "inventory",
+    slot = "slot"

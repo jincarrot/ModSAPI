@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# from typing import Union, Dict
+from typing import Union, Dict
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
@@ -14,9 +14,17 @@ class Dimension(object):
     """
 
     def __init__(self, dimId):
-        # type: (int) -> None
-        self.__dimId = dimId
-        self.__id = MinecraftDimensionTypes[self.__dimId]
+        # type: (Union[int, str]) -> None
+        if type(dimId).__name__ == 'int':
+            self.__dimId = dimId
+            self.__id = MinecraftDimensionTypes[self.__dimId]
+        else:
+            if dimId.find("minecraft:") >= 0:
+                self.__id = dimId
+                self.__dimId = MinecraftDimensionTypes.index(self.__id)
+            else:
+                self.__id = "minecraft:" + dimId
+                self.__dimId = MinecraftDimensionTypes.index(self.__id)
 
     def __str__(self):
         return "<Dimension> {id: %s}" % self.id
@@ -28,3 +36,11 @@ class Dimension(object):
         Identifier of the dimension.
         """
         return self.__id
+    
+    @property
+    def dimId(self):
+        # type: () -> int
+        """
+        id of the dimension.
+        """
+        return self.__dimId
