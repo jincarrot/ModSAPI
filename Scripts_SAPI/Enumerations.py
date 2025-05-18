@@ -57,3 +57,32 @@ class ItemLockMode(object):
     none = "none",
     inventory = "inventory",
     slot = "slot"
+
+
+class Direction(object):
+    """
+    A general purpose relative direction enumeration.
+    """
+    Down = "Down"
+    """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
+    East = "East"
+    """Returns the @minecraft/server.Block to the east (x + 1) of this item."""
+    North = "North"
+    """Returns the @minecraft/server.Block to the east (z + 1) of this item."""
+    South = "South"
+    """Returns the @minecraft/server.Block to the south (z - 1) of this item."""
+    Up = "Up"
+    """Returns the @minecraft/server.Block above (y + 1) of this item."""
+    West = "West"
+    """Returns the @minecraft/server.Block to the west (x - 1) of this item."""
+
+
+class EntityComponentTypes(object):
+    """
+    The types of entity components that are accessible via function Entity.getComponent.
+    """
+
+    __AddRider = "minecraft:addrider"
+    """When added, this component makes the entity spawn with a rider of the specified entityType."""
+    Health = "minecraft:health"
+    """Defines the health properties of an entity."""

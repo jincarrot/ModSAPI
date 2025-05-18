@@ -24,6 +24,14 @@ class Vector3(object):
             "z": self.z
         }
         return "<Vector3> %s" % data
+    
+    def __sub__(self, data):
+        data = {
+            "x": self.x - data.x,
+            "y": self.y - data.y,
+            "z": self.z - data.z
+        }
+        return Vector3(data)
 
 
 class Vector2(object):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Union, Dict
+# from typing import Union, Dict
 from ..Classes.Entity import *
 
 class Component(object):
@@ -9,7 +9,9 @@ class Component(object):
 
     def __init__(self, typeId):
         # type: (str) -> None
-        self.__typeId = typeId
+        if typeId.find("minecraft:") < 0:
+            typeId = "minecraft:" + typeId
+        self.__typeId = typeId.lower()
 
     def __str__(self):
         return "<Component> {typeId: %s}" % self.typeId
@@ -29,7 +31,7 @@ class EntityComponent(Component):
     """
     
     def __init__(self, typeId, data):
-        super().__init__(typeId)
+        Component.__init__(self, typeId)
         self.__entity = data['entity']
     
     def __str__(self):
@@ -47,3 +49,9 @@ class EntityComponent(Component):
         The entity will be undefined if it has been removed.
         """
         return self.__entity
+
+
+class ComponentGenerater(object):
+    """
+    组件加载器
+    """

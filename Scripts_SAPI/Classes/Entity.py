@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Union, Dict, List
-from mod.common.minecraftEnum import EntityComponentType
+# from typing import Any, Union, Dict, List
+from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
 from Dimension import *
 from Effect import *
@@ -290,18 +290,60 @@ class Entity(object):
         """
         Returns the first intersecting block from the direction that this entity is looking at.
         """
+        direction = self.getViewDirection()
+        location = self.location
+        dimension = self.dimension.dimId
+        blocks = serverApi.getEntitiesOrBlockFromRay(dimension, (location.x, location.y, location.z), (direction.x, direction.y, direction.z), 32, False, RayFilterType.OnlyBlocks)
+        temps = serverApi.getEntitiesOrBlockFromRay(dimension, (location.x, location.y, location.z), (direction.x + 0.000001, direction.y + 0.000001, direction.z + 0.000001), 32, False, RayFilterType.OnlyBlocks)
+        if len(blocks):
+            face = None
+            block = blocks[0]
+            temp = temps[0]
+            pos0 = block['hitPos']
+            pos1 = temp['hitPos']
+            if pos0[0] == pos1[0]:
+                if pos0[0] > block['pos'][0] + 0.5:
+                    face = Direction.East
+                else:
+                    face = Direction.West
+            elif pos0[1] == pos1[1]:
+                if pos0[1] > block['pos'][1] + 0.5:
+                    face = Direction.Up
+                else:
+                    face = Direction.Down
+            else:
+                if pos0[2] > block['pos'][2] + 0.5:
+                    face = Direction.North
+                else:
+                    face = Direction.South
+            data = {
+                "block": Block({"location": Vector3({"x": block['pos'][0], "y": block['pos'][1], "z": block['pos'][2]}), "dimension": self.dimension}),
+                "face": face,
+                "faceLocation": block['hitPos']
+            }
+            return BlockRaycastHit(data)
 
     def getComponent(self, componentId):
         # type: (str) -> EntityComponent
         """
         Gets a component (that represents additional capabilities) for an entity.
         """
+        componentId = componentId.split("minecraft:")[0].lower()
+        if componentId in vars(EntityComponentType).values():
+            if componentId == "minecraft:health":
+                return EntityHealthComponent(componentId, {"entity": self})
+        return EntityComponent(componentId, {"entity": self})
 
     def getComponents(self):
         # type: () -> List[EntityComponent]
         """
         Returns all components that are both present on this entity and supported by the API.
         """
+        componentNames = SComp.CreateEntityComponent(self.__id).GetAllComponentsName()
+        components = []
+        for name in componentNames:
+            components.append(self.getComponent(name))
+        return components
 
     def getDynamicProperty(self, identifier):
         # type: (str) -> Any
@@ -369,10 +411,20 @@ class Entity(object):
         return effects
 
     def getEntitiesFromViewDirection(self, options=EntityRaycastOptions):
-        # type: (dict) -> EntityRaycastHit
+        # type: (dict) -> List[EntityRaycastHit]
         """
         Gets the entities that this entity is looking at by performing a ray cast from the view of this entity.
         """
+        direction = self.getViewDirection()
+        location = self.location
+        dimension = self.dimension.dimId
+        entities = serverApi.getEntitiesOrBlockFromRay(dimension, (location.x, location.y, location.z), (direction.x, direction.y, direction.z), 16, True, RayFilterType.OnlyEntities)
+        if len(entities):
+            results = []
+            for entity in entities:
+                distance = math.sqrt((entity['hitPos'][0] - location.x) ** 2 + (entity['hitPos'][1] - location.y) ** 2 + (entity['hitPos'][2] - location.z) ** 2)
+                results.append(EntityRaycastHit({"entity": Entity(entity['entityId']), "distance": distance}))
+            return results
 
     def getHeadLocation(self):
         # type: () -> Vector3
@@ -475,6 +527,7 @@ class Entity(object):
         """
         Cause the entity to play the given animation.
         """
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand('playanimation @s "%s"' % animationName, self.__id)
 
     def remove(self):
         # type: () -> None
@@ -529,7 +582,7 @@ class Entity(object):
         """
         Runs a synchronous command on the entity.
         """
-        SComp.CreateCommand(self.__id).SetCommand(commandString)
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString, self.__id)
         return None
 
     def setDynamicProperty(self, identifier, value):
@@ -570,10 +623,12 @@ class Entity(object):
         SComp.CreateRot(self.__id).SetRot((rotation.x, rotation.y))
 
     def teleport(self, location, teleportOptions=TeleportOptions):
-        # type: (Vector3, dict) -> None
+        # type: (Union[Vector3, dict], dict) -> None
         """
         Teleports the selected entity to a new location
         """
+        location = Vector3(location) if type(location).__name__ == 'dict' else location
+        SComp.CreatePos(self.__id).SetFootPos((location.x, location.y, location.z))
 
     def triggerEvent(self, eventName):
         # type: (str) -> None
@@ -589,6 +644,7 @@ class Entity(object):
         """
         Attempts to try a teleport, but may not complete the teleport operation (for example, if there are blocks at the destination.)
         """
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("tp @s %s %s %s true" % (location.x, location.y, location.z), self.__id)
 
 
 class Player(Entity):
@@ -597,4 +653,4 @@ class Player(Entity):
     """
 
     def __init__(self, playerId):
-        super(Entity, self).__init__()
+        Entity.__init__(self, playerId)

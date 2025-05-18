@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from ..Classes.Block import *
+
 class EntityRaycastHit(object):
     """
     Contains information for entity raycast hit results.
@@ -31,6 +33,14 @@ class BlockRaycastHit(object):
         """Face of the block that was hit."""
         self.__faceLocation = data['faceLocation']
         """Hit location relative to the bottom north-west corner of the block."""
+    
+    def __str__(self):
+        data = {
+            "block": str(self.block),
+            "face": str(self.face),
+            "faceLocation": str(self.faceLocation)
+        }
+        return "<BlockRaycastHit> %s" % data
 
     @property
     def block(self):
