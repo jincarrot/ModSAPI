@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# from typing import Any, Union, Dict, List
+from typing import Any, Union, Dict, List
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
 from Dimension import *
@@ -10,6 +10,7 @@ from ..Interfaces.EntityOptions import *
 from ..Interfaces.TeleportOptions import *
 from ..Interfaces.Raycasts import *
 from EntityComponents import *
+import math
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
@@ -190,8 +191,8 @@ class Entity(object):
         """
         Adds or updates an effect, like poison, to the entity.
         """
-        effectType = effectType if type(effectType).__name__ == 'str' else effectType.getName()
-        options = EntityEffectOptions(options) if type(options).__name__ == 'dict' else options
+        effectType = effectType if type(effectType) == str else effectType.getName()
+        options = EntityEffectOptions(options if type(options) == dict else {})  if type(options) != EntityEffectOptions else options
         SComp.CreateEffect(self.__id).AddEffectToEntity(effectType, duration / 20 + 1, options.amplifier, options.showParticle)
 
         def stop():
@@ -286,16 +287,18 @@ class Entity(object):
             return False
 
     def getBlockFromViewDirection(self, options=BlockRaycastOptions):
-        # type: (dict) -> BlockRaycastHit
+        # type: (Union[dict, BlockRaycastOptions]) -> BlockRaycastHit
         """
+        note: options is not complete
         Returns the first intersecting block from the direction that this entity is looking at.
         """
+        options = BlockRaycastOptions(options if type(options) == dict else {}) if type(options) != BlockRaycastOptions else options
         direction = self.getViewDirection()
         location = self.location
         dimension = self.dimension.dimId
         blocks = serverApi.getEntitiesOrBlockFromRay(dimension, (location.x, location.y, location.z), (direction.x, direction.y, direction.z), 32, False, RayFilterType.OnlyBlocks)
         temps = serverApi.getEntitiesOrBlockFromRay(dimension, (location.x, location.y, location.z), (direction.x + 0.000001, direction.y + 0.000001, direction.z + 0.000001), 32, False, RayFilterType.OnlyBlocks)
-        if len(blocks):
+        if blocks and len(blocks):
             face = None
             block = blocks[0]
             temp = temps[0]
@@ -319,7 +322,7 @@ class Entity(object):
             data = {
                 "block": Block({"location": Vector3({"x": block['pos'][0], "y": block['pos'][1], "z": block['pos'][2]}), "dimension": self.dimension}),
                 "face": face,
-                "faceLocation": block['hitPos']
+                "faceLocation": Vector3({"x": block['hitPos'][0], "y": block['hitPos'][1], "z": block['hitPos'][2]})
             }
             return BlockRaycastHit(data)
 
@@ -516,18 +519,19 @@ class Entity(object):
         Matches the entity against the passed in options.
         Uses the location of the entity for matching if the location is not specified in the passed in EntityQueryOptions.
         """
-        options = EntityQueryOptions(options)
+        options = EntityQueryOptions(options if type(options) == dict else {}) if type(options) != EntityQueryOptions else options
         if options.selfCheck():
             if len(options.check([self.__id])):
                 return True
         return False
 
     def playAnimation(self, animationName, options=PlayAnimationOptions):
-        # type: (str, dict) -> None
+        # type: (str, Union[dict, PlayAnimationOptions]) -> None
         """
         Cause the entity to play the given animation.
         """
-        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand('playanimation @s "%s"' % animationName, self.__id)
+        options = PlayAnimationOptions(options if type(options) == dict else {}) if type(options) != PlayAnimationOptions else options
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand('playanimation @s "%s" %s %s %s %s' % (animationName, options.nextState, options.blendOutTime, options.stopExpression, options.controller), self.__id)
 
     def remove(self):
         # type: () -> None
@@ -623,11 +627,12 @@ class Entity(object):
         SComp.CreateRot(self.__id).SetRot((rotation.x, rotation.y))
 
     def teleport(self, location, teleportOptions=TeleportOptions):
-        # type: (Union[Vector3, dict], dict) -> None
+        # type: (Union[Vector3, dict], Union[dict, TeleportOptions]) -> None
         """
         Teleports the selected entity to a new location
         """
-        location = Vector3(location) if type(location).__name__ == 'dict' else location
+        location = Vector3(location if type(location) == dict else {}) if type(location) != Vector3 else location
+        teleportOptions = TeleportOptions(teleportOptions if type(teleportOptions) == dict else {}) if type(teleportOptions) != TeleportOptions else teleportOptions
         SComp.CreatePos(self.__id).SetFootPos((location.x, location.y, location.z))
 
     def triggerEvent(self, eventName):

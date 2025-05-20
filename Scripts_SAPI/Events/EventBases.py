@@ -14,42 +14,24 @@ class EventListener(object):
     事件监听处理器
     """
 
-    def __init__(self, eventName, callback, options=None):
-        # type: (str, types.FunctionType, EntityEventsOptions) -> None
+    def __init__(self, eventName, callback, options=None, detectFunc=None):
+        # type: (str, types.FunctionType, EntityEventsOptions, types.FunctionType) -> None
         self.__eventName = eventName
         self.__callback = callback
         self.__options = options
+        self.__detectFunction = detectFunc
+
+    @property
+    def options(self):
+        return self.__options
 
     def listen(self, data):
+        value = self.__detectFunction(self, data)
+        if value:
+            self.__callback(value)
+        """
         arg = {}
-        if self.__eventName == 'MobDieEvent':
-            if self.__options:
-                if self.__options.entities:
-                    entityIds = []
-                    for entity in self.__options.entities:
-                        entityIds.append(entity.id)
-                    if data['id'] not in entityIds:
-                        return
-                if self.__options.entityTypes:
-                    if SComp.CreateEngineType(data['id']).GetEngineTypeStr() not in self.__options.entityTypes:
-                        return
-            damagingEntity = data['attacker'] if data['attacker'] else None
-            damagingProjectile = None
-            if damagingEntity and SComp.CreateEntityComponent(damagingEntity).HasComponent(EntityComponentType.projectile):
-                damagingProjectile = damagingEntity
-                damagingEntity = SComp.CreateActorOwner(damagingProjectile).GetEntityOwner()
-            temp = {
-                "cause": data['cause']
-            }
-            if damagingEntity:
-                temp['damagingEntity'] = Entity(damagingEntity)
-            if damagingProjectile:
-                temp['damagingProjectile'] = Entity(damagingProjectile)
-            arg['damageSource'] = EntityDamageSource(temp)
-            arg['deadEntity'] = Entity(data['id'])
-            self.__callback(EntityDieAfterEvent(arg))
-
-        elif self.__eventName == "DamageEvent":
+        if self.__eventName == "DamageEvent":
             if self.__options:
                 if self.__options.entities:
                     entityIds = []
@@ -73,6 +55,7 @@ class EventListener(object):
             arg['hurtEntity'] = Entity(data['entityId'])
             arg['damage'] = data['damage']
             self.__callback(EntityHurtAfterEvent(arg))
+        """
 
 
 class EntityEvents(object):

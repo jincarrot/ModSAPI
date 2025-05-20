@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# from typing import Any, List, Union, Dict
+from typing import Any, List, Union, Dict
 from Dimension import *
 from ..Interfaces.Vector import *
 from ..Classes.ItemStack import *
@@ -100,6 +100,16 @@ class Block(object):
         self.__dimension = data['dimension']
         self.__location = data['location']
         self.__permutation = BlockPermutation(self)
+
+    def __str__(self):
+        data = {
+            "dimension": str(self.dimension),
+            "location": str(self.location),
+            "type": str(self.type),
+            "typeId": self.typeId,
+            "permutation": str(self.permutation)
+        }
+        return "<Block> %s" % data
 
     @property
     def dimension(self):

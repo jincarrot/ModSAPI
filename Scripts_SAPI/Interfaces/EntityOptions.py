@@ -1,13 +1,55 @@
 # -*- coding: utf-8 -*-
-# from typing import List, Dict, Union
+from typing import List, Dict, Union
 from Vector import *
 from ..Enumerations import *
-from ..Classes.Entity import *
+from ..Classes.Entity import Entity
 import math
 import mod.server.extraServerApi as serverApi
 
 comp = serverApi.GetEngineCompFactory()
 
+
+class EntityFilter(object):
+    """
+    Contains options for filtering entities.
+    """
+
+    def __init__(self, data):
+        self.excludeFamilies = data['excludeFamilies'] if 'excludeFamilies' in data else []
+        """If this value is set, this event will only fire for entities that do not match the entity families within this collection."""
+        self.excludeTypes = data['excludeTypes'] if 'excludeTypes' in data else []
+        """If this value is set, this event will only fire if the impacted entities' type matches this parameter."""
+        self.excludeGameModes = data['excludeGameModes'] if 'excludeGameModes' in data else []
+        """If this value is set, this event will only fire if the impacted entities' game mode matches this parameter."""
+        self.excludeNames = data['excludeNames'] if 'excludeNames' in data else []
+        """If this value is set, this event will only fire if the impacted entities' name matches this parameter."""
+        self.excludeTags = data['excludeTags'] if 'excludeTags' in data else []
+        """If this value is set, this event will only fire if the impacted entities' tags match this parameter."""
+        self.families = data['families'] if 'families' in data else []
+        """If this value is set, this event will only fire if the impacted entities' family matches this parameter."""
+        self.gameMode = data['gameMode'] if 'gameMode' in data else None
+        """If this value is set, this event will only fire if the impacted entities' game mode matches this parameter."""
+        self.maxHorizontalRotation = data['maxHorizontalRotation'] if 'maxHorizontalRotation' in data else None
+        """If this value is set, this event will only fire if the impacted entities' max horizontal rotation matches this parameter."""
+        self.maxLevel = data['maxLevel'] if 'maxLevel' in data else None
+        """If this value is set, this event will only fire if the impacted entities' level matches this parameter."""
+        self.maxVerticalRotation = data['maxVerticalRotation'] if 'maxVerticalRotation' in data else None
+        """If this value is set, this event will only fire if the impacted entities' max vertical rotation matches this parameter."""
+        self.minLevel = data['minLevel'] if 'minLevel' in data else None
+        """If this value is set, this event will only fire if the impacted entities' level matches this parameter."""
+        self.minHorizontalRotation = data['minHorizontalRotation'] if 'minHorizontalRotation' in data else None
+        """If this value is set, this event will only fire if the impacted entities' min horizontal rotation matches this parameter."""
+        self.minVerticalRotation = data['minVerticalRotation'] if 'minVerticalRotation' in data else None
+        """If this value is set, this event will only fire if the impacted entities' min vertical rotation matches this parameter."""
+        self.name = data['name'] if 'name' in data else ""
+        """If this value is set, this event will only fire if the impacted"""
+        self.propertyOptions = data['propertyOptions'] if 'propertyOptions' in data else None
+        """If this value is set, this event will only fire if the impacted entities' property options match this parameter."""
+        self.scoreOptions = data['scoreOptions'] if 'scoreOptions' in data else None
+        """If this value is set, this event will only fire if the impacted entities' score options match this parameter."""
+        self.tags = data['tags'] if 'tags' in data else []
+        """If this value is set, this event will only fire if the impacted entities' tags match this parameter."""
+        self.type = data['type'] if 'type' in data else ""
 
 class EntityEventsOptions(object):
     """
@@ -191,11 +233,18 @@ class EntityApplyDamageOptions(object):
         """Optional entity that caused the damage."""
 
 
-class EntityRaycastOptions(object):
+class EntityRaycastOptions(EntityFilter):
     """
     Returns the first intersecting block from the direction that this entity is looking at.
     """
 
     def __init__(self, data):
-        pass
+        EntityFilter.__init__(self, data)
+        self.ignoreBlockCollision =  data['ignoreBlockCollision'] if 'ignoreBlockCollision' in data else False
+        """Whether to ignore block collision."""
+        self.includeLiquidBlocks = data['includeLiquidBlocks'] if 'includeLiquidBlocks' in data else False
+        """Whether to include liquid blocks in the raycast."""
+        self.includePassableBlocks = data['includePassableBlocks'] if 'includePassableBlocks' in data else False
+        """Whether to include passable blocks in the raycast."""
+        self.maxDistance = data['maxDistance'] if 'maxDistance' in data else 16
 

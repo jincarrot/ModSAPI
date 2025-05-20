@@ -138,4 +138,4 @@ class EntityHealthComponent(EntityAttributeComponent):
     """
 
     def __init__(self, typeId, data):
-        super().__init__(typeId, data)
+        EntityAttributeComponent.__init__(self, typeId, data)
