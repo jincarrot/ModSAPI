@@ -1,0 +1,11 @@
+{
+    "bpType": "EnhancedInputPart",
+    "changes": {},
+    "classType": "PartInstance",
+    "clientPartType": null,
+    "customVariables": [],
+    "directoryPath": "EnhancedInput",
+    "metaType": "EnhancedInputPartMeta",
+    "objId": "9fe497669db14eb49509a420082a1966",
+    "partType": "EnhancedInputPart"
+}
