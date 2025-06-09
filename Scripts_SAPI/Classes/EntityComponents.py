@@ -12,7 +12,7 @@ class EntityAddRiderComponent(EntityComponent):
     """
     
     def __init__(self, typeId, data):
-        super().__init__(typeId, data)
+        EntityComponent.__init__(self, typeId, data)
         self.__entityType = data['entityType']
         self.__spawnEvent = data['spawnEvent']
     
@@ -50,15 +50,19 @@ class EntityAttributeComponent(EntityComponent):
 
     def __init__(self, typeId, data):
         EntityComponent.__init__(self, typeId, data)
+        if typeId.find("minecraft:") < 0:
+            typeId = "minecraft:" + typeId
+        self.__typeId = typeId.lower()
         self.__comp = SComp.CreateAttr(self.entity.id)
         nbt = SComp.CreateEntityDefinitions(self.entity.id).GetEntityNBTTags()['Attributes']
         for tag in nbt:
-            if tag['Name']['__value__'] == self.__typeId:
-                self.defaultValue = tag['Base']['__value__']
+            if tag['Name']['__value__'] == typeId:
+                self.__defaultValue = tag['Base']['__value__']
                 self.__effectiveMax = tag['Max']['__value__']
                 self.__effectiveMin = tag['Min']['__value__']
                 break
         self.__componentId = self.__typeId
+        self.__attrId = getattr(EntityComponentType, self.__componentId.split("minecraft:")[1])
 
     @property
     def componentId(self):
@@ -129,7 +133,7 @@ class EntityAttributeComponent(EntityComponent):
         """
         Sets the current value of this attribute to the specified value.
         """
-        SComp.CreateAttr(self.entity.id).SetAttribute(getattr(EntityComponentType, self.componentId.split("minecraft:")[0]), value)
+        self.__comp.SetAttrValue(self.__attrId, value)
 
 
 class EntityHealthComponent(EntityAttributeComponent):

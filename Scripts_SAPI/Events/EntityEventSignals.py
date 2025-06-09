@@ -117,6 +117,35 @@ class EntityHurtAfterEventSignal(EntityEvents):
     Manages callbacks that are connected to when an effect is added to an entity.
     """
 
+    @staticmethod
+    def __detectFunction(obj, data):
+        arg = {'error': False}
+        if obj.options:
+            if obj.options.entities:
+                entityIds = []
+                for entity in obj.options.entities:
+                    entityIds.append(entity.id)
+                if data['entityId'] not in entityIds:
+                    arg['error'] = True
+            if obj.options.entityTypes:
+                if SComp.CreateEngineType(data['entityId']).GetEngineTypeStr() not in obj.options.entityTypes:
+                    arg['error'] = True
+        damagingEntity = data['srcId'] if data['srcId'] else None
+        damagingProjectile = data['projectileId']
+        temp = {
+            "cause": data['cause']
+        }
+        if damagingEntity:
+            temp['damagingEntity'] = Entity(damagingEntity)
+        if damagingProjectile:
+            temp['damagingProjectile'] = Entity(damagingProjectile)
+        arg['damageSource'] = EntityDamageSource(temp)
+        arg['hurtEntity'] = Entity(data['entityId'])
+        arg['damage'] = data['damage']
+        if arg['error']:
+            return False
+        return EntityHurtAfterEvent(arg)
+
     def subscribe(self, callback, options=EntityEventsOptions):
         # type: (types.FunctionType, dict) -> None
         """
@@ -125,7 +154,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
         if type(options).__name__ != "dict":
             options = None
         eventName = "DamageEvent"
-        listener = EventListener(eventName, callback, options)
+        listener = EventListener(eventName, callback, options, self.__detectFunction)
         world = serverApi.GetSystem("SAPI", "world")
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, listener,
                              listener.listen)

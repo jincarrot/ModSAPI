@@ -68,7 +68,3 @@ class Effect(object):
         Gets the type id of this effect.
         """
         return self.__typeId
-
-
-class Scoreboard(object):
-    pass

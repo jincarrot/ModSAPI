@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Union, Dict, List
+# from typing import Any, Union, Dict, List
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
 from Dimension import *
@@ -25,6 +25,7 @@ class Entity(object):
 
     def __init__(self, entityId):
         self.__id = entityId
+        self.__healthComp = SComp.CreateAttr(self.__id)
 
     def __str__(self):
         data = {
@@ -173,6 +174,14 @@ class Entity(object):
         """
         SComp.CreateName(self.__id).SetName(name)
 
+    @property
+    def health(self):
+        return self.__healthComp.GetAttrValue(0)
+    
+    @health.setter
+    def health(self, value):
+        self.__healthComp.SetAttrValue(0, value)
+    
     @property
     def scoreboardIdentity(self):
         return 0
@@ -331,9 +340,9 @@ class Entity(object):
         """
         Gets a component (that represents additional capabilities) for an entity.
         """
-        componentId = componentId.split("minecraft:")[0].lower()
-        if componentId in vars(EntityComponentType).values():
-            if componentId == "minecraft:health":
+        componentId = componentId.split("minecraft:")[1].lower()
+        if componentId in vars(EntityComponentType).keys():
+            if componentId == "health":
                 return EntityHealthComponent(componentId, {"entity": self})
         return EntityComponent(componentId, {"entity": self})
 
@@ -659,3 +668,7 @@ class Player(Entity):
 
     def __init__(self, playerId):
         Entity.__init__(self, playerId)
+
+    @property
+    def camera(self):
+        """"""

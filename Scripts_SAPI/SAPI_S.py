@@ -14,13 +14,11 @@ class World(ServerSystem):
 
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
-        self.__systemName = systemName
-        self.__namespace = namespace
         self.__afterEvents = WorldAfterEvents()
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
-        print("SAPI-world loaded")
+        print("Scripts-API: world loaded")
 
     @property
     def afterEvents(self):
@@ -84,8 +82,69 @@ class World(ServerSystem):
         """
         Returns a dimension object.
         """
-        return Dimension(MinecraftDimensionTypes.index(dimensionId))
+        return Dimension(dimensionId)
 
+    @staticmethod
+    def setDynamicProperty(identifier, value):
+        # type: (str, Any) -> None
+        """
+        Sets a specified property to a value.
+        """
+        SComp.CreateExtraData(serverApi.GetLevelId()).SetExtraData(identifier, value)
+
+    @staticmethod
+    def getDynamicProperty(identifier):
+        # type: (str) -> Any
+        """
+        Returns a property value.
+        """
+        return SComp.CreateExtraData(serverApi.GetLevelId()).GetExtraData(identifier)
+    
+    @staticmethod
+    def getDynamicPropertyIds():
+        # type: () -> List[str]
+        """
+        Gets a set of dynamic property identifiers that have been set in this world.
+        """
+        data = SComp.CreateExtraData(serverApi.GetLevelId()).GetWholeExtraData()
+        return data.keys()
+    
+    @staticmethod
+    def getDynamicPropertyTotalByteCount():
+        # type: () -> int
+        """
+        Gets the total byte count of dynamic properties. 
+        This could potentially be used for your own analytics to ensure you're not storing gigantic sets of dynamic properties.
+        """
+        DataComp = SComp.CreateExtraData(serverApi.GetLevelId())
+        data = DataComp.GetWholeExtraData()
+        count = 0
+        for key in data.keys():
+            count += len(key)
+            value = data[key]
+            if type(value).__name__ == 'str':
+                count += len(value)
+            else:
+                count += 8
+        return count
+    
+    @staticmethod
+    def getEntity(id):
+        # type: (str) -> Entity | None
+        """
+        Returns an entity based on the provided id.
+        """
+        if SComp.CreateGame(serverApi.GetLevelId()).IsEntityAlive(id):
+            return Entity(id)
+        else:
+            return None
+        
+    @staticmethod
+    def getTimeOfDay():
+        """
+        Returns the time of day. (In ticks, between 0 and 24000)
+        """
+        return SComp.CreateTime(serverApi.GetLevelId()).GetTime() % 24000
 
 class System(ServerSystem):
     """

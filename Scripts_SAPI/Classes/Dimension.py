@@ -44,3 +44,16 @@ class Dimension(object):
         id of the dimension.
         """
         return self.__dimId
+
+    def getEntities(self, options=None):
+        # type: (None) -> List[Entity]
+        """
+        Gets the entities in the dimension.
+        """
+        import Entity as En
+        entityData = serverApi.GetEngineActor()
+        entities = []
+        for data in entityData:
+            if entityData[data]['dimensionId'] == self.__dimId:
+                entities.append(En.Entity(data))
+        return entities

@@ -7,8 +7,8 @@ class Component(object):
     Base class for downstream Component implementations.
     """
 
-    def __init__(self, typeId):
-        # type: (str) -> None
+    def __init__(self, typeId, data):
+        # type: (str, dict) -> None
         if typeId.find("minecraft:") < 0:
             typeId = "minecraft:" + typeId
         self.__typeId = typeId.lower()
@@ -31,7 +31,7 @@ class EntityComponent(Component):
     """
     
     def __init__(self, typeId, data):
-        Component.__init__(self, typeId)
+        Component.__init__(self, typeId, data)
         self.__entity = data['entity']
     
     def __str__(self):

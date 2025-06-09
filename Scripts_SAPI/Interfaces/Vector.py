@@ -66,3 +66,21 @@ class VectorXZ(object):
             "z": self.z
         }
         return "<VectorXZ> %s" % data
+
+
+class Motion(object):
+    """
+    运动器
+    """
+
+    def __init__(self, type, id):
+        self.__motionId = id
+        self.__type = type
+    
+    @property
+    def type(self):
+        return self.__type
+    
+    @property
+    def id(self):
+        return self.__motionId
