@@ -2,11 +2,12 @@
 
 # from typing import Union, Dict, List
 from ..Interfaces.Vector import *
+from ..Interfaces.CameraOptions import *
 import mod.client.extraClientApi as clientApi
 
 CComp = clientApi.GetEngineCompFactory()
 
-class Camera(object):
+class CameraPlus(object):
     """
     Note: This class is different from SAPI. It's based on Mod-api Client.
 
@@ -112,3 +113,43 @@ class Camera(object):
             res.append(Motion(motions[id], id))
         return res
     
+
+class Camera(object):
+    """
+    Contains methods relating to the active camera for the specified player.
+
+    Doc: https://learn.microsoft.com/en-us/minecraft/creator/scriptapi/minecraft/server/camera?view=minecraft-bedrock-experimental
+    """
+
+    def __init__(self, playerId):
+        self.playerId = playerId
+
+    def clear(self):
+        # type: () -> None
+        """
+        Clears the active camera for the specified player. 
+        Causes the specified players to end any in-progress camera perspectives, 
+        including any eased camera motions, and return to their normal perspective.
+        """
+        pass
+
+    def fade(self, fadeCameraOptions=None):
+        # type: (CameraFadeOptions) -> None
+        """
+        Begins a camera fade transition. A fade transition is a full-screen color that fades-in, holds, and then fades-out.
+        """
+        pass
+
+    def setCamera(self, cameraPreset, setOptions=None):
+        # type: (str, Union[CameraFixedBoomOptions]) -> None
+        """
+        Sets the current active camera for the specified player.
+        """
+        pass
+
+    def setDefaultCamera(self, cameraPreset, easeOptions=None):
+        # type: (str, EaseOptions) -> None
+        """
+        Sets the current active camera for the specified player and resets the position and rotation to the values defined in the JSON.
+        """
+        pass

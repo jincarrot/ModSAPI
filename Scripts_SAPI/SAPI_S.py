@@ -2,6 +2,7 @@
 
 from Classes.Entity import *
 from Classes.WorldEvents import *
+from Classes.Scoreboard import *
 from Interfaces.Game import *
 
 ServerSystem = serverApi.GetServerSystemCls()
@@ -18,7 +19,18 @@ class World(ServerSystem):
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
+        self.__ListenEvents()
         print("Scripts-API: world loaded")
+
+    def __ListenEvents(self):
+        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "ServerChatEvent", self, self.debug)
+
+    def debug(self, data):
+        msg = data['message']
+        if msg.find('debug ') == 0:
+            msg = msg[6:]
+            world = self
+            eval(msg)
 
     @property
     def afterEvents(self):

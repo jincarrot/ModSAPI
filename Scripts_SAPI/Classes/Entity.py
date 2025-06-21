@@ -10,12 +10,12 @@ from ..Interfaces.EntityOptions import *
 from ..Interfaces.TeleportOptions import *
 from ..Interfaces.Raycasts import *
 from EntityComponents import *
-import math
+import math, time, random
+from Camara import *
+from Request import *
 import mod.server.extraServerApi as serverApi
-import mod.client.extraClientApi as clientApi
 
 SComp = serverApi.GetEngineCompFactory()
-CComp = clientApi.GetEngineCompFactory()
 
 
 class Entity(object):
@@ -668,7 +668,22 @@ class Player(Entity):
 
     def __init__(self, playerId):
         Entity.__init__(self, playerId)
+        self.__id = playerId
 
     @property
     def camera(self):
-        """"""
+        # type: () -> Camera
+        """
+        The player's Camera.
+        """
+        return Camera(self.__id)
+    
+    @property
+    def clientSystemInfo(self):
+        """
+        Contains the player's device information.
+        """
+        requestId = request.create(self.__id, "clientSystemInfo")
+        value = request.getValue(requestId)
+        pass
+        

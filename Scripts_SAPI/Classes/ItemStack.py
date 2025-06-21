@@ -4,7 +4,6 @@ import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
 SComp = serverApi.GetEngineCompFactory()
-CComp = clientApi.GetEngineCompFactory()
 
 
 class ItemType(object):
