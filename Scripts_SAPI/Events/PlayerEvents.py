@@ -9,14 +9,18 @@ class ChatSendAfterEvent(object):
 
     def __init__(self, data):
         self.__message = data['message']
-        self.__sender = data['sender']
-        self.targets = data['targets']
+        self.__sender = Player(data['playerId']) if data['playerId'] else None
+        targetIds = data['toPlayerIds']
+        self.__targets = []
+        for id in targetIds:
+            self.__targets.append(Player(id))
 
     def __str__(self):
         data = {
             "message": self.__message,
+            "sender": str(self.__sender)
         }
-        return "<EntityDieAfterEvent> %s" % data
+        return "<ChatSendAfterEvent> %s" % data
 
     @property
     def message(self):
@@ -25,11 +29,21 @@ class ChatSendAfterEvent(object):
         Message that is being broadcast.
         """
         return self.__damageSource
-
+    
     @property
-    def deadEntity(self):
-        # type: () -> Entity
+    def sender(self):
+        # type: () -> Player
         """
-        Now-dead entity object.
+        Player that sent the chat message.
         """
-        return self.__deadEntity
+        return self.__sender
+    
+    @property
+    def targets(self):
+        # type: () -> List[Player]
+        """
+        Optional list of players that will receive this message. 
+        If defined, this message is directly targeted to one or more players (i.e., is not broadcast.)
+        """
+        return self.__targets
+

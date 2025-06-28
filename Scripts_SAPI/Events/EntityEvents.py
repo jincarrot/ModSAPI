@@ -24,7 +24,7 @@ class EntityDieAfterEvent(object):
 
     def __str__(self):
         data = {
-            "damageSource": self.__damageSource,
+            "damageSource": str(self.__damageSource),
             "deadEntity": str(self.__deadEntity)
         }
         return "<EntityDieAfterEvent> %s" % data
@@ -52,14 +52,21 @@ class EntityHurtAfterEvent(object):
     """
 
     def __init__(self, data):
+        temp = { "cause": data['cause'] }
+        damagingEntity = data['srcId'] if data['srcId'] else None
+        damagingProjectile = data['projectileId']
+        if damagingEntity:
+            temp['damagingEntity'] = Entity(damagingEntity)
+        if damagingProjectile:
+            temp['damagingProjectile'] = Entity(damagingProjectile)
         self.__damage = data['damage']
-        self.__damageSource = data['damageSource']
-        self.__hurtEntity = data['hurtEntity']
+        self.__damageSource = EntityDamageSource(temp)
+        self.__hurtEntity = Entity(data['entityId'])
 
     def __str__(self):
         data = {
             "damage": self.damage,
-            "damageSource": self.damageSource,
+            "damageSource": str(self.damageSource),
             "hurtEntity": str(self.hurtEntity)
         }
         return "<EntityHurtAfterEvent> %s" % data

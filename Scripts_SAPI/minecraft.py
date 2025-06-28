@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
-from SAPI_S import *
+import SAPI_S as SAPI
 
 def getWorld():
-    # type: () -> (World)
-    return serverApi.GetSystem("SAPI", "World")
+    # type: () -> SAPI.World
+    return serverApi.GetSystem("SAPI", "world")
 
 def getSystem():
-    # type: () -> System
-    return serverApi.GetSystem("SAPI", "System")
+    # type: () -> SAPI.System
+    return serverApi.GetSystem("SAPI", "system")
 
 world = getWorld()
 system = getSystem()

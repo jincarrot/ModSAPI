@@ -2,6 +2,7 @@
 # from typing import Union, Dict
 
 from ..Events.EntityEventSignals import *
+from ..Events.PlayerEventSignals import *
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
@@ -24,6 +25,7 @@ class WorldAfterEvents(object):
         self.__entityLoad = EntityLoadAfterEventSignal()
         self.__entityRemove = EntityRemoveAfterEventSignal()
         self.__entitySpawn = EntitySpawnAfterEventSignal()
+        self.__chatSend = ChatSendAfterEventSignal()
 
     @property
     def entityDie(self):
@@ -33,7 +35,7 @@ class WorldAfterEvents(object):
         return self.__entityDie
 
     @property
-    def effectAdd(self):
+    def _effectAdd(self):
         """
         error
         
@@ -42,25 +44,32 @@ class WorldAfterEvents(object):
         return self.__effectAdd
 
     @property
-    def entityHealthChanged(self):
+    def _entityHealthChanged(self):
         """
         This event fires when entity health changes in any degree.
         """
         return self.__entityHealthChanged
 
     @property
-    def entityHitBlock(self):
+    def _entityHitBlock(self):
         """
         This event fires when entity health changes in any degree.
         """
         return self.__entityHitBlock
 
     @property
-    def entityHurt(self):
+    def _entityHurt(self):
         """
         This event fires when an entity is hurt (takes damage).
         """
         return self.__entityHurt
+    
+    @property
+    def chatSend(self):
+        """
+        This event is triggered after a chat message has been broadcast or sent to players.
+        """
+        return self.__chatSend
 
 
 class WorldBeforeEvents(object):

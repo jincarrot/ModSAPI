@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 # from typing import Union, Dict
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 # from typing import Any, Union, Dict, List
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
@@ -668,7 +668,6 @@ class Player(Entity):
         data = {
             "id": self.id,
             "dimension": str(self.dimension),
-            "location": str(self.location),
             "name": self.name
         }
         return "<Player> %s" % data

@@ -9,16 +9,13 @@ class ChatSendAfterEventSignal(Events):
     Manages callbacks that are connected to chat messages being sent.
     """
 
-    def __detectFunction(self):
-        return True
+    def __init__(self):
+        self.__eventName = "ServerChatEvent"
 
-    def subscribe(self, callback, options=None):
+    def subscribe(self, callback):
         # type: (types.FunctionType, None) -> None
         """
         Adds a callback that will be called when new chat messages are sent.
         """
-        if type(options).__name__ != "dict":
-            options = None
-        eventName = "ServerChatEvent"
-        listener = EventListener(eventName, callback, options, self.__detectFunction)
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, listener, listener.listen)
+        import PlayerEvents as pe
+        EventListener(self.__eventName, callback, None, None, None, pe.ChatSendAfterEvent)

@@ -170,11 +170,11 @@ class SAPIS(ServerSystem):
         msg = data['message']
         if msg.find('debug ') == 0:
             msg = msg[6:]
-            world = self
+            world = serverApi.GetSystem("SAPI", "world")
             exec(compile(msg, "<string>", "exec"))
 
     @staticmethod
     def Init():
         import minecraft as m
-        m.world = getWorld()
+        m.world = m.getWorld()
 
