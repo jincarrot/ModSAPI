@@ -13,7 +13,9 @@ from EntityComponents import *
 import math, time, random
 from Camara import *
 from Request import *
+from ClientSystemInfo import *
 import mod.server.extraServerApi as serverApi
+from ..minecraft import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -31,16 +33,6 @@ class Entity(object):
         data = {
             "id": self.id,
             "dimension": str(self.dimension),
-            "isClimbing": self.isClimbing,
-            "isFalling": self.isFalling,
-            "isInWater": self.isInWater,
-            "isOnGround": self.isOnGround,
-            "isSleeping": self.isSleeping,
-            "isSneaking": self.isSneaking,
-            "isSprinting": self.isSprinting,
-            "isSwimming": self.isSwimming,
-            "location": str(self.location),
-            "nameTag": self.nameTag,
             "typeId": self.typeId
         }
         return "<Entity> %s" % data
@@ -340,7 +332,8 @@ class Entity(object):
         """
         Gets a component (that represents additional capabilities) for an entity.
         """
-        componentId = componentId.split("minecraft:")[1].lower()
+        if len(componentId.split("minecraft:")) > 1:
+            componentId = componentId.split("minecraft:")[1].lower()
         if componentId in vars(EntityComponentType).keys():
             if componentId == "health":
                 return EntityHealthComponent(componentId, {"entity": self})
@@ -418,6 +411,8 @@ class Entity(object):
         """
         datas = SComp.CreateEffect(self.__id).GetAllEffects()
         effects = []
+        if not datas:
+            datas = []
         for data in datas:
             effects.append(Effect(data['effectName'], int(data['duration_f'] * 20), data['amplifier']))
         return effects
@@ -548,7 +543,7 @@ class Entity(object):
         Immediately removes the entity from the world.
         The removed entity will not perform a death animation or drop loot upon removal.
         """
-        serverApi.GetSystem("SAPI", "world").DestroyEntity(self.__id)
+        world.DestroyEntity(self.__id)
 
     def removeEffect(self, effectType):
         # type: (Union[str, EffectType]) -> bool
@@ -571,7 +566,6 @@ class Entity(object):
         Resets an Entity Property back to its default value, as specified in the Entity's definition.
         This property change is not applied until the next tick.
         """
-        world = serverApi.GetSystem("SAPI", "world")
         # 获取原nbt
         nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
         # 检测是否存在该值
@@ -625,7 +619,7 @@ class Entity(object):
         if 'properties' in nbt and identifier in nbt['properties']:
             nbt['properties'][identifier]['__value__'] = value
             self.remove()
-            self.__id = serverApi.GetSystem("SAPI", "world").CreateEngineEntityByNBT(nbt)
+            self.__id = world.CreateEngineEntityByNBT(nbt)
 
     def setRotation(self, rotation):
         # type: (Union[str, Vector2]) -> None
@@ -670,6 +664,22 @@ class Player(Entity):
         Entity.__init__(self, playerId)
         self.__id = playerId
 
+    def __str__(self):
+        data = {
+            "id": self.id,
+            "dimension": str(self.dimension),
+            "location": str(self.location),
+            "name": self.name
+        }
+        return "<Player> %s" % data
+    
+    @property
+    def name(self):
+        """
+        Name of the player.
+        """
+        return self.nameTag
+
     @property
     def camera(self):
         # type: () -> Camera
@@ -680,10 +690,18 @@ class Player(Entity):
     
     @property
     def clientSystemInfo(self):
+        # type: () -> ClientSystemInfo
         """
         Contains the player's device information.
         """
         requestId = request.create(self.__id, "clientSystemInfo")
         value = request.getValue(requestId)
+        return ClientSystemInfo(value)
+
+    def sendToast(self, title, message):
+        # type: (str, str) -> None
+        """
+        send a toast to player
+        """
         pass
         

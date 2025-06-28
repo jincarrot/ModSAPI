@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import mod.server.extraServerApi as serverApi
+from ..minecraft import *
 
 class Request(object):
     """
@@ -18,7 +19,7 @@ class Request(object):
             "state": 0,
             "value": None
         }
-        serverApi.GetSystem("SAPI", "world").NotifyToClient(target, "getData", {"requestId": requestId, "dataName": dataName})
+        world.NotifyToClient(target, "getData", {"requestId": requestId, "dataName": dataName})
         return requestId
 
     def getState(self, requestId):

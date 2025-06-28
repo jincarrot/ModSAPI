@@ -8,8 +8,6 @@ from Interfaces.Game import *
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
 
-baseTypes = ("int", "float", "str", "list", "tuple", "dict", "bool", "NoneType")
-
 
 class World(ServerSystem):
 
@@ -19,18 +17,7 @@ class World(ServerSystem):
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
-        self.__ListenEvents()
         print("Scripts-API: world loaded")
-
-    def __ListenEvents(self):
-        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "ServerChatEvent", self, self.debug)
-
-    def debug(self, data):
-        msg = data['message']
-        if msg.find('debug ') == 0:
-            msg = msg[6:]
-            world = self
-            eval(msg)
 
     @property
     def afterEvents(self):
@@ -98,7 +85,7 @@ class World(ServerSystem):
 
     @staticmethod
     def setDynamicProperty(identifier, value):
-        # type: (str, Any) -> None
+        # type: (str, 0) -> None
         """
         Sets a specified property to a value.
         """
@@ -106,7 +93,7 @@ class World(ServerSystem):
 
     @staticmethod
     def getDynamicProperty(identifier):
-        # type: (str) -> Any
+        # type: (str) -> 0
         """
         Returns a property value.
         """
@@ -166,13 +153,28 @@ class System(ServerSystem):
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
 
-    def __getObj(self, data):
-        info = {}
-        attrs = dir(data)
-        for attr in attrs:
-            if attr.find("__") == 0:
-                continue
-            info[attr] = getattr(data, attr)
-            if info[attr] and not (type(info[attr]).__name__ in baseTypes):
-                info[attr] = self.__getObj(info[attr])
-        return "Object %s" % type(data).__name__, info
+class SAPIS(ServerSystem):
+    """
+    base system of this addon
+    """
+
+    def __init__(self, namespace, systemName):
+        ServerSystem.__init__(self, namespace, systemName)
+        self.__ListenEvents()
+
+    def __ListenEvents(self):
+        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "ServerChatEvent", self, self.debug)
+        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "LoadServerAddonScriptsAfter", self, self.Init)
+    
+    def debug(self, data):
+        msg = data['message']
+        if msg.find('debug ') == 0:
+            msg = msg[6:]
+            world = self
+            exec(compile(msg, "<string>", "exec"))
+
+    @staticmethod
+    def Init():
+        import minecraft as m
+        m.world = getWorld()
+

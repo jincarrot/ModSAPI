@@ -1,5 +1,6 @@
 # coding=utf-8
 from ..Classes.Entity import *
+from ..Interfaces.Sources import *
 
 
 class EntityDieAfterEvent(object):
@@ -8,13 +9,23 @@ class EntityDieAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__damageSource = data['damageSource']
-        self.__deadEntity = data['deadEntity']
+        temp = { "cause": data['cause'] }
+        damagingEntity = data['attacker'] if data['attacker'] else None
+        damagingProjectile = None
+        if damagingEntity and SComp.CreateEntityComponent(damagingEntity).HasComponent(EntityComponentType.projectile):
+            damagingProjectile = damagingEntity
+            damagingEntity = SComp.CreateActorOwner(damagingProjectile).GetEntityOwner()
+        if damagingEntity:
+            temp['damagingEntity'] = Entity(damagingEntity)
+        if damagingProjectile:
+            temp['damagingProjectile'] = Entity(damagingProjectile)
+        self.__damageSource = EntityDamageSource(temp)
+        self.__deadEntity = Entity(data['id'])
 
     def __str__(self):
         data = {
-            "damageSource": self.damageSource,
-            "deadEntity": str(self.deadEntity)
+            "damageSource": self.__damageSource,
+            "deadEntity": str(self.__deadEntity)
         }
         return "<EntityDieAfterEvent> %s" % data
 

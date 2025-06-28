@@ -35,6 +35,8 @@ class WorldAfterEvents(object):
     @property
     def effectAdd(self):
         """
+        error
+        
         This event fires when an effect, like poisoning, is added to an entity.
         """
         return self.__effectAdd

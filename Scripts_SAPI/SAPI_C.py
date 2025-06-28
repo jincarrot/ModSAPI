@@ -5,6 +5,8 @@ from Classes.Request import *
 
 ClientSystem = clientApi.GetClientSystemCls()
 
+CComp = clientApi.GetEngineCompFactory()
+
 
 class SAPI_C(ClientSystem):
 
@@ -19,5 +21,12 @@ class SAPI_C(ClientSystem):
     def getData(self, data):
         """receive request from server"""
         requestId = data['requestId']
-        request.update(requestId, "test")
+        requestDataName = data['dataName']
+        data = None
+        if requestDataName == 'clientSystemInfo':
+            data = {
+                "maxRenderDistance": None,
+                "platformType": clientApi.GetPlatform()
+            }
+        request.update(requestId, data)
 
