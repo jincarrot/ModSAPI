@@ -27,6 +27,7 @@ class SAPIS(ServerSystem):
     def __ListenEvents(self):
         self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "ServerChatEvent", self, self.debug)
         self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "LoadServerAddonScriptsAfter", self, self.Init)
+        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "CustomCommandTriggerServerEvent", self, self.customCommand)
     
     def debug(self, data):
         global world
@@ -35,10 +36,18 @@ class SAPIS(ServerSystem):
             msg = msg[6:]
             if not world:
                 world = getWorld()
-            print(getWorld())
             exec(compile(msg, "<string>", "exec"))
 
     @staticmethod
     def Init(__data):
         global world
         world = getWorld()
+
+    def customCommand(self, data):
+        if data['command'] == 'modsapi':
+            args = data['args']
+            origin = data['origin']['entityId']
+            if origin:
+                if args[0]['value'] == 'debug':
+                    self.debug({"message": "debug %s" % args[1]['value']})
+            data['return_failed'] = False

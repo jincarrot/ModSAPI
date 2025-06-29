@@ -32,6 +32,7 @@ class EntityEvents(Events):
         return True
                 
     def subscribe(self, callback, options=None):
+        # type: (types.FunctionType, dict) -> None
         EventListener(self.eventName, callback, options, self._check, None)
 
 
@@ -45,6 +46,7 @@ class EntityDieAfterEventSignal(EntityEvents):
         self.__eventName = "MobDieEvent"
 
     def subscribe(self, callback, options=None):
+        # type: (types.FunctionType, dict) -> None
         import EntityEvents as ee
         EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityDieAfterEvent)
 

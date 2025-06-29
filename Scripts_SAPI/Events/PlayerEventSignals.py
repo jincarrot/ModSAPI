@@ -13,7 +13,7 @@ class ChatSendAfterEventSignal(Events):
         self.__eventName = "ServerChatEvent"
 
     def subscribe(self, callback):
-        # type: (types.FunctionType, None) -> None
+        # type: (types.FunctionType) -> None
         """
         Adds a callback that will be called when new chat messages are sent.
         """
