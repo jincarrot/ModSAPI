@@ -2,7 +2,6 @@
 # from typing import Any, Union, Dict, List
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
-from Dimension import *
 from Effect import *
 from ..Interfaces.BlockOptions import *
 from ..Interfaces.AnimeOptions import *
@@ -24,6 +23,7 @@ class Entity(object):
     """
     Represents the state of an entity (a mob, the player, or other moving objects like mine carts) in the world.
     """
+    import Dimension as d
 
     def __init__(self, entityId):
         self.__id = entityId
@@ -50,11 +50,11 @@ class Entity(object):
 
     @property
     def dimension(self):
-        # type: () -> Dimension
+        # type: () -> Entity.d.Dimension
         """
         Dimension that the entity is currently within.
         """
-        dim = Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
+        dim = self.d.Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
         return dim
 
     @property
@@ -200,7 +200,8 @@ class Entity(object):
             if SComp.CreateGame(self.__id).IsEntityAlive(self.__id):
                 SComp.CreateEffect(self.__id).RemoveEffectFromEntity(effectType)
 
-        SComp.CreateGame(serverApi.GetLevelId()).AddTimer(duration / 20.0, stop)
+        if duration < 20:
+            SComp.CreateGame(serverApi.GetLevelId()).AddTimer(duration / 20.0, stop)
         return Effect(effectType, duration, options.amplifier)
 
     def addTag(self, tag):

@@ -154,13 +154,16 @@ class EntityRemoveAfterEventSignal(EntityEvents):
 
 class EntitySpawnAfterEventSignal(EntityEvents):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Registers a script-based event handler for handling what happens when an entity spawns.
     """
+
+    def __init__(self):
+        self.__eventName = "ServerSpawnMobEvent"
 
     def subscribe(self, callback, options=EntityEventsOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "EntityRemoveEvent", world, callback)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntitySpawnAfterEvent)

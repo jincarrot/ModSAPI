@@ -62,9 +62,50 @@ class ItemUseAfterEvent(object):
     @property
     def itemStack(self):
         # type: () -> ItemStack
+        """
+        The impacted item stack that is being used.
+        """
         return self.__itemStack
     
     @property
     def source(self):
         # type: () -> Player
+        """
+        Returns the source entity that triggered this item event.
+        """
         return self.__source
+    
+class ItemCompleteUseAfterEvent(object):
+    """
+    Contains information related to a chargeable item completing being charged.
+    """
+
+    def __init__(self, data):
+        itemData = data['itemDict']
+        self.__itemStack = ItemStack(itemData['newItemName'], itemData['count'])
+        self.__source = Player(data['playerId'])
+        self.__useDuration = data['durationLeft']
+
+    @property
+    def itemStack(self):
+        # type: () -> ItemStack
+        """
+        Returns the item stack that has completed charging.
+        """
+        return self.__itemStack
+    
+    @property
+    def source(self):
+        # type: () -> Player
+        """
+        Returns the source entity that triggered this item event.
+        """
+        return self.__source
+    
+    @property
+    def useDuration(self):
+        # type: () -> float
+        """
+        Returns the time, in ticks, for the remaining duration left before the charge completes its cycle.
+        """
+        return self.__useDuration

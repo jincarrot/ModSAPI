@@ -3,6 +3,8 @@
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
+from ..Interfaces.Vector import *
+from ..minecraft import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -11,6 +13,8 @@ class Dimension(object):
     """
     A class that represents a particular dimension (e.g., The End) within a world.
     """
+    import Entity as e
+    import ItemStack as i
 
     def __init__(self, dimId):
         # type: (Union[int, str]) -> None
@@ -56,3 +60,24 @@ class Dimension(object):
             if entityData[data]['dimensionId'] == self.__dimId:
                 entities.append(En.Entity(data))
         return entities
+
+    def spawnEntity(self, identifier, location, options=None):
+        # type: (str, Vector3, None) -> Dimension.e.Entity
+        """
+        Creates a new entity (e.g., a mob) at the specified location.
+        """
+        pass
+
+    def spawnItem(self, itemStack, location):
+        # type: (Dimension.i.ItemStack, Vector3) -> Dimension.e.Entity
+        """
+        Creates a new item stack as an entity at the specified location.
+        """
+        global world
+        if not world:
+            world = getWorld()
+        itemDict = {
+            "newItemName": itemStack.typeId,
+            "count": itemStack.amount
+        }
+        return Dimension.e.Entity(world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z)))

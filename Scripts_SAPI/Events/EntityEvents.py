@@ -94,3 +94,23 @@ class EntityHurtAfterEvent(object):
         Entity that was hurt.
         """
         return self.__hurtEntity
+
+
+class EntitySpawnAfterEvent(object):
+    """
+    Contains data related to an entity spawning within the world.
+    """
+
+    def __init__(self, data):
+        self.__cause = None
+        self.__entity = Entity(data['entityId'])
+    
+    @property
+    def cause(self):
+        # type: () ->str
+        return self.__cause
+    
+    @property
+    def entity(self):
+        # type: () -> Entity 
+        return self.__entity
