@@ -26,6 +26,7 @@ class WorldAfterEvents(object):
         self.__entityRemove = EntityRemoveAfterEventSignal()
         self.__entitySpawn = EntitySpawnAfterEventSignal()
         self.__chatSend = ChatSendAfterEventSignal()
+        self.__itemUse = ItemUseAfterEventSignal()
 
     @property
     def entityDie(self):
@@ -70,6 +71,13 @@ class WorldAfterEvents(object):
         This event is triggered after a chat message has been broadcast or sent to players.
         """
         return self.__chatSend
+    
+    @property
+    def itemUse(self):
+        """
+        This event fires when an item is successfully used by a player.
+        """
+        return self.__itemUse
 
 
 class WorldBeforeEvents(object):

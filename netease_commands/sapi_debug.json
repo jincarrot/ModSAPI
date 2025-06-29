@@ -1,7 +1,7 @@
 {
 	"format_version": "0.0.1",
 	"name": "modsapi",
-	"description": "打开ModSAPI调试界面",
+	"description": "ModSAPI调试",
 	"permission_level": "admin",
 	"args": [
         {

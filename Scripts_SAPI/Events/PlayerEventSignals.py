@@ -19,3 +19,16 @@ class ChatSendAfterEventSignal(Events):
         """
         import PlayerEvents as pe
         EventListener(self.__eventName, callback, None, None, None, pe.ChatSendAfterEvent)
+
+class ItemUseAfterEventSignal(Events):
+    """
+    Manages callbacks that are connected to an item use event.
+    """
+
+    def __init__(self):
+        self.__eventName = "ItemUseAfterServerEvent"
+
+    def subscribe(self, callback):
+        # type: (types.FunctionType) -> None
+        import PlayerEvents as pe
+        EventListener(self.__eventName, callback, None, None, None, pe.ItemUseAfterEvent)

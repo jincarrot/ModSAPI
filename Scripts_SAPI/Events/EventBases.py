@@ -9,19 +9,6 @@ ServerSystem = serverApi.GetServerSystemCls()
 SComp = serverApi.GetEngineCompFactory()
 
 
-class Wrapper(object):
-    """
-    wrapper
-    """
-
-    def __init__(self, T):
-        self.__T = T
-
-    def wrap(self, data):
-        # type: (dict) -> 0
-        return self.__T(data)
-
-
 class EventListener(object):
     """
     process event

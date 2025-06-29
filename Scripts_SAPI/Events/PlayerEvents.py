@@ -47,3 +47,24 @@ class ChatSendAfterEvent(object):
         """
         return self.__targets
 
+
+class ItemUseAfterEvent(object):
+    """
+    Contains information related to an item being used on a block. 
+    This event fires when an item used by a player successfully triggers an entity interaction.
+    """
+
+    def __init__(self, data):
+        itemData = data['itemDict']
+        self.__itemStack = ItemStack(itemData['newItemName'], itemData['count'])
+        self.__source = Player(data['entityId'])
+
+    @property
+    def itemStack(self):
+        # type: () -> ItemStack
+        return self.__itemStack
+    
+    @property
+    def source(self):
+        # type: () -> Player
+        return self.__source
