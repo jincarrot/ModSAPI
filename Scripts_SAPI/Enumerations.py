@@ -63,8 +63,10 @@ class Direction(object):
     """
     A general purpose relative direction enumeration.
     """
-    Down = "Down"
-    """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
+    @property
+    def Down(self):
+        """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
+        return "Down"
     East = "East"
     """Returns the @minecraft/server.Block to the east (x + 1) of this item."""
     North = "North"

@@ -18,6 +18,8 @@ class World(ServerSystem):
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
         print("Scripts-API: world loaded")
+        global world
+        world = self
 
     @property
     def afterEvents(self):
@@ -152,29 +154,3 @@ class System(ServerSystem):
 
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
-
-class SAPIS(ServerSystem):
-    """
-    base system of this addon
-    """
-
-    def __init__(self, namespace, systemName):
-        ServerSystem.__init__(self, namespace, systemName)
-        self.__ListenEvents()
-
-    def __ListenEvents(self):
-        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "ServerChatEvent", self, self.debug)
-        self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "LoadServerAddonScriptsAfter", self, self.Init)
-    
-    def debug(self, data):
-        msg = data['message']
-        if msg.find('debug ') == 0:
-            msg = msg[6:]
-            world = serverApi.GetSystem("SAPI", "world")
-            exec(compile(msg, "<string>", "exec"))
-
-    @staticmethod
-    def Init():
-        import minecraft as m
-        m.world = m.getWorld()
-

@@ -661,6 +661,7 @@ class Player(Entity):
     """
 
     def __init__(self, playerId):
+        # type: (str) -> None
         Entity.__init__(self, playerId)
         self.__id = playerId
 
@@ -697,10 +698,16 @@ class Player(Entity):
         value = request.getValue(requestId)
         return ClientSystemInfo(value)
 
-    def sendToast(self, title, message):
+    def sendToast(self, message, title=""):
         # type: (str, str) -> None
         """
         send a toast to player
         """
-        pass
-        
+        global world
+        data = {
+            "title": title,
+            "message": message
+        }
+        if not world:
+            world = getWorld()
+        world.NotifyToClient(self.__id, "sendToast", data)

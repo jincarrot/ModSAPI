@@ -17,6 +17,7 @@ class SAPI_C(ClientSystem):
 
     def __ListenEvent(self):
         self.ListenForEvent("SAPI", "world", "getData", self, self.getData)
+        self.ListenForEvent("SAPI", "world", "sendToast", self, self.sendToast)
 
     def getData(self, data):
         """receive request from server"""
@@ -29,4 +30,7 @@ class SAPI_C(ClientSystem):
                 "platformType": clientApi.GetPlatform()
             }
         request.update(requestId, data)
+
+    def sendToast(self, data):
+        CComp.CreateGame(clientApi.GetLevelId()).SetPopupNotice(data['message'], data['title'])
 
