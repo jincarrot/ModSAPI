@@ -31,7 +31,7 @@ class EntityDieAfterEvent(object):
 
     @property
     def damageSource(self):
-        # type: () -> EntityDamageCause
+        # type: () -> EntityDamageSource
         """
         If specified, provides more information on the source of damage that caused the death of this entity.
         """

@@ -15,6 +15,7 @@ from Request import *
 from ClientSystemInfo import *
 import mod.server.extraServerApi as serverApi
 from ..minecraft import *
+from Command import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -327,6 +328,7 @@ class Entity(object):
                 "faceLocation": Vector3({"x": block['hitPos'][0], "y": block['hitPos'][1], "z": block['hitPos'][2]})
             }
             return BlockRaycastHit(data)
+        return None
 
     def getComponent(self, componentId):
         # type: (str) -> EntityComponent
@@ -586,11 +588,27 @@ class Entity(object):
             return value
 
     def runCommand(self, commandString):
-        # type: (str) -> None
+        # type: (str) -> CommandResult
         """
         Runs a synchronous command on the entity.
+
+        Note: it may return wrong message
         """
         SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString, self.__id)
+        index = commandString.find("@")
+        if index >= 0:
+            selector = ""
+            while index < len(commandString):
+                hasParam = False
+                if commandString[index] == "[":
+                    hasParam = True
+                if commandString[index] == "]":
+                    break
+                if commandString[index] == " " and not hasParam:
+                    break
+                selector += commandString[index]
+                index += 1
+            return CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
         return None
 
     def setDynamicProperty(self, identifier, value):
