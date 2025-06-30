@@ -497,6 +497,12 @@ class Entity(object):
         direction = serverApi.GetDirFromRot(rot)
         return Vector3({"x": direction[0], "y": direction[1], "z": direction[2]})
 
+    def getFamilies(self):
+        """
+        Returns family types
+        """
+        return SComp.CreateAttr(self.__id).GetTypeFamily()
+
     def hasComponent(self, componentId):
         # type: (str) -> bool
         """
@@ -511,6 +517,14 @@ class Entity(object):
         Returns whether an entity has a particular tag.
         """
         return SComp.CreateTag(self.__id).EntityHasTag(tag)
+
+    def hasFamily(self, familyName):
+        # type: (str) -> bool
+        """
+        Returns whether an entity belongs to a family.
+        """
+        families = SComp.CreateAttr(self.__id).GetTypeFamily()
+        return familyName in families
 
     def kill(self):
         # type: () -> bool
@@ -603,6 +617,7 @@ class Entity(object):
                 if commandString[index] == "[":
                     hasParam = True
                 if commandString[index] == "]":
+                    selector += commandString[index]
                     break
                 if commandString[index] == " " and not hasParam:
                     break
