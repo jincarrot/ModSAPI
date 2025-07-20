@@ -4,6 +4,7 @@ from Classes.Entity import *
 from Classes.WorldEvents import *
 from Classes.Scoreboard import *
 from Interfaces.Game import *
+from Classes.Container import *
 
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
@@ -147,6 +148,13 @@ class World(ServerSystem):
         """
         return SComp.CreateTime(serverApi.GetLevelId()).GetTime() % 24000
 
+    def listen(self, eventName, callback):
+        # type: (str, types.FunctionType) -> None
+        """
+        listen for an event
+        """
+        pass
+    
 class System(ServerSystem):
     """
     A class that provides system-level events and functions.

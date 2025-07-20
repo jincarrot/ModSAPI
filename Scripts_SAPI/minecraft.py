@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
 import SAPI_S as SAPI
+from Classes.ItemStack import *
 
 def getWorld():
     # type: () -> SAPI.World
@@ -11,6 +12,7 @@ def getSystem():
     return serverApi.GetSystem("SAPI", "system")
 
 world = getWorld()
+"""ddd"""
 system = getSystem()
 
 ServerSystem = serverApi.GetServerSystemCls()
@@ -36,6 +38,7 @@ class SAPIS(ServerSystem):
             msg = msg[6:]
             if not world:
                 world = getWorld()
+            print(msg)
             exec(compile(msg, "<string>", "exec"))
 
     @staticmethod

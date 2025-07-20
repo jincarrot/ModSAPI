@@ -693,11 +693,13 @@ class Player(Entity):
     """
     Represents a player within the world.
     """
+    import Container as con
 
     def __init__(self, playerId):
         # type: (str) -> None
         Entity.__init__(self, playerId)
         self.__id = playerId
+        self.__container = self.con.Container(None, self.__id)
 
     def __str__(self):
         data = {
@@ -731,6 +733,12 @@ class Player(Entity):
         requestId = request.create(self.__id, "clientSystemInfo")
         value = request.getValue(requestId)
         return ClientSystemInfo(value)
+
+    @property
+    def container(self):
+        # type: () -> con.Container
+        """returns the container of player's inventory"""
+        return self.__container
 
     def sendToast(self, message, title=""):
         # type: (str, str) -> None

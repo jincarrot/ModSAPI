@@ -1,6 +1,7 @@
 # coding=utf-8
 import mod.client.extraClientApi as clientApi
 import math, time
+from Classes.ClientEvents import *
 from Classes.Request import *
 
 ClientSystem = clientApi.GetClientSystemCls()
@@ -33,4 +34,21 @@ class SAPI_C(ClientSystem):
 
     def sendToast(self, data):
         CComp.CreateGame(clientApi.GetLevelId()).SetPopupNotice(data['message'], data['title'])
+
+
+class Client(ClientSystem):
+
+    def __init__(self, namespace, systemName):
+        ClientSystem.__init__(self, namespace, systemName)
+        self.__afterEvents = ClientAfterEvents()
+        self.__beforeEvents = ClientBeforeEvents()
+        print("SAPI: client loaded")
+
+    @property
+    def afterEvents(self):
+        return self.__afterEvents
+    
+    @property
+    def beforeEvents(self):
+        return self.__beforeEvents
 
