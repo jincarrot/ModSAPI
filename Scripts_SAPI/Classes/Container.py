@@ -95,25 +95,51 @@ class Container(object):
         if not self.isValid:
             return None
         if not itemStack:
-            itemStack = ItemStack("minecraft:dirt", 0)
+            return None
         itemDict = itemStack.getItemDict()
+        itemDict['count'] = 1
         if self.__playerId:
-            SComp.CreateItem(serverApi.GetLevelId()).SpawnItemToPlayerInv(itemDict, self.__playerId)
-            return itemStack
+            for i in range(0, itemStack.amount):
+                if not SComp.CreateItem(serverApi.GetLevelId()).SpawnItemToPlayerInv(itemDict, self.__playerId):
+                    break
+                itemStack.amount -= 1
+            return itemStack if itemStack.amount > 0 else None
         elif self.__entityId:
             if self.emptySlotsCount:
-                inv = SComp.CreateEntityDefinitions(self.__entityId).GetEntityNBTTags()['ChestItems']
-                for i in range(0, self.size):
-                    if not inv[i]['Count']['__value__']:
-                        SComp.CreateItem(self.__entityId).SetEntityItem(0, itemDict, i)
-                        return itemStack
+                # has empty slots
+                InvComp = SComp.CreateItem(self.__entityId)
+                for slotId in range(0, self.size):
+                    if itemStack.amount < 1:
+                        return None
+                    slotData = InvComp.GetEntityItem(0, slotId, True)
+                    if (not slotData) or (slotData['newItemName'] == itemStack.typeId and slotData['count'] < itemStack.maxAmount and slotData['userData'] == itemDict['userData']):
+                        # get empty or stackable slot
+                        if not slotData:
+                            slotData = itemDict
+                            slotData['count'] = 0
+                        itemDict['count'] = slotData['count'] + itemStack.amount
+                        itemDict['count'] = itemDict['count'] if itemDict['count'] <= itemStack.maxAmount else itemStack.maxAmount
+                        itemStack.amount -= itemDict['count'] - slotData['count']
+                        InvComp.SetEntityItem(0, itemDict, slotId)
+                return itemStack if itemStack.amount > 0 else None
         elif self.__location:
             if self.emptySlotsCount:
                 comp = SComp.CreateItem(serverApi.GetLevelId())
                 for i in range(0, self.size):
-                    if not comp.GetContainerItem(self.__location, i, self.__dimId):
+                    if itemStack < 1:
+                        return None
+                    slotData = comp.GetContainerItem(self.__location, i, self.__dimId)
+                    if (not slotData) or (slotData['newItemName'] == itemStack.typeId and slotData['count'] < itemStack.maxAmount and slotData['userData'] == itemDict['userData']):
+                        if not slotData:
+                            slotData = itemDict
+                            slotData['count'] = 0
+                        itemDict['count'] = slotData['count'] + itemStack.amount
+                        itemDict['count'] = itemDict['count'] if itemDict['count'] <= itemStack.maxAmount else itemStack.maxAmount
+                        itemStack.amount -= itemDict['count'] - slotData['count']
+                        # vanilla container
                         comp.SpawnItemToContainer(itemDict, i, self.__location, self.__dimId)
                         if not comp.GetContainerItem(self.__location, i, self.__dimId):
+                            # custom container
                             nbt = SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockEntityData(self.__dimId, self.__location)
                             data = {
                                 'Count': {'__type__': 1, '__value__': itemDict['count']}, 
@@ -124,7 +150,7 @@ class Container(object):
                                 data['tag'] = itemDict['userData']
                             nbt['Items'].append(data)
                             SComp.CreateBlockInfo(serverApi.GetLevelId()).SetBlockEntityData(self.__dimId, self.__location, nbt)
-                        return itemStack
+                return itemStack if itemStack.amount > 0 else None
         return None
 
     def clearAll(self):
@@ -219,7 +245,7 @@ class Container(object):
         if not self.isValid:
             return None
         if not itemStack:
-            itemStack = ItemStack("minecraft:dirt", 0)
+            return None
         itemDict = itemStack.getItemDict()
         if self.__playerId:
             SComp.CreateItem(self.__entityId).SpawnItemToPlayerInv(itemDict, self.__playerId, slot)
