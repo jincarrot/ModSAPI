@@ -740,6 +740,21 @@ class Player(Entity):
         """returns the container of player's inventory"""
         return self.__container
 
+    def playSound(self, soundID, soundOptions=PlayerSoundOptions):
+        # type: (str, dict) -> None
+        if soundOptions == PlayerSoundOptions:
+            soundOptions = {}
+        if 'location' not in soundOptions:
+            pos = SComp.CreatePos(self.__id).GetPos()
+            soundOptions['location'] = Vector3({"x": pos.x, "y": pos.y, "z": pos.z})
+        options = PlayerSoundOptions(soundOptions) if type(soundOptions) == dict else soundOptions
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("playsound %s @s %s %s %s %s %s" % (soundID, options.location.x, options.location.y, options.location.z, options.volume, options.pitch), self.__id)
+
+    def sendMessage(self, message):
+        # type: (str) -> None
+        """Sends a message to the player."""
+        SComp.CreateMsg(self.__id).NotifyOneMessage(self.__id, message)
+
     def sendToast(self, message, title=""):
         # type: (str, str) -> None
         """

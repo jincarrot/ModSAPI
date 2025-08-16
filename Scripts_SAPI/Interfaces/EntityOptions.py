@@ -2,7 +2,7 @@
 # from typing import List, Dict, Union
 from Vector import *
 from ..Enumerations import *
-from ..Classes.Entity import *
+# from ..Classes.Entity import *
 import math
 import mod.server.extraServerApi as serverApi
 
@@ -50,6 +50,7 @@ class EntityFilter(object):
         self.tags = data['tags'] if 'tags' in data else []
         """If this value is set, this event will only fire if the impacted entities' tags match this parameter."""
         self.type = data['type'] if 'type' in data else ""
+
 
 class EntityEventsOptions(object):
     """
@@ -129,12 +130,12 @@ class EntityQueryOptions(object):
     def selfCheck(self):
         # type: () -> bool
         """检查数据是否合法"""
-        if type(self.data).__name__ == "dict" and set(self.data.keys()).issubset(set(EntityQueryOptionsProperties)):
+        if type(self.data) == dict and set(self.data.keys()).issubset(set(EntityQueryOptionsProperties)):
             if self.farthest >= 0 and self.closest >= 0:
                 return False
             for key in self.data:
                 if key in ["closest", "farthest", "maxDistance", "minDistance"] and not (
-                        type(self.data[key]).__name__ == 'int' and self.data[key] >= 0):
+                        type(self.data[key]) == int and self.data[key] >= 0):
                     return False
             return True
         print("Invalid value! Check your data: \n%s" % self.data)
@@ -248,3 +249,32 @@ class EntityRaycastOptions(EntityFilter):
         """Whether to include passable blocks in the raycast."""
         self.maxDistance = data['maxDistance'] if 'maxDistance' in data else 16
 
+
+class SpawnEntityOptions(object):
+    """
+    Contains additional options for spawning an Entity.
+    """
+
+    def __init__(self, data):
+        self.initialPersistence = data['initialPersistence'] if 'initialPersistence' in data else False# type: bool
+        """Optional boolean which determines if this entity should persist in the game world. Persistence prevents the entity from automatically despawning."""
+        self.initialRotation = data['initialRotation'] if 'initialRotation' in data else 0 # type: int
+        """Optional initial rotation, in degrees, to set on the entity when it spawns."""
+        self.spawnEvent = data['spawnEvent'] if 'spawnEvent' in data else None # type： str
+        """Optional spawn event to send to the entity after it is spawned."""
+
+
+class PlayerSoundOptions(object):
+    """
+    Additional options for how a sound plays for a player.
+    """
+
+    def __init__(self, data):
+        self.location = data['location'] if 'location' in data else None # type: Vector3
+        """Location of the sound; if not specified, the sound is played near a player."""
+        if type(self.location) == dict:
+            self.location = Vector3(self.location)
+        self.pitch = data['pitch'] if 'pitch' in data else 1.0
+        """Optional pitch of the sound."""
+        self.volume = data['volume'] if 'volume' in data else 1.0
+        """Optional volume of the sound."""

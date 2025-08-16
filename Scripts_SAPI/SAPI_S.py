@@ -65,12 +65,13 @@ class World(ServerSystem):
 
     @staticmethod
     def getPlayers(options=EntityQueryOptions):
-        # type: (dict) -> List[Player]
+        # type: (dict | EntityQueryOptions) -> List[Player]
         """
         Returns a set of players based on a set of conditions defined via the EntityQueryOptions set of filter criteria.
         """
-        options = EntityQueryOptions(options)
+        options = EntityQueryOptions(options) if type(options) == dict else options
         players = []
+        playerIds = serverApi.GetPlayerList()
         if options.selfCheck():
             playerIds = serverApi.GetPlayerList()
             playerIds = options.check(playerIds)

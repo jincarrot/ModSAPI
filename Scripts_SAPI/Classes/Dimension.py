@@ -4,6 +4,7 @@ from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 from ..Interfaces.Vector import *
+from ..Interfaces.EntityOptions import *
 from ..minecraft import *
 
 SComp = serverApi.GetEngineCompFactory()
@@ -15,6 +16,8 @@ class Dimension(object):
     """
     import Entity as e
     import ItemStack as i
+    import Block as b
+    import Command as c
 
     def __init__(self, dimId):
         # type: (Union[int, str]) -> None
@@ -48,28 +51,107 @@ class Dimension(object):
         """
         return self.__dimId
 
-    def getEntities(self, options=None):
-        # type: (None) -> List[Entity]
+    def getBlock(self, location):
+        # type: (dict | Vector3) -> b.Block
+        """
+        Returns a block instance at the given location.
+        """
+        return self.b.Block({"dimension": self, "location": Vector3(location) if type(location) == dict else location})
+
+    def getEntities(self, options=EntityQueryOptions):
+        # type: (dict | EntityQueryOptions) -> List[e.Entity]
         """
         Gets the entities in the dimension.
         """
-        import Entity as En
         entityData = serverApi.GetEngineActor()
+        entityIds = serverApi.GetPlayerList()
         entities = []
-        for data in entityData:
-            if entityData[data]['dimensionId'] == self.__dimId:
-                entities.append(En.Entity(data))
+        if options == EntityQueryOptions:
+            options = {}
+        options = EntityQueryOptions(options) if type(options) == dict else options
+        if options.selfCheck():
+            for entityId in entityData:
+                if entityData[entityId]['dimensionId'] == self.__dimId:
+                    entityIds.append(entityId)
+            entityIds = options.check(entityIds)
+            for entityId in entityIds:
+                entities.append(self.e.Entity(entityId))
         return entities
+    
+    def getEntitiesAtBlockLocation(self, location):
+        # type: (dict | Vector3) -> List[e.Entity]
+        """
+        Returns a set of entities at a particular location.
+        """
+        result = []
+        pos = Vector3(location) if type(location) == dict else location
+        entityIds = SComp.CreateGame(serverApi.GetLevelId()).GetEntitiesInSquareArea(None, (int(pos.x), int(pos.y), int(pos.z)), (int(pos.x), int(pos.y), int(pos.z)), self.dimId)
+        for entityId in entityIds:
+            result.append(self.e.Entity(entityId))
+        return result
 
-    def spawnEntity(self, identifier, location, options=None):
-        # type: (str, Vector3, None) -> Dimension.e.Entity
+    def getPlayers(self, options=EntityQueryOptions):
+        # type: (dict | EntityQueryOptions) -> List[e.Player]
+        playerIds = serverApi.GetPlayerList()
+        if options == EntityQueryOptions:
+            options = {}
+        options = EntityQueryOptions(options) if type(options) == dict else options
+        players = []
+        if options.selfCheck():
+            for playerId in playerIds:
+                if SComp.CreateDimension(playerId).GetEntityDimensionId() != self.dimId:
+                    playerIds.remove(playerId)
+            playerIds = options.check(playerIds)
+            for playerId in playerIds:
+                players.append(self.e.Player(playerId))
+        return players
+
+    def runCommand(self, commandString):
+        # type: (str) -> c.CommandResult
+        """
+        Runs a command synchronously using the context of the broader dimenion.
+
+        Note: this may return wrong message.
+        """
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString)
+        index = commandString.find("@")
+        if index >= 0:
+            selector = ""
+            while index < len(commandString):
+                hasParam = False
+                if commandString[index] == "[":
+                    hasParam = True
+                if commandString[index] == "]":
+                    selector += commandString[index]
+                    break
+                if commandString[index] == " " and not hasParam:
+                    break
+                selector += commandString[index]
+                index += 1
+            return self.c.CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
+        return None
+
+    def spawnEntity(self, identifier, location, options=SpawnEntityOptions):
+        # type: (str, dict | Vector3, dict | SpawnEntityOptions) -> Dimension.e.Entity
         """
         Creates a new entity (e.g., a mob) at the specified location.
         """
-        pass
+        global world
+        if not world:
+            world = getWorld()
+        pos = Vector3(location) if type(location) == dict else pos
+        if options == SpawnEntityOptions:
+            options = {}
+        options = SpawnEntityOptions(options) if type(options) == dict else options
+        entityId = world.CreateEngineEntityByTypeStr(identifier, (pos.x, pos.y, pos.z), (0, options.initialRotation), self.dimId)
+        if options.spawnEvent:
+            SComp.CreateEntityEvent(serverApi.GetLevelId()).TriggerCustomEvent(entityId, options.spawnEvent)
+        if options.initialPersistence:
+            SComp.CreateAttr(entityId).SetPersistent(options.initialPersistence)
+        return self.e.Entity(entityId)
 
     def spawnItem(self, itemStack, location):
-        # type: (Dimension.i.ItemStack, Vector3) -> Dimension.e.Entity
+        # type: (Dimension.i.ItemStack, Vector3 | dict) -> Dimension.e.Entity
         """
         Creates a new item stack as an entity at the specified location.
         """
@@ -80,4 +162,5 @@ class Dimension(object):
             "newItemName": itemStack.typeId,
             "count": itemStack.amount
         }
+        location = Vector3(location) if type(location) == dict else location
         return Dimension.e.Entity(world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z)))
