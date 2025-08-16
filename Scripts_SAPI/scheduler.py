@@ -6,8 +6,8 @@ from math import max
 class Task:
     taskId = 0
 
-    def __init__(self, thread, once):
-        self.thread = thread # type: Thread
+    def __init__(self, fn, once):
+        self.thread = Thread(target=fn) # type: Thread
         self.once = once     # type: bool
         self.id = Task.taskId
         Task.taskId += 1
@@ -51,13 +51,13 @@ class Scheduler:
         """
         return Future.runAsync(lambda: self.execute(scheduleName))
 
-    def addTask(self, scheduleName, thread, once=False):
-        # type: (str, Thread, Optional[bool]) -> int
+    def addTask(self, scheduleName, fn, once=False):
+        # type: (str, Callable[[], None], Optional[bool]) -> int
         """
         :return: 移除任务的函数
         """
         queue = self._getTaskQueue(scheduleName)
-        task = Task(thread, once)
+        task = Task(fn, once)
         queue.append(task)
         return task.id
     
