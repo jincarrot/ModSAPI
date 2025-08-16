@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, List, Union, Dict
+# from typing import Any, List, Union, Dict
 from Dimension import *
 from ..Interfaces.Vector import *
 from ..Classes.ItemStack import *
@@ -30,9 +30,14 @@ class BlockPermutation(object):
     BlockType and properties (also sometimes called block state) which describe a block (but does not belong to a specific @minecraft/server.Block).
     """
     
-    def __init__(self, block):
-        # type: (Block) -> None
+    def __init__(self, block, blockName=None, states=None):
+        # type: (Block, str, dict) -> None
         self.__block = block
+        self.__blockName = blockName
+        self.__states = states
+        if block:
+            self.__states = SComp.CreateBlockState(serverApi.GetLevelId()).GetBlockStates((self.__block.location.x, self.__block.location.y, self.__block.location.z), self.__block.dimension.dimId)
+            self.__blockName = self.__block.typeId
 
     @property
     def type(self):
@@ -40,7 +45,7 @@ class BlockPermutation(object):
         """
         Block type name
         """
-        return self.__block.type
+        return BlockType(self.__blockName)
 
     def __canBeDestroyedByLiquidSpread(self, liquidType='water'):
         # type: (str) -> bool
@@ -55,32 +60,32 @@ class BlockPermutation(object):
         """
 
     def getAllStates(self):
-        # type: () -> Dict[str, str]
+        # type: () -> Dict[str, 0]
         """
         Returns all available block states associated with this block.
         """
-        return SComp.CreateBlockState(serverApi.GetLevelId()).GetBlockStates((self.__block.location.x, self.__block.location.y, self.__block.location.z), self.__block.dimension.dimId)
+        return self.__states
     
     def getItemStack(self, amount=1):
         # type: (int) -> ItemStack
         """
         Retrieves a prototype item stack based on this block permutation that can be used with item Container/ContainerSlot APIs.
         """
-        return ItemStack(self.__block.typeId, amount)
+        return ItemStack(self.__blockName, amount)
     
     def getState(self, stateName):
         # type: (str) -> Any
         """
         Gets a state for the permutation.
         """
-        return self.getAllStates()[stateName]
+        return self.__states[stateName] if stateName in self.__states else None
     
     def getTags(self):
         # type: () -> List[str]
         """
         Creates a copy of the permutation.
         """
-        return SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockTags(self.__block.typeId)
+        return SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockTags(self.__blockName)
     
     def hasTag(self, tag):
         # type: (str) -> bool
@@ -88,7 +93,31 @@ class BlockPermutation(object):
         Checks to see if the permutation has a specific tag.
         """
         return tag in self.getTags()
+    
+    def matches(self, blockName, states=None):
+        # type: (str, dict) -> bool
+        """
+        Returns a boolean whether a specified permutation matches this permutation. If states is not specified, matches checks against the set of types more broadly.
+        """
+        if self.__blockName != blockName:
+            return False
+        if states:
+            current = self.getAllStates()
+            for state in states:
+                if state in current:
+                    if current[state] != states[state]:
+                        return False
+                else:
+                    return False
+        return True
 
+    def resolve(blockName, states=None):
+        # type: (str, dict) -> BlockPermutation
+        """
+        Given a type identifier and an optional set of properties, will return a BlockPermutation object that is usable in other block APIs (e.g., block.setPermutation)
+        """
+        return BlockPermutation(None, blockName, states)
+        
 
 class Block(object):
     """
@@ -229,3 +258,10 @@ class Block(object):
         Returns the @minecraft/server.Vector3 of the center of this block on the X and Z axis.
         """
         return Vector3({"x": int(self.location.x) + 0.5, "y": int(self.location.y), "z": int(self.location.z) + 0.5})
+
+    def setPermutation(self, permutation):
+        # type: (BlockPermutation) -> None
+        """
+        Sets the block in the dimension to the state of the permutation.
+        """
+        pass

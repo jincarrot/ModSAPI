@@ -2,25 +2,25 @@
 
 from Classes.Entity import *
 from Classes.WorldEvents import *
+from Classes.Scoreboard import *
 from Interfaces.Game import *
+from Classes.Container import *
 
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
-
-baseTypes = ("int", "float", "str", "list", "tuple", "dict", "bool", "NoneType")
 
 
 class World(ServerSystem):
 
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
-        self.__systemName = systemName
-        self.__namespace = namespace
         self.__afterEvents = WorldAfterEvents()
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
-        print("SAPI-world loaded")
+        print("Scripts-API: world loaded")
+        global world
+        world = self
 
     @property
     def afterEvents(self):
@@ -65,12 +65,13 @@ class World(ServerSystem):
 
     @staticmethod
     def getPlayers(options=EntityQueryOptions):
-        # type: (dict) -> List[Player]
+        # type: (dict | EntityQueryOptions) -> List[Player]
         """
         Returns a set of players based on a set of conditions defined via the EntityQueryOptions set of filter criteria.
         """
-        options = EntityQueryOptions(options)
+        options = EntityQueryOptions(options) if type(options) == dict else options
         players = []
+        playerIds = serverApi.GetPlayerList()
         if options.selfCheck():
             playerIds = serverApi.GetPlayerList()
             playerIds = options.check(playerIds)
@@ -84,9 +85,77 @@ class World(ServerSystem):
         """
         Returns a dimension object.
         """
-        return Dimension(MinecraftDimensionTypes.index(dimensionId))
+        return Dimension(dimensionId)
 
+    @staticmethod
+    def setDynamicProperty(identifier, value):
+        # type: (str, 0) -> None
+        """
+        Sets a specified property to a value.
+        """
+        SComp.CreateExtraData(serverApi.GetLevelId()).SetExtraData(identifier, value)
 
+    @staticmethod
+    def getDynamicProperty(identifier):
+        # type: (str) -> 0
+        """
+        Returns a property value.
+        """
+        return SComp.CreateExtraData(serverApi.GetLevelId()).GetExtraData(identifier)
+    
+    @staticmethod
+    def getDynamicPropertyIds():
+        # type: () -> List[str]
+        """
+        Gets a set of dynamic property identifiers that have been set in this world.
+        """
+        data = SComp.CreateExtraData(serverApi.GetLevelId()).GetWholeExtraData()
+        return data.keys()
+    
+    @staticmethod
+    def getDynamicPropertyTotalByteCount():
+        # type: () -> int
+        """
+        Gets the total byte count of dynamic properties. 
+        This could potentially be used for your own analytics to ensure you're not storing gigantic sets of dynamic properties.
+        """
+        DataComp = SComp.CreateExtraData(serverApi.GetLevelId())
+        data = DataComp.GetWholeExtraData()
+        count = 0
+        for key in data.keys():
+            count += len(key)
+            value = data[key]
+            if type(value).__name__ == 'str':
+                count += len(value)
+            else:
+                count += 8
+        return count
+    
+    @staticmethod
+    def getEntity(id):
+        # type: (str) -> Entity | None
+        """
+        Returns an entity based on the provided id.
+        """
+        if SComp.CreateGame(serverApi.GetLevelId()).IsEntityAlive(id):
+            return Entity(id)
+        else:
+            return None
+        
+    @staticmethod
+    def getTimeOfDay():
+        """
+        Returns the time of day. (In ticks, between 0 and 24000)
+        """
+        return SComp.CreateTime(serverApi.GetLevelId()).GetTime() % 24000
+
+    def listen(self, eventName, callback):
+        # type: (str, types.FunctionType) -> None
+        """
+        listen for an event
+        """
+        pass
+    
 class System(ServerSystem):
     """
     A class that provides system-level events and functions.
@@ -94,14 +163,3 @@ class System(ServerSystem):
 
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
-
-    def __getObj(self, data):
-        info = {}
-        attrs = dir(data)
-        for attr in attrs:
-            if attr.find("__") == 0:
-                continue
-            info[attr] = getattr(data, attr)
-            if info[attr] and not (type(info[attr]).__name__ in baseTypes):
-                info[attr] = self.__getObj(info[attr])
-        return "Object %s" % type(data).__name__, info

@@ -12,7 +12,7 @@ class EntityAddRiderComponent(EntityComponent):
     """
     
     def __init__(self, typeId, data):
-        super().__init__(typeId, data)
+        EntityComponent.__init__(self, typeId, data)
         self.__entityType = data['entityType']
         self.__spawnEvent = data['spawnEvent']
     
@@ -47,18 +47,21 @@ class EntityAttributeComponent(EntityComponent):
     """
     This is a base abstract class for any entity component that centers around a number and can have a minimum, maximum, and default defined value.
     """
+    import Entity as en
+    __componentId = ""
 
-    def __init__(self, typeId, data):
-        EntityComponent.__init__(self, typeId, data)
-        self.__comp = SComp.CreateAttr(self.entity.id)
+    def __init__(self, data):
+        EntityComponent.__init__(self, data)
+        self.__entity = data['entity'] # type: EntityAttributeComponent.en.Entity
+        self.__comp = SComp.CreateAttr(self.__entity.id)
         nbt = SComp.CreateEntityDefinitions(self.entity.id).GetEntityNBTTags()['Attributes']
         for tag in nbt:
-            if tag['Name']['__value__'] == self.__typeId:
-                self.defaultValue = tag['Base']['__value__']
+            if tag['Name']['__value__'] == self.__componentId:
+                self.__defaultValue = tag['Base']['__value__']
                 self.__effectiveMax = tag['Max']['__value__']
                 self.__effectiveMin = tag['Min']['__value__']
                 break
-        self.__componentId = self.__typeId
+        self.__attrId = getattr(EntityComponentType, self.__componentId.split("minecraft:")[1])
 
     @property
     def componentId(self):
@@ -129,13 +132,46 @@ class EntityAttributeComponent(EntityComponent):
         """
         Sets the current value of this attribute to the specified value.
         """
-        SComp.CreateAttr(self.entity.id).SetAttribute(getattr(EntityComponentType, self.componentId.split("minecraft:")[0]), value)
+        self.__comp.SetAttrValue(self.__attrId, value)
 
 
 class EntityHealthComponent(EntityAttributeComponent):
     """
     Defines the health properties of an entity.
     """
+    __componentId = "minecraft:health"
 
-    def __init__(self, typeId, data):
-        EntityAttributeComponent.__init__(self, typeId, data)
+    def __init__(self, data):
+        EntityAttributeComponent.__init__(self, data)
+        self.__entity = data['entity']
+
+
+class EntityInventoryComponent(EntityComponent):
+    """Defines this entity's inventory properties."""
+    __componentId = 'minecraft:inventory'
+    import Container as con
+    import Entity as en
+
+    def __init__(self, data):
+        EntityComponent.__init__(self, data)
+        self.__entity = data['entity'] # type: EntityInventoryComponent.en.Entity
+
+    def __str__(self):
+        data = {
+            "entity": str(self.__entity)
+        }
+        return "<EntityInventoryComponent> %s" % data
+
+    @property
+    def componentId(self):
+        return self.__componentId
+        
+    @property
+    def container(self):
+        # type: () -> con.Container
+        """
+        Defines the container for this entity. 
+        The container will be undefined if the entity has been removed.
+        """
+        return self.con.Container(None, self.__entity.id)
+    

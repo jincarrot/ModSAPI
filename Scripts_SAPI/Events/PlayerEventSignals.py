@@ -1,141 +1,55 @@
 # coding=utf-8
 
-import types
 from EventBases import *
-from ..Interfaces.EntityOptions import *
 import mod.server.extraServerApi as serverApi
 
 
-class EntityDieAfterEventSignal(EntityEvents):
+class ChatSendAfterEventSignal(Events):
     """
-    Supports registering for an event that fires after an entity has died.
-    """
-
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Subscribes to an event that fires when an entity dies.
-        """
-        if type(options).__name__ != "dict":
-            options = None
-        eventName = "MobDieEvent"
-        listener = EventListener(eventName, callback, options)
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, listener, listener.listen)
-
-
-class EffectAddAfterEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Manages callbacks that are connected to chat messages being sent.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
+    def __init__(self):
+        self.__eventName = "ServerChatEvent"
+
+    def subscribe(self, callback):
+        # type: (types.FunctionType) -> None
         """
-        Adds a callback that will be called when an effect is added to an entity.
+        Adds a callback that will be called when new chat messages are sent.
         """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "AddEffectServerEvent", world, callback)
+        import PlayerEvents as pe
+        EventListener(self.__eventName, callback, None, None, None, pe.ChatSendAfterEvent)
 
 
-class EntityHealthChangedAfterEventSignal(EntityEvents):
+class ItemUseAfterEventSignal(Events):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
-    """
-
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "HealthChangeServerEvent", world, callback)
-
-
-class EntityHitBlockAfterEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Manages callbacks that are connected to an item use event.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
+    def __init__(self):
+        self.__eventName = "ItemUseAfterServerEvent"
+
+    def subscribe(self, callback):
+        # type: (types.FunctionType) -> None
         """
-        Adds a callback that will be called when an effect is added to an entity.
+        Adds a callback that will be called when an item is used.
         """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "OnMobHitBlockServerEvent", world, callback)
+        import PlayerEvents as pe
+        EventListener(self.__eventName, callback, None, None, None, pe.ItemUseAfterEvent)
 
 
-class EntityHitEntityAfterEventSignal(EntityEvents):
+class ItemCompleteUseAfterEventSignal(Events):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
-    """
-
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "DamageEvent", world, callback)
-
-
-class EntityHurtAfterEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Manages callbacks that are connected to the completion of charging for a chargeable item.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
+    def __init__(self):
+        self.__eventName = "ItemReleaseUsingServerEvent"
+
+    def subscribe(self, callback):
+        # type: (types.FunctionType) -> None
         """
-        Adds a callback that will be called when an effect is added to an entity.
+        Adds a callback that will be called when a chargeable item completes charging.
         """
-        if type(options).__name__ != "dict":
-            options = None
-        eventName = "DamageEvent"
-        listener = EventListener(eventName, callback, options)
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, listener,
-                             listener.listen)
-
-
-class EntityLoadAfterEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an effect is added to an entity.
-    """
-
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "AddEntityServerEvent", world, callback)
-
-
-class EntityRemoveAfterEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an effect is added to an entity.
-    """
-
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "EntityRemoveEvent", world, callback)
-
-
-class EntitySpawnAfterEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an effect is added to an entity.
-    """
-
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "EntityRemoveEvent", world, callback)
+        import PlayerEvents as pe
+        EventListener(self.__eventName, callback, None, None, None, pe.ItemCompleteUseAfterEvent)

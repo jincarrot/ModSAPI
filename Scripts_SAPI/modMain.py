@@ -17,9 +17,13 @@ class Script_SAPI(object):
                                  "Scripts_SAPI.SAPI_S.World")
         serverApi.RegisterSystem("SAPI", "system",
                                  "Scripts_SAPI.SAPI_S.System")
+        serverApi.RegisterSystem("SAPI", "Base",
+                                 "Scripts_SAPI.minecraft.SAPIS")
 
     @Mod.InitClient()
     def SAPI_ClientInit(self):
         clientApi.RegisterSystem("SAPI", "SAPI_C",
                                  "Scripts_SAPI.SAPI_C.SAPI_C")
+        clientApi.RegisterSystem("SAPI", "client", 
+                                 "Scripts_SAPI.SAPI_C.Client")
 

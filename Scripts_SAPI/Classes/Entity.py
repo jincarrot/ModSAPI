@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-from typing import Any, Union, Dict, List
+# coding=utf-8
+# from typing import Any, Union, Dict, List
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
-from Dimension import *
 from Effect import *
 from ..Interfaces.BlockOptions import *
 from ..Interfaces.AnimeOptions import *
@@ -10,36 +9,31 @@ from ..Interfaces.EntityOptions import *
 from ..Interfaces.TeleportOptions import *
 from ..Interfaces.Raycasts import *
 from EntityComponents import *
-import math
+import math, time, random
+from Camara import *
+from Request import *
+from ClientSystemInfo import *
 import mod.server.extraServerApi as serverApi
-import mod.client.extraClientApi as clientApi
+from ..minecraft import *
+from Command import *
 
 SComp = serverApi.GetEngineCompFactory()
-CComp = clientApi.GetEngineCompFactory()
 
 
 class Entity(object):
     """
     Represents the state of an entity (a mob, the player, or other moving objects like mine carts) in the world.
     """
+    import Dimension as d
 
     def __init__(self, entityId):
         self.__id = entityId
+        self.__healthComp = SComp.CreateAttr(self.__id)
 
     def __str__(self):
         data = {
             "id": self.id,
             "dimension": str(self.dimension),
-            "isClimbing": self.isClimbing,
-            "isFalling": self.isFalling,
-            "isInWater": self.isInWater,
-            "isOnGround": self.isOnGround,
-            "isSleeping": self.isSleeping,
-            "isSneaking": self.isSneaking,
-            "isSprinting": self.isSprinting,
-            "isSwimming": self.isSwimming,
-            "location": str(self.location),
-            "nameTag": self.nameTag,
             "typeId": self.typeId
         }
         return "<Entity> %s" % data
@@ -57,11 +51,11 @@ class Entity(object):
 
     @property
     def dimension(self):
-        # type: () -> Dimension
+        # type: () -> Entity.d.Dimension
         """
         Dimension that the entity is currently within.
         """
-        dim = Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
+        dim = self.d.Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
         return dim
 
     @property
@@ -174,6 +168,14 @@ class Entity(object):
         SComp.CreateName(self.__id).SetName(name)
 
     @property
+    def health(self):
+        return self.__healthComp.GetAttrValue(0)
+    
+    @health.setter
+    def health(self, value):
+        self.__healthComp.SetAttrValue(0, value)
+    
+    @property
     def scoreboardIdentity(self):
         return 0
 
@@ -199,7 +201,8 @@ class Entity(object):
             if SComp.CreateGame(self.__id).IsEntityAlive(self.__id):
                 SComp.CreateEffect(self.__id).RemoveEffectFromEntity(effectType)
 
-        SComp.CreateGame(serverApi.GetLevelId()).AddTimer(duration / 20.0, stop)
+        if duration < 20:
+            SComp.CreateGame(serverApi.GetLevelId()).AddTimer(duration / 20.0, stop)
         return Effect(effectType, duration, options.amplifier)
 
     def addTag(self, tag):
@@ -325,15 +328,17 @@ class Entity(object):
                 "faceLocation": Vector3({"x": block['hitPos'][0], "y": block['hitPos'][1], "z": block['hitPos'][2]})
             }
             return BlockRaycastHit(data)
+        return None
 
     def getComponent(self, componentId):
         # type: (str) -> EntityComponent
         """
         Gets a component (that represents additional capabilities) for an entity.
         """
-        componentId = componentId.split("minecraft:")[0].lower()
-        if componentId in vars(EntityComponentType).values():
-            if componentId == "minecraft:health":
+        if len(componentId.split("minecraft:")) > 1:
+            componentId = componentId.split("minecraft:")[1].lower()
+        if componentId in vars(EntityComponentType).keys():
+            if componentId == "health":
                 return EntityHealthComponent(componentId, {"entity": self})
         return EntityComponent(componentId, {"entity": self})
 
@@ -409,6 +414,8 @@ class Entity(object):
         """
         datas = SComp.CreateEffect(self.__id).GetAllEffects()
         effects = []
+        if not datas:
+            datas = []
         for data in datas:
             effects.append(Effect(data['effectName'], int(data['duration_f'] * 20), data['amplifier']))
         return effects
@@ -490,6 +497,12 @@ class Entity(object):
         direction = serverApi.GetDirFromRot(rot)
         return Vector3({"x": direction[0], "y": direction[1], "z": direction[2]})
 
+    def getFamilies(self):
+        """
+        Returns family types
+        """
+        return SComp.CreateAttr(self.__id).GetTypeFamily()
+
     def hasComponent(self, componentId):
         # type: (str) -> bool
         """
@@ -504,6 +517,14 @@ class Entity(object):
         Returns whether an entity has a particular tag.
         """
         return SComp.CreateTag(self.__id).EntityHasTag(tag)
+
+    def hasFamily(self, familyName):
+        # type: (str) -> bool
+        """
+        Returns whether an entity belongs to a family.
+        """
+        families = SComp.CreateAttr(self.__id).GetTypeFamily()
+        return familyName in families
 
     def kill(self):
         # type: () -> bool
@@ -539,7 +560,7 @@ class Entity(object):
         Immediately removes the entity from the world.
         The removed entity will not perform a death animation or drop loot upon removal.
         """
-        serverApi.GetSystem("SAPI", "world").DestroyEntity(self.__id)
+        world.DestroyEntity(self.__id)
 
     def removeEffect(self, effectType):
         # type: (Union[str, EffectType]) -> bool
@@ -562,7 +583,6 @@ class Entity(object):
         Resets an Entity Property back to its default value, as specified in the Entity's definition.
         This property change is not applied until the next tick.
         """
-        world = serverApi.GetSystem("SAPI", "world")
         # 获取原nbt
         nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
         # 检测是否存在该值
@@ -582,11 +602,28 @@ class Entity(object):
             return value
 
     def runCommand(self, commandString):
-        # type: (str) -> None
+        # type: (str) -> CommandResult
         """
         Runs a synchronous command on the entity.
+
+        Note: it may return wrong message
         """
         SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString, self.__id)
+        index = commandString.find("@")
+        if index >= 0:
+            selector = ""
+            while index < len(commandString):
+                hasParam = False
+                if commandString[index] == "[":
+                    hasParam = True
+                if commandString[index] == "]":
+                    selector += commandString[index]
+                    break
+                if commandString[index] == " " and not hasParam:
+                    break
+                selector += commandString[index]
+                index += 1
+            return CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
         return None
 
     def setDynamicProperty(self, identifier, value):
@@ -616,7 +653,7 @@ class Entity(object):
         if 'properties' in nbt and identifier in nbt['properties']:
             nbt['properties'][identifier]['__value__'] = value
             self.remove()
-            self.__id = serverApi.GetSystem("SAPI", "world").CreateEngineEntityByNBT(nbt)
+            self.__id = world.CreateEngineEntityByNBT(nbt)
 
     def setRotation(self, rotation):
         # type: (Union[str, Vector2]) -> None
@@ -656,6 +693,78 @@ class Player(Entity):
     """
     Represents a player within the world.
     """
+    import Container as con
 
     def __init__(self, playerId):
+        # type: (str) -> None
         Entity.__init__(self, playerId)
+        self.__id = playerId
+        self.__container = self.con.Container(None, self.__id)
+
+    def __str__(self):
+        data = {
+            "id": self.id,
+            "dimension": str(self.dimension),
+            "name": self.name
+        }
+        return "<Player> %s" % data
+    
+    @property
+    def name(self):
+        """
+        Name of the player.
+        """
+        return self.nameTag
+
+    @property
+    def camera(self):
+        # type: () -> Camera
+        """
+        The player's Camera.
+        """
+        return Camera(self.__id)
+    
+    @property
+    def clientSystemInfo(self):
+        # type: () -> ClientSystemInfo
+        """
+        Contains the player's device information.
+        """
+        requestId = request.create(self.__id, "clientSystemInfo")
+        value = request.getValue(requestId)
+        return ClientSystemInfo(value)
+
+    @property
+    def container(self):
+        # type: () -> con.Container
+        """returns the container of player's inventory"""
+        return self.__container
+
+    def playSound(self, soundID, soundOptions=PlayerSoundOptions):
+        # type: (str, dict) -> None
+        if soundOptions == PlayerSoundOptions:
+            soundOptions = {}
+        if 'location' not in soundOptions:
+            pos = SComp.CreatePos(self.__id).GetPos()
+            soundOptions['location'] = Vector3({"x": pos.x, "y": pos.y, "z": pos.z})
+        options = PlayerSoundOptions(soundOptions) if type(soundOptions) == dict else soundOptions
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("playsound %s @s %s %s %s %s %s" % (soundID, options.location.x, options.location.y, options.location.z, options.volume, options.pitch), self.__id)
+
+    def sendMessage(self, message):
+        # type: (str) -> None
+        """Sends a message to the player."""
+        SComp.CreateMsg(self.__id).NotifyOneMessage(self.__id, message)
+
+    def sendToast(self, message, title=""):
+        # type: (str, str) -> None
+        """
+        send a toast to player
+        """
+        global world
+        data = {
+            "title": title,
+            "message": message
+        }
+        if not world:
+            world = getWorld()
+        world.NotifyToClient(self.__id, "sendToast", data)

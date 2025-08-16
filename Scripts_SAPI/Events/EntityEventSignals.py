@@ -4,6 +4,36 @@ import types
 from EventBases import *
 from ..Interfaces.EntityOptions import *
 import mod.server.extraServerApi as serverApi
+from ..minecraft import *
+
+
+class EntityEvents(Events):
+
+    def __init__(self):
+        self.__eventName = None
+
+    def _check(self, obj, data, valueName):
+        # type: (EventListener, dict, str) -> bool
+        options = obj.options
+        if type(options) != dict:
+            options = None
+        else:
+            options = EntityEventsOptions(options)
+        if options:
+            if options.entities:
+                entityIds = []
+                for entity in options.entities:
+                    entityIds.append(entity.id)
+                if data[valueName] not in entityIds:
+                    return False
+            if options.entityTypes:
+                if SComp.CreateEngineType(data[valueName]).GetEngineTypeStr() not in options.entityTypes:
+                    return False
+        return True
+                
+    def subscribe(self, callback, options=None):
+        # type: (types.FunctionType, dict) -> None
+        EventListener(self.eventName, callback, options, self._check, None)
 
 
 class EntityDieAfterEventSignal(EntityEvents):
@@ -11,49 +41,14 @@ class EntityDieAfterEventSignal(EntityEvents):
     Supports registering for an event that fires after an entity has died.
     """
 
-    @staticmethod
-    def __detectFunction(obj, data):
-        arg = {}
-        if obj.options:
-            if obj.options.entities:
-                entityIds = []
-                for entity in obj.options.entities:
-                    entityIds.append(entity.id)
-                if data['id'] not in entityIds:
-                    arg['error'] = True
-            if obj.options.entityTypes:
-                if SComp.CreateEngineType(data['id']).GetEngineTypeStr() not in obj.options.entityTypes:
-                    arg['error'] = True
-        damagingEntity = data['attacker'] if data['attacker'] else None
-        damagingProjectile = None
-        if damagingEntity and SComp.CreateEntityComponent(damagingEntity).HasComponent(EntityComponentType.projectile):
-            damagingProjectile = damagingEntity
-            damagingEntity = SComp.CreateActorOwner(damagingProjectile).GetEntityOwner()
-        temp = {
-            "cause": data['cause']
-        }
-        if damagingEntity:
-            temp['damagingEntity'] = Entity(damagingEntity)
-        if damagingProjectile:
-            temp['damagingProjectile'] = Entity(damagingProjectile)
-        arg['damageSource'] = EntityDamageSource(temp)
-        arg['deadEntity'] = Entity(data['id'])
-        if arg['error']:
-            return False
-        return EntityDieAfterEvent(arg)
+    def __init__(self):
+        EntityEvents.__init__(self)
+        self.__eventName = "MobDieEvent"
 
-
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def subscribe(self, callback, options=None):
         # type: (types.FunctionType, dict) -> None
-        """
-        Subscribes to an event that fires when an entity dies.
-        """
-        if type(options).__name__ != "dict":
-            options = None
-        eventName = "MobDieEvent"
-        listener = EventListener(eventName, callback, options, self.__detectFunction)
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, listener, listener.listen)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityDieAfterEvent)
 
 
 class EffectAddAfterEventSignal(EntityEvents):
@@ -66,7 +61,7 @@ class EffectAddAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
+
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "AddEffectServerEvent", world, callback)
 
 
@@ -80,7 +75,7 @@ class EntityHealthChangedAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
+
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "HealthChangeServerEvent", world, callback)
 
 
@@ -94,7 +89,7 @@ class EntityHitBlockAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
+
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "OnMobHitBlockServerEvent", world, callback)
 
 
@@ -108,7 +103,7 @@ class EntityHitEntityAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
+
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "DamageEvent", world, callback)
 
 
@@ -117,18 +112,16 @@ class EntityHurtAfterEventSignal(EntityEvents):
     Manages callbacks that are connected to when an effect is added to an entity.
     """
 
+    def __init__(self):
+        self.__eventName = "DamageEvent"
+
     def subscribe(self, callback, options=EntityEventsOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        if type(options).__name__ != "dict":
-            options = None
-        eventName = "DamageEvent"
-        listener = EventListener(eventName, callback, options)
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, listener,
-                             listener.listen)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, "entityId", self._check, ee.EntityHurtAfterEvent)
 
 
 class EntityLoadAfterEventSignal(EntityEvents):
@@ -141,7 +134,7 @@ class EntityLoadAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
+
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "AddEntityServerEvent", world, callback)
 
 
@@ -155,19 +148,22 @@ class EntityRemoveAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
+
         world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "EntityRemoveEvent", world, callback)
 
 
 class EntitySpawnAfterEventSignal(EntityEvents):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Registers a script-based event handler for handling what happens when an entity spawns.
     """
+
+    def __init__(self):
+        self.__eventName = "ServerSpawnMobEvent"
 
     def subscribe(self, callback, options=EntityEventsOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        world = serverApi.GetSystem("SAPI", "world")
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "EntityRemoveEvent", world, callback)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntitySpawnAfterEvent)

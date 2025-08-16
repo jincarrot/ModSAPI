@@ -4,7 +4,6 @@ import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
 SComp = serverApi.GetEngineCompFactory()
-CComp = clientApi.GetEngineCompFactory()
 
 
 class ItemType(object):
@@ -42,8 +41,15 @@ class ItemStack(object):
         """Gets or sets whether the item is kept on death."""
         self.lockMode = ItemLockMode.none
         """Gets or sets the item's lock mode. The default value is ItemLockMode.none."""
-        self.nameTag = self.__typeId.split('minecraft:')[0]
+        self.nameTag = None
         """Given name of this stack of items. The name tag is displayed when hovering over the item. Setting the name tag to an empty string or undefined will remove the name tag."""
+
+    def __str__(self):
+        data = {
+            "typeId": self.typeId,
+            "amount": self.amount
+        }
+        return "<ItemStack> %s" % data
 
     @property
     def typeId(self):
@@ -77,3 +83,36 @@ class ItemStack(object):
         Maximum stack size of the item.
         """
         return self.__maxAmount
+
+    def getItemDict(self):
+        # type: () -> dict
+        """获取网易物品数据"""
+        data = {
+            "newItemName": self.__typeId,
+            "count": self.amount
+        }
+        userData = {}
+        if self.keepOnDeath:
+            userData['minecraft:keep_on_death'] = {'__type__': 1, '__value__': 1}
+        if self.lockMode != "none":
+            userData['minecraft:item_lock'] = {'__type__': 1, '__value__': 2 if self.lockMode == 'inventory' else 1}
+        if self.nameTag:
+            SComp.CreateItem(serverApi.GetLevelId()).SetCustomName(data, self.nameTag)
+        if userData:
+            data['userData'] = userData
+        return data
+    
+    def getLore(self):
+        # type: () -> List[str]
+        """
+        Returns the lore value - a secondary display string - for an ItemStack.
+        """
+        pass
+
+    def setLore(self, loreList=None):
+        # type: (List[str]) -> None
+        """
+        Sets the lore value - a secondary display string - for an ItemStack. 
+        The lore list is cleared if set to an empty string or undefined.
+        """
+        pass

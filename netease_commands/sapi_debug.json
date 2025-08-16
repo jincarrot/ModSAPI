@@ -1,0 +1,17 @@
+{
+	"format_version": "0.0.1",
+	"name": "modsapi",
+	"description": "ModSAPI调试",
+	"permission_level": "admin",
+	"args": [
+        {
+            "type": "enum",
+            "name": "Operation",
+            "options": ["debug"]
+        },
+        {
+            "type": "str",
+            "name": "Code"
+        }
+    ]
+}

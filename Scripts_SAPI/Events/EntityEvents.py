@@ -1,5 +1,6 @@
 # coding=utf-8
 from ..Classes.Entity import *
+from ..Interfaces.Sources import *
 
 
 class EntityDieAfterEvent(object):
@@ -8,19 +9,29 @@ class EntityDieAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__damageSource = data['damageSource']
-        self.__deadEntity = data['deadEntity']
+        temp = { "cause": data['cause'] }
+        damagingEntity = data['attacker'] if data['attacker'] else None
+        damagingProjectile = None
+        if damagingEntity and SComp.CreateEntityComponent(damagingEntity).HasComponent(EntityComponentType.projectile):
+            damagingProjectile = damagingEntity
+            damagingEntity = SComp.CreateActorOwner(damagingProjectile).GetEntityOwner()
+        if damagingEntity:
+            temp['damagingEntity'] = Entity(damagingEntity)
+        if damagingProjectile:
+            temp['damagingProjectile'] = Entity(damagingProjectile)
+        self.__damageSource = EntityDamageSource(temp)
+        self.__deadEntity = Entity(data['id'])
 
     def __str__(self):
         data = {
-            "damageSource": self.damageSource,
-            "deadEntity": str(self.deadEntity)
+            "damageSource": str(self.__damageSource),
+            "deadEntity": str(self.__deadEntity)
         }
         return "<EntityDieAfterEvent> %s" % data
 
     @property
     def damageSource(self):
-        # type: () -> EntityDamageCause
+        # type: () -> EntityDamageSource
         """
         If specified, provides more information on the source of damage that caused the death of this entity.
         """
@@ -41,14 +52,21 @@ class EntityHurtAfterEvent(object):
     """
 
     def __init__(self, data):
+        temp = { "cause": data['cause'] }
+        damagingEntity = data['srcId'] if data['srcId'] else None
+        damagingProjectile = data['projectileId']
+        if damagingEntity:
+            temp['damagingEntity'] = Entity(damagingEntity)
+        if damagingProjectile:
+            temp['damagingProjectile'] = Entity(damagingProjectile)
         self.__damage = data['damage']
-        self.__damageSource = data['damageSource']
-        self.__hurtEntity = data['hurtEntity']
+        self.__damageSource = EntityDamageSource(temp)
+        self.__hurtEntity = Entity(data['entityId'])
 
     def __str__(self):
         data = {
             "damage": self.damage,
-            "damageSource": self.damageSource,
+            "damageSource": str(self.damageSource),
             "hurtEntity": str(self.hurtEntity)
         }
         return "<EntityHurtAfterEvent> %s" % data
@@ -76,3 +94,23 @@ class EntityHurtAfterEvent(object):
         Entity that was hurt.
         """
         return self.__hurtEntity
+
+
+class EntitySpawnAfterEvent(object):
+    """
+    Contains data related to an entity spawning within the world.
+    """
+
+    def __init__(self, data):
+        self.__cause = None
+        self.__entity = Entity(data['entityId'])
+    
+    @property
+    def cause(self):
+        # type: () ->str
+        return self.__cause
+    
+    @property
+    def entity(self):
+        # type: () -> Entity 
+        return self.__entity

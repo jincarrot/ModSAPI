@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 # from typing import Union, Dict
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
 SComp = serverApi.GetEngineCompFactory()
-CComp = clientApi.GetEngineCompFactory()
 
 
 class EffectType(object):
@@ -68,7 +67,3 @@ class Effect(object):
         Gets the type id of this effect.
         """
         return self.__typeId
-
-
-class Scoreboard(object):
-    pass

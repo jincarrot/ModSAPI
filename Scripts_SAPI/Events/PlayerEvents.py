@@ -9,14 +9,18 @@ class ChatSendAfterEvent(object):
 
     def __init__(self, data):
         self.__message = data['message']
-        self.__sender = data['sender']
-        self.targets = data['targets']
+        self.__sender = Player(data['playerId']) if data['playerId'] else None
+        targetIds = data['toPlayerIds']
+        self.__targets = []
+        for id in targetIds:
+            self.__targets.append(Player(id))
 
     def __str__(self):
         data = {
             "message": self.__message,
+            "sender": str(self.__sender)
         }
-        return "<EntityDieAfterEvent> %s" % data
+        return "<ChatSendAfterEvent> %s" % data
 
     @property
     def message(self):
@@ -25,11 +29,83 @@ class ChatSendAfterEvent(object):
         Message that is being broadcast.
         """
         return self.__damageSource
+    
+    @property
+    def sender(self):
+        # type: () -> Player
+        """
+        Player that sent the chat message.
+        """
+        return self.__sender
+    
+    @property
+    def targets(self):
+        # type: () -> List[Player]
+        """
+        Optional list of players that will receive this message. 
+        If defined, this message is directly targeted to one or more players (i.e., is not broadcast.)
+        """
+        return self.__targets
+
+
+class ItemUseAfterEvent(object):
+    """
+    Contains information related to an item being used on a block. 
+    This event fires when an item used by a player successfully triggers an entity interaction.
+    """
+
+    def __init__(self, data):
+        itemData = data['itemDict']
+        self.__itemStack = ItemStack(itemData['newItemName'], itemData['count'])
+        self.__source = Player(data['entityId'])
 
     @property
-    def deadEntity(self):
-        # type: () -> Entity
+    def itemStack(self):
+        # type: () -> ItemStack
         """
-        Now-dead entity object.
+        The impacted item stack that is being used.
         """
-        return self.__deadEntity
+        return self.__itemStack
+    
+    @property
+    def source(self):
+        # type: () -> Player
+        """
+        Returns the source entity that triggered this item event.
+        """
+        return self.__source
+    
+class ItemCompleteUseAfterEvent(object):
+    """
+    Contains information related to a chargeable item completing being charged.
+    """
+
+    def __init__(self, data):
+        itemData = data['itemDict']
+        self.__itemStack = ItemStack(itemData['newItemName'], itemData['count'])
+        self.__source = Player(data['playerId'])
+        self.__useDuration = data['durationLeft']
+
+    @property
+    def itemStack(self):
+        # type: () -> ItemStack
+        """
+        Returns the item stack that has completed charging.
+        """
+        return self.__itemStack
+    
+    @property
+    def source(self):
+        # type: () -> Player
+        """
+        Returns the source entity that triggered this item event.
+        """
+        return self.__source
+    
+    @property
+    def useDuration(self):
+        # type: () -> float
+        """
+        Returns the time, in ticks, for the remaining duration left before the charge completes its cycle.
+        """
+        return self.__useDuration

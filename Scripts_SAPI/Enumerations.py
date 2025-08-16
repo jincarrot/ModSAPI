@@ -63,8 +63,10 @@ class Direction(object):
     """
     A general purpose relative direction enumeration.
     """
-    Down = "Down"
-    """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
+    @property
+    def Down(self):
+        """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
+        return "Down"
     East = "East"
     """Returns the @minecraft/server.Block to the east (x + 1) of this item."""
     North = "North"
@@ -86,3 +88,37 @@ class EntityComponentTypes(object):
     """When added, this component makes the entity spawn with a rider of the specified entityType."""
     Health = "minecraft:health"
     """Defines the health properties of an entity."""
+
+
+class GameMode(object):
+    """
+    Represents a game mode for the current world experience.
+    """
+    
+    adventure = 'adventure'
+    """World is in a more locked-down experience, where blocks may not be manipulated."""
+
+    creative = 'creative'
+    """World is in a full creative mode. In creative mode, the player has all the resources
+    available in the item selection tabs and the survival selection tab. They can also destroy
+    blocks instantly including those which would normally be indestructible. Command and
+    structure blocks can also be used in creative mode. Items also do not lose durability or disappear."""
+    
+    spectator = 'spectator'
+    
+    survival = 'survival'
+    """World is in a survival mode, where players can take damage and entities may not be peaceful.
+    Survival mode is where the player must collect resources, build structures while surviving
+    in their generated world. Activities can, over time, chip away at player health and hunger bar."""
+
+
+class ItemLockMode(object):
+    """
+    Specifies the lock mode for items in containers.
+    """
+    
+    inventory = 'inventory'
+    
+    none = 'none'
+    
+    slot = 'slot'
