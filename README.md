@@ -1,6 +1,7 @@
 # ModSAPI
 
-![ModSAPI Logo](pack_icon.png =300x300)
-A library for Minecraft Netease Edition to create mod with SAPI style
+<img src="pack_icon.png" width="100" align="right"/>
 
-[Document](http://modsapi.pages.dev)
+A library for Minecraft Netease Edition to create mod with SAPI style!
+
+click [here](http://modsapi.pages.dev) to see the document
