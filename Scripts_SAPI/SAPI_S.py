@@ -5,6 +5,7 @@ from Classes.WorldEvents import *
 from Classes.Scoreboard import *
 from Interfaces.Game import *
 from Classes.Container import *
+from scheduler import Scheduler
 
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
@@ -12,8 +13,12 @@ comp = serverApi.GetEngineCompFactory()
 
 class World(ServerSystem):
 
+    scriptScheduler = Scheduler()
+    gameScheduler = Scheduler()
+
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
+        self._initScheduler()
         self.__afterEvents = WorldAfterEvents()
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
@@ -21,6 +26,18 @@ class World(ServerSystem):
         print("Scripts-API: world loaded")
         global world
         world = self
+
+    def _OnScriptTickServer(self):
+        self.scriptScheduler.executeSequenceAsync()
+
+    def _initScheduler(self):
+        self.ListenForEvent(
+            serverApi.GetEngineNamespace(),
+            serverApi.GetEngineSystemName(),
+            "OnScriptTickServer",
+            self,
+            self._OnScriptTickServer
+        )
 
     @property
     def afterEvents(self):
