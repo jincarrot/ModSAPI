@@ -2,6 +2,7 @@
 
 from EventBases import *
 import mod.server.extraServerApi as serverApi
+from ..decorators import *
 
 
 class ChatSendAfterEventSignal(Events):
@@ -12,6 +13,7 @@ class ChatSendAfterEventSignal(Events):
     def __init__(self):
         self.__eventName = "ServerChatEvent"
 
+    @ServerMethod
     def subscribe(self, callback):
         # type: (types.FunctionType) -> None
         """

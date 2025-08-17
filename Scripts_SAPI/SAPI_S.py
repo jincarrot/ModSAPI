@@ -6,6 +6,8 @@ from Classes.Scoreboard import *
 from Interfaces.Game import *
 from Classes.Container import *
 from scheduler import Scheduler
+from decorators import *
+import types
 
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
@@ -18,7 +20,7 @@ class World(ServerSystem):
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
-        print("Scripts-API: world loaded")
+        print("ModSAPI: world loaded")
         global world
         world = self
 
@@ -52,6 +54,7 @@ class World(ServerSystem):
         return self.__scoreboard
 
     @staticmethod
+    @ServerMethod
     def getAllPlayers():
         # type: () -> list[Player]
         """
@@ -64,6 +67,7 @@ class World(ServerSystem):
         return players
 
     @staticmethod
+    @ServerMethod
     def getPlayers(options=EntityQueryOptions):
         # type: (dict | EntityQueryOptions) -> list[Player]
         """
@@ -80,6 +84,7 @@ class World(ServerSystem):
         return players
 
     @staticmethod
+    @ServerMethod
     def getDimension(dimensionId):
         # type: (str) -> Dimension
         """
@@ -88,6 +93,7 @@ class World(ServerSystem):
         return Dimension(dimensionId)
 
     @staticmethod
+    @ServerMethod
     def setDynamicProperty(identifier, value):
         # type: (str, 0) -> None
         """
@@ -96,6 +102,7 @@ class World(ServerSystem):
         SComp.CreateExtraData(serverApi.GetLevelId()).SetExtraData(identifier, value)
 
     @staticmethod
+    @ServerMethod
     def getDynamicProperty(identifier):
         # type: (str) -> 0
         """
@@ -104,6 +111,7 @@ class World(ServerSystem):
         return SComp.CreateExtraData(serverApi.GetLevelId()).GetExtraData(identifier)
     
     @staticmethod
+    @ServerMethod
     def getDynamicPropertyIds():
         # type: () -> list[str]
         """
@@ -113,6 +121,7 @@ class World(ServerSystem):
         return data.keys()
     
     @staticmethod
+    @ServerMethod
     def getDynamicPropertyTotalByteCount():
         # type: () -> int
         """
@@ -132,6 +141,7 @@ class World(ServerSystem):
         return count
     
     @staticmethod
+    @ServerMethod
     def getEntity(id):
         # type: (str) -> Entity | None
         """
@@ -143,6 +153,7 @@ class World(ServerSystem):
             return None
         
     @staticmethod
+    @ServerMethod
     def getTimeOfDay():
         """
         Returns the time of day. (In ticks, between 0 and 24000)
@@ -166,6 +177,7 @@ class System(ServerSystem):
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
         self._initScheduler()
+        print("ModSAPI: system loaded")
 
     def _OnScriptTickServer(self):
         self._scriptScheduler.executeSequenceAsync()
@@ -179,20 +191,34 @@ class System(ServerSystem):
             self._OnScriptTickServer
         )
 
-    def run(self, fn):
-        return self._scriptScheduler.run(fn)
+    def run(self, callback):
+        # type: (types.FunctionType) -> int
+        """
+        Runs a specified function at the next available future time. 
+        This is frequently used to implement delayed behaviors and game loops. 
+        When run within the context of an event handler, this will generally run the code at the end of the same tick where the event occurred. 
+        When run in other code (a system.run callout), this will run the function in the next tick. 
+        
+        Note, however, that depending on load on the system, running in the same or next tick is not guaranteed."""
+        return self._scriptScheduler.run(callback)
 
-    def runTimeout(self, fn, ticks=1):
-        return self._scriptScheduler.runTimer(fn, ticks)
+    def runTimeout(self, callback, tickDelay=1):
+        # type: (types.FunctionType, int) -> int
+        """
+        Runs a set of code at a future time specified by tickDelay.
+        """
+        return self._scriptScheduler.runTimer(callback, tickDelay)
 
-    def runInterval(self, fn, ticks=1):
-        return self._scriptScheduler.runTimer(fn, ticks, True)
+    def runInterval(self, callback, tickInterval=1):
+        # type: (types.FunctionType, int) -> int
+        """
+        Runs a set of code on an interval.
+        """
+        return self._scriptScheduler.runTimer(callback, tickInterval, True)
 
-    def clearTimeout(self, id):
-        self._scriptScheduler.removeTask('SchedulerTask', id)
-
-    def clearInterval(self, id):
-        self._scriptScheduler.removeTask('SchedulerTask', id)
-
-    def clearRun(self, id):
-        self._scriptScheduler.removeTask('SchedulerTask', id)
+    def clearRun(self, runId):
+        # type: (int) -> None
+        """
+        Cancels the execution of a function run that was previously scheduled via @minecraft/server.System.run.
+        """
+        self._scriptScheduler.removeTask('SchedulerTask', runId)

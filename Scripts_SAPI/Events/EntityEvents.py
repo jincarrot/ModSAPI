@@ -107,7 +107,7 @@ class EntitySpawnAfterEvent(object):
     
     @property
     def cause(self):
-        # type: () ->str
+        # type: () -> str
         return self.__cause
     
     @property

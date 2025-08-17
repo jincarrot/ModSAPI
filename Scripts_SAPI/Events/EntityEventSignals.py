@@ -5,6 +5,7 @@ from EventBases import *
 from ..Interfaces.EntityOptions import *
 import mod.server.extraServerApi as serverApi
 from ..minecraft import *
+from ..decorators import *
 
 
 class EntityEvents(Events):
@@ -160,6 +161,7 @@ class EntitySpawnAfterEventSignal(EntityEvents):
     def __init__(self):
         self.__eventName = "ServerSpawnMobEvent"
 
+    @ServerMethod
     def subscribe(self, callback, options=EntityEventsOptions):
         # type: (types.FunctionType, dict) -> None
         """

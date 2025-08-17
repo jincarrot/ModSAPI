@@ -4,6 +4,7 @@ import math, time
 from Classes.ClientEvents import *
 from Classes.Request import *
 from scheduler import Scheduler
+from minecraft import *
 
 ClientSystem = clientApi.GetClientSystemCls()
 
@@ -36,6 +37,16 @@ class SAPI_C(ClientSystem):
         CComp.CreateGame(clientApi.GetLevelId()).SetPopupNotice(data['message'], data['title'])
 
 
+def ClientMethod(func):
+    """client method"""
+    def wrapper(*args, **kwargs):
+        global system
+        if not system:
+            system = getSystem()
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
+
 class Client(ClientSystem):
 
     _frameScheduler = Scheduler()
@@ -56,10 +67,14 @@ class Client(ClientSystem):
     def beforeEvents(self):
         return self.__beforeEvents
     
+    @property
+    def camera(self):
+        return 1
+    
     def _OnScriptTickClient(self):
         self._scriptScheduler.executeSequenceAsync()
     
-    def _OnGameRenderTick(self):
+    def _OnGameRenderTick(self, __data):
         self._frameScheduler.executeSequenceAsync()
 
     def _initScheduler(self):

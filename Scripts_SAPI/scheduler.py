@@ -1,7 +1,7 @@
 from threading import Thread
-from typing import Optional, Callable, Any, Exception
+# from typing import Optional, Callable, Any, Exception
 from time import time
-from math import max
+from math import *
 
 class Task:
     taskId = 0

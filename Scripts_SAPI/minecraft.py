@@ -12,7 +12,6 @@ def getSystem():
     return serverApi.GetSystem("SAPI", "system")
 
 world = getWorld()
-"""ddd"""
 system = getSystem()
 
 ServerSystem = serverApi.GetServerSystemCls()

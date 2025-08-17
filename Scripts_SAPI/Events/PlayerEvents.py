@@ -28,7 +28,7 @@ class ChatSendAfterEvent(object):
         """
         Message that is being broadcast.
         """
-        return self.__damageSource
+        return self.__message
     
     @property
     def sender(self):
