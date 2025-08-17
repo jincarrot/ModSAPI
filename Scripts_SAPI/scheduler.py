@@ -88,6 +88,7 @@ class Scheduler:
             return (0.0, self._skippedUpdates)
 
         self._seqenceExecuting = True
+        self.execute('SchedulerTask')
         for scheduleName in self.scheduleSequence:
             self.execute(scheduleName)
         dt = time() - self._lastExecutedTime
@@ -110,25 +111,17 @@ class Scheduler:
             if (self._innerTicks - startTick) % ticks <= 0:
                 fn()
 
-        return wrapper            
-
-    def runTimeout(this, fn, ticks=1):
-        seq = this.scheduleSequence
-        this.addTask(
-            seq[seq.count() - 1],
-            Thread(target=this._timeoutWrapper(fn, max(1, ticks))),
-            True
+        return wrapper
+    
+    def runTimer(self, fn, ticks=1, interval=False):
+        return self.addTask(
+            'SchedulerTask',
+            self._timeoutWrapper(fn, max(1, ticks)),
+            not interval
         )
         
     def run(this, fn):
-        this.runTimeout(fn)
-
-    def runIntrval(this, fn, ticks=1):
-        seq = this.scheduleSequence
-        this.addTask(
-            seq[seq.count() - 1],
-            Thread(target=this._timeoutWrapper(fn, max(1, ticks))),
-        )
+        return this.runTimer(fn)
 
 class Future:
     def _wrapper(self, fn):

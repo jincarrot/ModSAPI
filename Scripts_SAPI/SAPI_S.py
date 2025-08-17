@@ -10,15 +10,10 @@ from scheduler import Scheduler
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
 
-
 class World(ServerSystem):
-
-    scriptScheduler = Scheduler()
-    gameScheduler = Scheduler()
 
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
-        self._initScheduler()
         self.__afterEvents = WorldAfterEvents()
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
@@ -26,18 +21,6 @@ class World(ServerSystem):
         print("Scripts-API: world loaded")
         global world
         world = self
-
-    def _OnScriptTickServer(self):
-        self.scriptScheduler.executeSequenceAsync()
-
-    def _initScheduler(self):
-        self.ListenForEvent(
-            serverApi.GetEngineNamespace(),
-            serverApi.GetEngineSystemName(),
-            "OnScriptTickServer",
-            self,
-            self._OnScriptTickServer
-        )
 
     @property
     def afterEvents(self):
@@ -70,7 +53,7 @@ class World(ServerSystem):
 
     @staticmethod
     def getAllPlayers():
-        # type: () -> List[Player]
+        # type: () -> list[Player]
         """
         Returns an array of all active players within the world.
         """
@@ -82,7 +65,7 @@ class World(ServerSystem):
 
     @staticmethod
     def getPlayers(options=EntityQueryOptions):
-        # type: (dict | EntityQueryOptions) -> List[Player]
+        # type: (dict | EntityQueryOptions) -> list[Player]
         """
         Returns a set of players based on a set of conditions defined via the EntityQueryOptions set of filter criteria.
         """
@@ -122,7 +105,7 @@ class World(ServerSystem):
     
     @staticmethod
     def getDynamicPropertyIds():
-        # type: () -> List[str]
+        # type: () -> list[str]
         """
         Gets a set of dynamic property identifiers that have been set in this world.
         """
@@ -178,5 +161,38 @@ class System(ServerSystem):
     A class that provides system-level events and functions.
     """
 
+    _scriptScheduler = Scheduler()
+
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
+        self._initScheduler()
+
+    def _OnScriptTickServer(self):
+        self._scriptScheduler.executeSequenceAsync()
+
+    def _initScheduler(self):
+        self.ListenForEvent(
+            serverApi.GetEngineNamespace(),
+            serverApi.GetEngineSystemName(),
+            "OnScriptTickServer",
+            self,
+            self._OnScriptTickServer
+        )
+
+    def run(self, fn):
+        return self._scriptScheduler.run(fn)
+
+    def runTimeout(self, fn, ticks=1):
+        return self._scriptScheduler.runTimer(fn, ticks)
+
+    def runInterval(self, fn, ticks=1):
+        return self._scriptScheduler.runTimer(fn, ticks, True)
+
+    def clearTimeout(self, id):
+        self._scriptScheduler.removeTask('SchedulerTask', id)
+
+    def clearInterval(self, id):
+        self._scriptScheduler.removeTask('SchedulerTask', id)
+
+    def clearRun(self, id):
+        self._scriptScheduler.removeTask('SchedulerTask', id)
