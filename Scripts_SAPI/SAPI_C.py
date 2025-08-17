@@ -11,13 +11,9 @@ CComp = clientApi.GetEngineCompFactory()
 
 
 class SAPI_C(ClientSystem):
-    frameScheduler = Scheduler()
-    scriptScheduler = Scheduler()
-
     def __init__(self, namespace, systemName):
         ClientSystem.__init__(self, namespace, systemName)
         self.__ListenEvent()
-        self._initScheduler()
         print("SAPI_C loaded")
 
     def __ListenEvent(self):
@@ -39,11 +35,32 @@ class SAPI_C(ClientSystem):
     def sendToast(self, data):
         CComp.CreateGame(clientApi.GetLevelId()).SetPopupNotice(data['message'], data['title'])
 
+
+class Client(ClientSystem):
+
+    _frameScheduler = Scheduler()
+    _scriptScheduler = Scheduler()
+
+    def __init__(self, namespace, systemName):
+        ClientSystem.__init__(self, namespace, systemName)
+        self.__afterEvents = ClientAfterEvents()
+        self.__beforeEvents = ClientBeforeEvents()
+        self._initScheduler()
+        print("SAPI: client loaded")
+
+    @property
+    def afterEvents(self):
+        return self.__afterEvents
+    
+    @property
+    def beforeEvents(self):
+        return self.__beforeEvents
+    
     def _OnScriptTickClient(self):
-        self.scriptScheduler.executeSequenceAsync()
+        self._scriptScheduler.executeSequenceAsync()
     
     def _OnGameRenderTick(self):
-        self.frameScheduler.executeSequenceAsync()
+        self._frameScheduler.executeSequenceAsync()
 
     def _initScheduler(self):
         self.ListenForEvent(
@@ -62,20 +79,24 @@ class SAPI_C(ClientSystem):
             self._OnGameRenderTick
         )
 
+    @staticmethod
+    def onUpdate(fn, stage='Update'):
+        return Client._frameScheduler.addTask(stage, fn)
 
-class Client(ClientSystem):
-
-    def __init__(self, namespace, systemName):
-        ClientSystem.__init__(self, namespace, systemName)
-        self.__afterEvents = ClientAfterEvents()
-        self.__beforeEvents = ClientBeforeEvents()
-        print("SAPI: client loaded")
-
-    @property
-    def afterEvents(self):
-        return self.__afterEvents
+    @staticmethod
+    def onTick(fn, stage='Update'):
+        return Client._scriptScheduler.addTask(stage, fn)
     
-    @property
-    def beforeEvents(self):
-        return self.__beforeEvents
+    @staticmethod
+    def Timer(fn, ticks=1, interval=False):
+        return Client._scriptScheduler.runTimer(fn, ticks, interval)
+    
+    @staticmethod
+    def removeTimer(id):
+        # type: (int) -> None
+        Client._scriptScheduler.removeTask('SchedulerTask', id)
 
+    @staticmethod
+    def removeTask(stage, id):
+        # type: (str, int) -> None
+        Client._frameScheduler.removeTask(stage, id)
