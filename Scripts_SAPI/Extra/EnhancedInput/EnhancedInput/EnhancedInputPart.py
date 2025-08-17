@@ -55,6 +55,27 @@ InputEvents = (
     'OnGamepadTriggerClientEvent',
 )
 
+class QueryStateOption:
+    action = ''
+    mapping = ''
+    keyType = 0
+    key = -1
+    state = -1
+
+    def __init__(
+        self,
+        action='',
+        mapping='',
+        keyType=0,
+        key=-1,
+        state=-1
+    ):
+        self.action = action
+        self.mapping = mapping
+        self.keyType = keyType
+        self.key = key
+        self.state = state
+
 class InputMapping(CopyTrait):
     properties = ('inputType', 'preventDefault', 'eventInput', 'mouseInput', 'keyboardInput', 'gamepadInput', 'advanced')
     def __init__(self, copyOf):
@@ -126,12 +147,6 @@ class ActionStates:
     Disuse = 0
     Triggered = 1
     Ongoing = 2
-
-class ActionState:
-    def __init__(self):
-        self.action = ""
-        self.value = (0.0, 0.0, 0.0)
-        self.state = None
 
 class ActionEventType:
     Started = 1
@@ -269,6 +284,15 @@ class InputStateStack(list):
             if node.action == action and node.input.inputType == input.inputType:
                 return node
         return None
+    
+    def Filter(self, fn):
+        # type : (Callable[[InputNode], bool]) -> list[InputNode]
+        Value = []
+        for node in self:
+            if fn(node):
+                Value.append(node)
+        return Value
+
 
 
 @registerGenericClass("EnhancedInputPart")
@@ -767,3 +791,20 @@ class EnhancedInputPart(PartBase):
                 EnhancedInput.Action(action),
                 Event.ToEventData()
             )
+            
+    def QueryState(self, option=QueryStateOption()):
+        # type: (QueryStateOption) -> list[InputNode]
+        def filter(inputState):
+            if option.action and inputState.action != option.action:
+                return False
+            if option.mapping and inputState.mapping != option.mapping:
+                return False
+            if option.keyType != -1 and inputState.input.type != option.keyType:
+                return False
+            if option.key != -1 and inputState.input.key != option.key:
+                return False
+            if option.state != -1 and inputState.state != option.state:
+                return False
+            return True
+
+        return self.inputStateStack.Filter(filter)

@@ -3,6 +3,7 @@ import mod.client.extraClientApi as clientApi
 import math, time
 from Classes.ClientEvents import *
 from Classes.Request import *
+from scheduler import Scheduler
 
 ClientSystem = clientApi.GetClientSystemCls()
 
@@ -10,10 +11,13 @@ CComp = clientApi.GetEngineCompFactory()
 
 
 class SAPI_C(ClientSystem):
+    frameScheduler = Scheduler()
+    scriptScheduler = Scheduler()
 
     def __init__(self, namespace, systemName):
         ClientSystem.__init__(self, namespace, systemName)
         self.__ListenEvent()
+        self._initScheduler()
         print("SAPI_C loaded")
 
     def __ListenEvent(self):
@@ -34,6 +38,29 @@ class SAPI_C(ClientSystem):
 
     def sendToast(self, data):
         CComp.CreateGame(clientApi.GetLevelId()).SetPopupNotice(data['message'], data['title'])
+
+    def _OnScriptTickClient(self):
+        self.scriptScheduler.executeSequenceAsync()
+    
+    def _OnGameRenderTick(self):
+        self.frameScheduler.executeSequenceAsync()
+
+    def _initScheduler(self):
+        self.ListenForEvent(
+            clientApi.GetEngineNamespace(),
+            clientApi.GetEngineSystemName(),
+            "OnScriptTickClient",
+            self,
+            self._OnScriptTickClient
+        )
+
+        self.ListenForEvent(
+            clientApi.GetEngineNamespace(),
+            clientApi.GetEngineSystemName(),
+            "GameRenderTickEvent",
+            self,
+            self._OnGameRenderTick
+        )
 
 
 class Client(ClientSystem):
