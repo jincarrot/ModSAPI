@@ -1,26 +1,31 @@
+# coding=utf-8
 from threading import Thread
-# from typing import Optional, Callable, Any, Exception
 from time import time
-from math import *
+from types import *
+
 
 class Task:
     taskId = 0
 
     def __init__(self, fn, once):
-        self.thread = Thread(target=fn) # type: Thread
-        self.once = once     # type: bool
+        self.thread = Thread(target=fn)  # type: Thread
+        self.once = once  # type: bool
         self.id = Task.taskId
         Task.taskId += 1
 
+
 class Scheduler:
+    def __init__(self):
+        pass
+
     scheduleSequence = (
-        'BeforUpdate',
+        'BeforeUpdate',
         'Update',
         'AfterUpdate',
     )
 
-    _scheduleQueues = {} # type: dict[str, list[Task]]
-    _executingThreads = [] # type: list[Task]
+    _scheduleQueues = {}  # type: dict[str, list[Task]]
+    _executingThreads = []  # type: list[Task]
 
     def _getTaskQueue(self, scheduleName):
         # type: (str) -> list[Task]
@@ -30,29 +35,25 @@ class Scheduler:
             self._scheduleQueues[scheduleName] = queue
 
         return queue
-    
+
     def execute(self, scheduleName):
         queue = self._getTaskQueue(scheduleName)
         for t in queue:
             self._executingThreads.append(t)
             t.thread.start()
-        
+
         for t in self._executingThreads:
             t.thread.join()
             self._executingThreads.remove(t)
             if t.once:
                 queue.remove(t)
-    
+
     def executeAsync(self, scheduleName):
-        # type: (str) -> 'Future[None, Exception]'
-        """
-        :rtype: Future[None, Exception]
-        :return: Future object holding None or Exception
-        """
+        # type: (str) -> Future
         return Future.runAsync(lambda: self.execute(scheduleName))
 
     def addTask(self, scheduleName, fn, once=False):
-        # type: (str, Callable[[], None], Optional[bool]) -> int
+        # type: (str, FunctionType, bool) -> int
         """
         :return: 移除任务的函数
         """
@@ -60,9 +61,9 @@ class Scheduler:
         task = Task(fn, once)
         queue.append(task)
         return task.id
-    
+
     def removeTask(self, scheduleName, taskId=-1):
-        # type: (str, Optional[int]) -> None
+        # type: (str, int) -> None
         queue = self._getTaskQueue(scheduleName)
         if taskId != -1:
             for task in queue:
@@ -72,7 +73,7 @@ class Scheduler:
         else:
             queue.clear()
 
-    _seqenceExecuting = False
+    _sequenceExecuting = False
     _lastExecutedTime = time()
     _skippedUpdates = 0
     _innerTicks = 0
@@ -83,45 +84,43 @@ class Scheduler:
         :return: (deltaTime, skippedUpdates)
         """
         self._innerTicks += 1
-        if self._seqenceExecuting:
+        if self._sequenceExecuting:
             self._skippedUpdates += 1
-            return (0.0, self._skippedUpdates)
+            return 0.0, self._skippedUpdates
 
-        self._seqenceExecuting = True
+        self._sequenceExecuting = True
         self.execute('SchedulerTask')
         for scheduleName in self.scheduleSequence:
             self.execute(scheduleName)
         dt = time() - self._lastExecutedTime
         self._lastExecutedTime = time()
-        self._seqenceExecuting = False
+        self._sequenceExecuting = False
 
-        return (dt, self._skippedUpdates)
+        return dt, self._skippedUpdates
 
     def executeSequenceAsync(self):
         # type: () -> Future[tuple[float, int], Exception]
-        """
-        :rtype: Future[(deltaTime, skippedUpdates), Exception]
-        :return: Future object
-        """
         return Future.runAsync(lambda: self.executeSequence())
 
     def _timeoutWrapper(self, fn, ticks):
         startTick = self._innerTicks
+
         def wrapper():
             if (self._innerTicks - startTick) % ticks <= 0:
                 fn()
 
         return wrapper
-    
+
     def runTimer(self, fn, ticks=1, interval=False):
         return self.addTask(
             'SchedulerTask',
             self._timeoutWrapper(fn, max(1, ticks)),
             not interval
         )
-        
-    def run(this, fn):
-        return this.runTimer(fn)
+
+    def run(self, fn):
+        return self.runTimer(fn)
+
 
 class Future:
     def _wrapper(self, fn):
@@ -130,10 +129,11 @@ class Future:
                 self._value = fn()
             except Exception as e:
                 self._error = e
+
         return wrapper
 
     def __init__(self, executor):
-        # type: (Callable[[], None]) -> None
+        # type: (FunctionType) -> None
         self._executor = Thread(target=self._wrapper(executor))
         self._value = None
         self._error = None
@@ -142,18 +142,14 @@ class Future:
         self._executor.start()
 
     def wait(self):
-        # type: () -> tuple[Any, Exception]
-        """
-        :return: (result, error)
-        """
+        # type: () -> tuple[InstanceType, Exception]
         self._executor.join()
-        return (self._value, self._error)
-    
-    def result(this, onReturn, onError):
-        # type: (Callable[[Any], Any], Callable[[Exception], Any]) -> Any
-        (result, error) = this.wait()
+        return self._value, self._error
+
+    def result(self, onReturn, onError):
+        # type: (FunctionType, FunctionType) -> type
+        (result, error) = self.wait()
         return onReturn(result) if error is None else onError(error)
-            
 
     @staticmethod
     def runAsync(fn):
