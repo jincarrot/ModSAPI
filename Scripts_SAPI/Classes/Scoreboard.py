@@ -100,7 +100,6 @@ class Scoreboard(object):
     """
 
     @staticmethod
-    @ServerMethod
     def addObjective(objectiveId, displayName=""):
         # type: (str, str) -> ScoreboardObjective
         """
@@ -112,7 +111,6 @@ class Scoreboard(object):
         return ScoreboardObjective(objectiveId, objectiveId)
     
     @staticmethod
-    @ServerMethod
     def getObjective(objectiveId):
         # type: (str) -> ScoreboardObjective
         """
@@ -125,7 +123,6 @@ class Scoreboard(object):
                 displayName = data['displayName']
         return ScoreboardObjective(objectiveId, displayName)
     
-    @ServerMethod
     def clearObjectiveAtDisplaySlot(self, displaySlotId):
         # type: (str) -> ScoreboardObjective
         """
@@ -138,7 +135,6 @@ class Scoreboard(object):
         return obj
     
     @staticmethod
-    @ServerMethod
     def getObjectiveAtDisplaySlot(displaySlotId):
         # type: (str) -> ScoreboardObjective
         """
@@ -153,7 +149,6 @@ class Scoreboard(object):
         return None
     
     @staticmethod
-    @ServerMethod
     def getObjectives():
         # type: () -> List[ScoreboardObjective]
         """

@@ -19,7 +19,7 @@ class EntityEvents(Events):
         if type(options) != dict:
             options = None
         else:
-            options = EntityEventsOptions(options)
+            options = EntityEventOptions(options)
         if options:
             if options.entities:
                 entityIds = []
@@ -48,6 +48,7 @@ class EntityDieAfterEventSignal(EntityEvents):
 
     def subscribe(self, callback, options=None):
         # type: (types.FunctionType, dict) -> None
+        """Subscribes to an event that fires when an entity dies."""
         import EntityEvents as ee
         EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityDieAfterEvent)
 
@@ -57,27 +58,31 @@ class EffectAddAfterEventSignal(EntityEvents):
     Manages callbacks that are connected to when an effect is added to an entity.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
+    def __init__(self):
+        EntityEvents.__init__(self)
+        self.__eventName = "AddEffectServerEvent"
 
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "AddEffectServerEvent", world, callback)
+    def subscribe(self, callback, options=None):
+        # type: (types.FunctionType, dict) -> None
+        """Adds a callback that will be called when an effect is added to an entity."""
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EffectAddAfterEvent)
 
 
 class EntityHealthChangedAfterEventSignal(EntityEvents):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Manages callbacks that are connected to when the health of an entity changes.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
+    def __init__(self):
+        EntityEvents.__init__(self)
+        self.__eventName = "HealthChangeServerEvent"
 
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "HealthChangeServerEvent", world, callback)
+    def subscribe(self, callback, options=None):
+        # type: (types.FunctionType, dict) -> None
+        """Adds a callback that will be called when the health of an entity changes."""
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHealthChangedAfterEvent)
 
 
 class EntityHitBlockAfterEventSignal(EntityEvents):
@@ -85,7 +90,7 @@ class EntityHitBlockAfterEventSignal(EntityEvents):
     Manages callbacks that are connected to when an effect is added to an entity.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
@@ -96,16 +101,65 @@ class EntityHitBlockAfterEventSignal(EntityEvents):
 
 class EntityHitEntityAfterEventSignal(EntityEvents):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Manages callbacks that are connected to when an entity makes a melee attack on another entity.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def __init__(self):
+        self.__eventName = "DamageEvent"
+
+    def _check(self, obj, data, valueName):
+        # type: (EventListener, dict, str) -> bool
+        options = obj.options
+        if SComp.CreateEngineType(data['srcId']).GetEngineTypeStr() == 'minecraft:player':
+            return False
+        if data['cause'] != "entity_attack":
+            return False
+        if type(options) != dict:
+            options = None
+        else:
+            options = EntityEventOptions(options)
+        if options:
+            if options.entities:
+                entityIds = []
+                for entity in options.entities:
+                    entityIds.append(entity.id)
+                if data[valueName] not in entityIds:
+                    return False
+            if options.entityTypes:
+                if SComp.CreateEngineType(data[valueName]).GetEngineTypeStr() not in options.entityTypes:
+                    return False
+        return True
+
+    def _checkPlayer(self, obj, data, valueName):
+        # type: (EventListener, dict, str) -> bool
+        options = obj.options
+        if SComp.CreateEngineType(data['playerId']).GetEngineTypeStr() != 'minecraft:player':
+            return False
+        if type(options) != dict:
+            options = None
+        else:
+            options = EntityEventOptions(options)
+        if options:
+            if options.entities:
+                entityIds = []
+                for entity in options.entities:
+                    entityIds.append(entity.id)
+                if data['playerId'] not in entityIds:
+                    return False
+            if options.entityTypes:
+                if 'minecraft:player' not in options.entityTypes:
+                    return False
+        return True
+
+    def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
-        Adds a callback that will be called when an effect is added to an entity.
+        Adds a callback that will be called when an entity hits another entity.
         """
-
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "DamageEvent", world, callback)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHitEntityAfterEvent)
+        # 实体与玩家分开
+        EventListener("PlayerAttackEntityEvent", callback, options, self._checkPlayer, "entityId", ee.EntityHitEntityAfterEvent)
 
 
 class EntityHurtAfterEventSignal(EntityEvents):
@@ -116,7 +170,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
     def __init__(self):
         self.__eventName = "DamageEvent"
 
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
@@ -130,7 +184,7 @@ class EntityLoadAfterEventSignal(EntityEvents):
     Manages callbacks that are connected to when an effect is added to an entity.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
@@ -144,7 +198,7 @@ class EntityRemoveAfterEventSignal(EntityEvents):
     Manages callbacks that are connected to when an effect is added to an entity.
     """
 
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
@@ -161,8 +215,7 @@ class EntitySpawnAfterEventSignal(EntityEvents):
     def __init__(self):
         self.__eventName = "ServerSpawnMobEvent"
 
-    @ServerMethod
-    def subscribe(self, callback, options=EntityEventsOptions):
+    def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.

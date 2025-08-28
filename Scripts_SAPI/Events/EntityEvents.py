@@ -45,7 +45,6 @@ class EntityDieAfterEvent(object):
         """
         return self.__deadEntity
 
-
 class EntityHurtAfterEvent(object):
     """
     Contains data related to the death of an entity in the game.
@@ -95,6 +94,38 @@ class EntityHurtAfterEvent(object):
         """
         return self.__hurtEntity
 
+class EntityHitEntityAfterEvent(object):
+    """
+    Contains information related to an entity hitting (melee attacking) another entity.
+    """
+
+    def __init__(self, data):
+        self.__damagingEntity = Entity(data['srcId'] if 'cause' in data else data['playerId'])
+        self.__hitEntity = Entity(data['entityId'] if 'cause' in data else data['victimId'])
+
+    def __str__(self):
+        data = {
+            "damagingEntity": str(self.__damagingEntity),
+            "hitEntity": str(self.__hitEntity)
+        }
+        return "<EntityHurtAfterEvent> %s" % data
+
+
+    @property
+    def damagingEntity(self):
+        # type: () -> Entity
+        """
+        Entity that made a hit/melee attack.
+        """
+        return self.__damagingEntity
+
+    @property
+    def hitEntity(self):
+        # type: () -> Entity
+        """
+        Entity that was hit by the attack.
+        """
+        return self.__hitEntity
 
 class EntitySpawnAfterEvent(object):
     """
@@ -114,3 +145,77 @@ class EntitySpawnAfterEvent(object):
     def entity(self):
         # type: () -> Entity 
         return self.__entity
+
+class EffectAddAfterEvent(object):
+    """
+    Contains information related to changes to an effect - like poison - being added to an entity.
+    """
+
+    def __init__(self, data):
+        self.__effect = Effect(data['effectName'], data['effectDuration'], data['effectAmplifier'])
+        self.__entity = Entity(data['entityId'])
+
+    def __str__(self):
+        data = {
+            "effect": str(self.__effect),
+            "entity": str(self.__entity)
+        }
+        return "<EffectAddAfterEvent> %s" % data
+
+    @property
+    def effect(self):
+        # type: () -> Effect
+        """
+        Additional properties and details of the effect.
+        """
+        return self.__effect
+
+    @property
+    def entity(self):
+        # type: () -> Entity
+        """
+        Entity that the effect is being added to.
+        """
+        return self.__entity
+
+class EntityHealthChangedAfterEvent(object):
+    """
+    Contains information related to an entity when its health changes. 
+    
+    Warning: don't change the health of an entity in this event, or it will cause an infinite loop!
+    """
+
+    def __init__(self, data):
+        self.__newValue = data['to']
+        self.__entity = Entity(data['entityId'])
+        self.__oldValue = data['from']
+
+    def __str__(self):
+        data = {
+            "entity": str(self.__entity)
+        }
+        return "<EntityHealthChangedAfterEvent> %s" % data
+
+    @property
+    def entity(self):
+        # type: () -> Entity
+        """
+        Entity whose health changed.
+        """
+        return self.__entity
+    
+    @property
+    def oldValue(self):
+        # type: () -> int
+        """
+        Old health value of the entity.
+        """
+        return self.__oldValue
+    
+    @property
+    def newValue(self):
+        # type: () -> Entity
+        """
+        New health value of the entity.
+        """
+        return self.__newValue

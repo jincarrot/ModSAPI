@@ -34,6 +34,12 @@ class Effect(object):
         self.__duration = duration
         self.__displayName = typeId
 
+    def __str__(self):
+        data = {
+            "typeId": self.__typeId
+        }
+        return "<Effect> %s" % data
+
     @property
     def amplifier(self):
         # type: () -> int

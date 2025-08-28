@@ -725,6 +725,10 @@ class Player(Entity):
         return Camera(self.__id)
     
     @property
+    def client(self):
+        pass
+    
+    @property
     def clientSystemInfo(self):
         # type: () -> ClientSystemInfo
         """

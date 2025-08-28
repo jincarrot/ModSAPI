@@ -47,7 +47,7 @@ def ClientMethod(func):
         return result
     return wrapper
 
-class Client(ClientSystem):
+class ClientP(ClientSystem):
 
     _frameScheduler = Scheduler()
     _scriptScheduler = Scheduler()
@@ -96,22 +96,38 @@ class Client(ClientSystem):
 
     @staticmethod
     def onUpdate(fn, stage='Update'):
-        return Client._frameScheduler.addTask(stage, fn)
+        return ClientP._frameScheduler.addTask(stage, fn)
 
     @staticmethod
     def onTick(fn, stage='Update'):
-        return Client._scriptScheduler.addTask(stage, fn)
+        return ClientP._scriptScheduler.addTask(stage, fn)
     
     @staticmethod
     def Timer(fn, ticks=1, interval=False):
-        return Client._scriptScheduler.runTimer(fn, ticks, interval)
+        return ClientP._scriptScheduler.runTimer(fn, ticks, interval)
     
     @staticmethod
     def removeTimer(id):
         # type: (int) -> None
-        Client._scriptScheduler.removeTask('SchedulerTask', id)
+        ClientP._scriptScheduler.removeTask('SchedulerTask', id)
 
     @staticmethod
     def removeTask(stage, id):
         # type: (str, int) -> None
-        Client._frameScheduler.removeTask(stage, id)
+        ClientP._frameScheduler.removeTask(stage, id)
+
+
+class Client(ServerSystem):
+    """
+    A class that provides client system.
+    """
+
+    def __init__(self, namespace, systemName):
+        ServerSystem.__init__(self, namespace, systemName)
+        self.__afterEvents = ClientAfterEvents()
+        self.__beforeEvents = ClientBeforeEvents()
+        print("ModSAPI: client-loader loaded")
+
+    @property
+    def afterEvents(self):
+        request.create()

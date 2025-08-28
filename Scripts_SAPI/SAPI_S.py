@@ -54,7 +54,6 @@ class World(ServerSystem):
         return self.__scoreboard
 
     @staticmethod
-    @ServerMethod
     def getAllPlayers():
         # type: () -> list[Player]
         """
@@ -67,7 +66,6 @@ class World(ServerSystem):
         return players
 
     @staticmethod
-    @ServerMethod
     def getPlayers(options=EntityQueryOptions):
         # type: (dict | EntityQueryOptions) -> list[Player]
         """
@@ -84,7 +82,6 @@ class World(ServerSystem):
         return players
 
     @staticmethod
-    @ServerMethod
     def getDimension(dimensionId):
         # type: (str) -> Dimension
         """
@@ -93,7 +90,6 @@ class World(ServerSystem):
         return Dimension(dimensionId)
 
     @staticmethod
-    @ServerMethod
     def setDynamicProperty(identifier, value):
         # type: (str, 0) -> None
         """
@@ -102,7 +98,6 @@ class World(ServerSystem):
         SComp.CreateExtraData(serverApi.GetLevelId()).SetExtraData(identifier, value)
 
     @staticmethod
-    @ServerMethod
     def getDynamicProperty(identifier):
         # type: (str) -> 0
         """
@@ -111,7 +106,6 @@ class World(ServerSystem):
         return SComp.CreateExtraData(serverApi.GetLevelId()).GetExtraData(identifier)
     
     @staticmethod
-    @ServerMethod
     def getDynamicPropertyIds():
         # type: () -> list[str]
         """
@@ -121,7 +115,6 @@ class World(ServerSystem):
         return data.keys()
     
     @staticmethod
-    @ServerMethod
     def getDynamicPropertyTotalByteCount():
         # type: () -> int
         """
@@ -141,7 +134,6 @@ class World(ServerSystem):
         return count
     
     @staticmethod
-    @ServerMethod
     def getEntity(id):
         # type: (str) -> Entity | None
         """
@@ -153,7 +145,6 @@ class World(ServerSystem):
             return None
         
     @staticmethod
-    @ServerMethod
     def getTimeOfDay():
         """
         Returns the time of day. (In ticks, between 0 and 24000)
@@ -222,3 +213,4 @@ class System(ServerSystem):
         Cancels the execution of a function run that was previously scheduled via @minecraft/server.System.run.
         """
         self._scriptScheduler.removeTask('SchedulerTask', runId)
+

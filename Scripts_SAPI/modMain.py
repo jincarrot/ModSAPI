@@ -24,6 +24,4 @@ class Script_SAPI(object):
     def SAPI_ClientInit(self):
         clientApi.RegisterSystem("SAPI", "SAPI_C",
                                  "Scripts_SAPI.SAPI_C.SAPI_C")
-        clientApi.RegisterSystem("SAPI", "client", 
-                                 "Scripts_SAPI.SAPI_C.Client")
 

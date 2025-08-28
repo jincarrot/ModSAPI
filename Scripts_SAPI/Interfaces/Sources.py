@@ -60,3 +60,24 @@ class EntityDamageSource(object):
     @damagingProjectile.setter
     def damagingProjectile(self, data):
         self.__damagingProjectile = data
+
+class BlockHitInformation(object):
+    """
+    Contains more information for events where a block is hit.
+    """
+
+    def __init__(self, data):
+        self.block = Block(data['block']) # type: Block
+        """Block that was hit."""
+        self.face = Direction_ModSDK[data['face']] # type: str
+        """Face of the block that was hit."""
+        self.faceLocation = data['faceLocation'] # type: Vector3
+        """Location relative to the bottom north-west corner of the block."""
+
+class EntityHitInformation(object):
+    """
+    Contains additional information about an entity that was hit.
+    """
+
+    def __init__(self, data):
+        self.entity = Entity(data['entity']) # type: Entity

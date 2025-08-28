@@ -187,7 +187,8 @@ class Container(object):
             itemDict = comp.GetPlayerItem(0, slot, True)
             if not itemDict:
                 return None
-            item = ItemStack(itemDict['newItemName'], item['count'])
+            item = ItemStack(itemDict['newItemName'], itemDict['count'])
+            print(itemDict)
             if itemDict['userData']:
                 data = itemDict['userData']
                 if 'minecraft:keep_on_death' in data:

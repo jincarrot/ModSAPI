@@ -3,6 +3,7 @@
 
 from ..Events.EntityEventSignals import *
 from ..Events.PlayerEventSignals import *
+from ..Events.ProjectileEventSignals import *
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
@@ -16,18 +17,20 @@ class WorldAfterEvents(object):
     """
 
     def __init__(self):
-        self.__entityDie = EntityDieAfterEventSignal()
-        self.__effectAdd = EffectAddAfterEventSignal()
-        self.__entityHealthChanged = EntityHealthChangedAfterEventSignal()
+        self.__entityDie = EntityDieAfterEventSignal() #
+        self.__effectAdd = EffectAddAfterEventSignal() #
+        self.__entityHealthChanged = EntityHealthChangedAfterEventSignal() #
         self.__entityHitBlock = EntityHitBlockAfterEventSignal()
-        self.__entityHitEntity = EntityHitEntityAfterEventSignal()
-        self.__entityHurt = EntityHurtAfterEventSignal()
+        self.__entityHitEntity = EntityHitEntityAfterEventSignal() #
+        self.__entityHurt = EntityHurtAfterEventSignal() #
         self.__entityLoad = EntityLoadAfterEventSignal()
         self.__entityRemove = EntityRemoveAfterEventSignal()
-        self.__entitySpawn = EntitySpawnAfterEventSignal()
-        self.__chatSend = ChatSendAfterEventSignal()
-        self.__itemUse = ItemUseAfterEventSignal()
-        self.__itemCompleteUse = ItemCompleteUseAfterEventSignal()
+        self.__entitySpawn = EntitySpawnAfterEventSignal() #
+        self.__chatSend = ChatSendAfterEventSignal() #
+        self.__itemUse = ItemUseAfterEventSignal() #
+        self.__itemCompleteUse = ItemCompleteUseAfterEventSignal() #
+        self.__projectileHitBlock = ProjectileHitBlockAfterEventSignal() #
+        self.__projectileHitEntity = ProjectileHitEntityAfterEventSignal() #
 
     @property
     def entityDie(self):
@@ -37,14 +40,14 @@ class WorldAfterEvents(object):
         return self.__entityDie
 
     @property
-    def _effectAdd(self):
+    def effectAdd(self):
         """
         This event fires when an effect, like poisoning, is added to an entity.
         """
         return self.__effectAdd
 
     @property
-    def _entityHealthChanged(self):
+    def entityHealthChanged(self):
         """
         This event fires when entity health changes in any degree.
         """
@@ -58,12 +61,19 @@ class WorldAfterEvents(object):
         return self.__entityHitBlock
 
     @property
-    def _entityHurt(self):
+    def entityHurt(self):
         """
         This event fires when an entity is hurt (takes damage).
         """
         return self.__entityHurt
     
+    @property
+    def entityHitEntity(self):
+        """
+        This event fires when an entity hits (that is, melee attacks) another entity.
+        """
+        return self.__entityHitEntity
+
     @property
     def entitySpawn(self):
         """
@@ -92,6 +102,15 @@ class WorldAfterEvents(object):
         """
         return self.__itemCompleteUse
 
+    @property
+    def projectileHitBlock(self):
+        """This event fires when a projectile hits a block."""
+        return self.__projectileHitBlock
+    
+    @property
+    def projectileHitEntity(self):
+        """This event fires when a projectile hits an entity."""
+        return self.__projectileHitEntity
 
 class WorldBeforeEvents(object):
     pass

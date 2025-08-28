@@ -13,9 +13,9 @@ class Vector3(object):
         """
         Contains a description of a vector.
         """
-        self.x = data['x'] if 'x' in data else 0
-        self.y = data['y'] if 'y' in data else 0
-        self.z = data['z'] if 'z' in data else 0
+        self.x = data['x'] if 'x' in data else 0 # type: float
+        self.y = data['y'] if 'y' in data else 0 # type: float
+        self.z = data['z'] if 'z' in data else 0 # type: float
 
     def __str__(self):
         data = {
@@ -26,12 +26,18 @@ class Vector3(object):
         return "<Vector3> %s" % data
     
     def __sub__(self, data):
+        # type: (Vector3) -> Vector3
         data = {
             "x": self.x - data.x,
             "y": self.y - data.y,
             "z": self.z - data.z
         }
         return Vector3(data)
+    
+    def getData(self):
+        # type: () -> dict
+        """获取字典数据"""
+        return {"x": self.x, "y": self.y, "z": self.z}
 
 
 class Vector2(object):

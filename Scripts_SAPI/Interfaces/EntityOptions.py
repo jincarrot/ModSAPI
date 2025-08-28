@@ -52,7 +52,7 @@ class EntityFilter(object):
         self.type = data['type'] if 'type' in data else ""
 
 
-class EntityEventsOptions(object):
+class EntityEventOptions(object):
     """
     Contains optional parameters for registering an entity event.
     """

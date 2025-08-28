@@ -42,7 +42,7 @@ class Events(object):
     def __init__(self):
         self.__eventName = None
 
-    def __check(self, obj, data, valueName):
+    def _check(self, obj, data, valueName):
         pass
 
     def subscribe(self, callback, options=None):
