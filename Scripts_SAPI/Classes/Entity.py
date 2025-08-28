@@ -335,12 +335,12 @@ class Entity(object):
         """
         Gets a component (that represents additional capabilities) for an entity.
         """
-        if len(componentId.split("minecraft:")) > 1:
+        if componentId.find("minecraft:") >= 0:
             componentId = componentId.split("minecraft:")[1].lower()
         if componentId in vars(EntityComponentType).keys():
             if componentId == "health":
-                return EntityHealthComponent(componentId, {"entity": self})
-        return EntityComponent(componentId, {"entity": self})
+                return EntityHealthComponent({"entity": self})
+        return EntityComponent({"entity": self})
 
     def getComponents(self):
         # type: () -> List[EntityComponent]

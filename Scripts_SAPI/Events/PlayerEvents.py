@@ -47,7 +47,6 @@ class ChatSendAfterEvent(object):
         """
         return self.__targets
 
-
 class ItemUseAfterEvent(object):
     """
     Contains information related to an item being used on a block. 
@@ -58,6 +57,13 @@ class ItemUseAfterEvent(object):
         itemData = data['itemDict']
         self.__itemStack = ItemStack(itemData['newItemName'], itemData['count'])
         self.__source = Player(data['entityId'])
+
+    def __str__(self):
+        data = {
+            "itemStack": str(self.__itemStack),
+            "source": str(self.__source)
+        }
+        return "<ItemUseAfterEvent> %s" % data
 
     @property
     def itemStack(self):
@@ -85,6 +91,13 @@ class ItemCompleteUseAfterEvent(object):
         self.__itemStack = ItemStack(itemData['newItemName'], itemData['count'])
         self.__source = Player(data['playerId'])
         self.__useDuration = data['durationLeft']
+
+    def __str__(self):
+        data = {
+            "itemStack": str(self.__itemStack),
+            "source": str(self.__source)
+        }
+        return "<ItemCompleteUseAfterEvent> %s" % data
 
     @property
     def itemStack(self):

@@ -29,6 +29,7 @@ class EntityComponent(Component):
     """
     __componentId = ""
     import Entity as en
+    import EntityComponents as ec
     
     def __init__(self, data):
         Component.__init__(self, data)
@@ -49,6 +50,10 @@ class EntityComponent(Component):
         The entity will be undefined if it has been removed.
         """
         return self.__entity
+
+    def asHealthComponent(self): 
+        # type: () -> ec.EntityHealthComponent
+        return self
 
 
 class BlockComponent(Component):

@@ -140,10 +140,16 @@ class EntityHealthComponent(EntityAttributeComponent):
     Defines the health properties of an entity.
     """
     __componentId = "minecraft:health"
+    import Entity as e
 
     def __init__(self, data):
         EntityAttributeComponent.__init__(self, data)
         self.__entity = data['entity']
+
+    @property
+    def entity(self):
+        # type: () -> e.Entity
+        return self.__entity
 
 
 class EntityInventoryComponent(EntityComponent):
