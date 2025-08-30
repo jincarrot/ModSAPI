@@ -47,10 +47,11 @@ class EntityDieAfterEvent(object):
 
 class EntityHurtAfterEvent(object):
     """
-    Contains data related to the death of an entity in the game.
+    Contains data related to the hurt of an entity in the game.
     """
 
     def __init__(self, data):
+        self.__data = data
         temp = { "cause": data['cause'] }
         damagingEntity = data['srcId'] if data['srcId'] else None
         damagingProjectile = data['projectileId']
@@ -72,11 +73,17 @@ class EntityHurtAfterEvent(object):
 
     @property
     def damage(self):
-        # type: () -> int
+        # type: () -> float
         """
         Describes the amount of damage caused.
         """
         return self.__damage
+    
+    @damage.setter
+    def damage(self, value):
+        # type: (float) -> None
+        self.__damage = value
+        self.__data['damage'] = value
 
     @property
     def damageSource(self):
@@ -219,3 +226,84 @@ class EntityHealthChangedAfterEvent(object):
         New health value of the entity.
         """
         return self.__newValue
+
+
+class EntityHurtBeforeEvent(object):
+    """
+    Contains data related to the hurt of an entity in the game.
+    """
+
+    def __init__(self, data):
+        self.__data = data
+        temp = { "cause": data['cause'] , "customTag": data['customTag']}
+        damagingEntity = data['srcId'] if data['srcId'] else None
+        damagingProjectile = data['projectileId']
+        if damagingEntity:
+            temp['damagingEntity'] = Entity(damagingEntity)
+        if damagingProjectile:
+            temp['damagingProjectile'] = Entity(damagingProjectile)
+        self.__damage = data['damage']
+        self.__damageSource = EntityDamageSource(temp)
+        self.__hurtEntity = Entity(data['entityId'])
+
+    def __str__(self):
+        data = {
+            "damage": self.damage,
+            "damageSource": str(self.damageSource),
+            "hurtEntity": str(self.hurtEntity)
+        }
+        return "<EntityHurtAfterEvent> %s" % data
+
+    @property
+    def damage(self):
+        # type: () -> int
+        """
+        Describes the amount of damage caused.
+        """
+        return self.__damage
+
+    @damage.setter
+    def damage(self, value):
+        # type: (int) -> None
+        self.__damage = value
+        self.__data['damage'] = value
+
+    @property
+    def damageSource(self):
+        # type: () -> EntityDamageCause
+        """
+        Source information on the entity that may have applied this damage.
+        """
+        return self.__damageSource
+
+    @property
+    def hurtEntity(self):
+        # type: () -> Entity
+        """
+        Entity that was hurt.
+        """
+        return self.__hurtEntity
+
+    @property
+    def cancel(self):
+        # type: () -> bool
+        """returns whether the event is canceled."""
+        return self.__data['cancel']
+    
+    @cancel.setter
+    def cancel(self, value):
+        # type: (bool) -> None
+        self.__data['damage'] = 0
+        self.__data['knock'] = False
+        self.__data['ignite'] = False
+
+    @property
+    def cancelKnock(self):
+        # type: () -> None
+        """Cancel the knockback of this damage."""
+        return self.__data['knock']
+    
+    @cancelKnock.setter
+    def cancelKnock(self, value):
+        # type: (bool) -> None
+        self.__data['knock'] = value

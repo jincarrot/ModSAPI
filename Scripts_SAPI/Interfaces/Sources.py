@@ -14,12 +14,14 @@ class EntityDamageSource(object):
     def __init__(self, data):
         # type: (dict) -> None
         self.__cause = data['cause']
+        self.__customTag = data['customTag'] if 'customTag' in data else ''
         self.__damagingEntity = data['damagingEntity'] if 'damagingEntity' in data else None
         self.__damagingProjectile = data['damagingProjectile'] if 'damagingProjectile' in data else None
 
     def __str__(self):
         data = {
             "cause": self.cause,
+            "custom_tag": self.__customTag,
             "damagingEntity": str(self.damagingEntity),
             "damagingProjectile": str(self.damagingProjectile)
         }
@@ -60,6 +62,19 @@ class EntityDamageSource(object):
     @damagingProjectile.setter
     def damagingProjectile(self, data):
         self.__damagingProjectile = data
+
+    @property
+    def customTag(self):
+        # type: () -> str
+        """
+        Custom damage tag.
+        """
+        return self.__customTag
+    
+    @customTag.setter
+    def customTag(self, data):
+        # type: (str) -> None
+        self.__customTag = data
 
 class BlockHitInformation(object):
     """

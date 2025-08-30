@@ -168,7 +168,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
-        self.__eventName = "DamageEvent"
+        self.__eventName = "ActuallyHurtServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
@@ -176,7 +176,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
         Adds a callback that will be called when an effect is added to an entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, "entityId", self._check, ee.EntityHurtAfterEvent)
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtAfterEvent)
 
 
 class EntityLoadAfterEventSignal(EntityEvents):
@@ -222,3 +222,38 @@ class EntitySpawnAfterEventSignal(EntityEvents):
         """
         import EntityEvents as ee
         EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntitySpawnAfterEvent)
+
+
+
+class EntityHurtBeforeEventSignal(EntityEvents):
+    """
+    Manages callbacks that are connected to when an entity hurt.
+    """
+
+    def __init__(self):
+        self.__eventName = "DamageEvent"
+
+    def subscribe(self, callback, options=EntityEventOptions):
+        # type: (types.FunctionType, dict) -> None
+        """
+        Adds a callback that will be called when an effect is added to an entity.
+        """
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtBeforeEvent)
+
+
+class AbsorbDamageBeforeEventSignal(EntityEvents):
+    """
+    Manages callbacks that are connected to when an entity hurt and absorb damage.
+    """
+
+    def __init__(self):
+        self.__eventName = "ActuallyHurtServerEvent"
+
+    def subscribe(self, callback, options=EntityEventOptions):
+        # type: (types.FunctionType, dict) -> None
+        """
+        Adds a callback that will be called when an effect is added to an entity.
+        """
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtBeforeEvent)

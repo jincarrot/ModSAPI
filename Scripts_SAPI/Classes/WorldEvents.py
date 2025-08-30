@@ -113,4 +113,29 @@ class WorldAfterEvents(object):
         return self.__projectileHitEntity
 
 class WorldBeforeEvents(object):
-    pass
+    """
+    A set of events that fire before an actual action occurs. 
+    In most cases, you can potentially cancel or modify the impending event. 
+    
+    Note that in before events any APIs that modify gameplay state will not function and will throw an error. (e.g., dimension.spawnEntity)
+    """
+
+    def __init__(self):
+        self.__chatSend = ChatSendBeforeEventSignal()
+        self.__entityHurt = EntityHurtBeforeEventSignal()
+
+    @property
+    def chatSend(self):
+        """
+        This event is triggered after a chat message has been broadcast or sent to players.
+        """
+        return self.__chatSend
+    
+    @property
+    def entityHurt(self):
+        """
+        This event fires when an entity is hurt (takes damage).
+        """
+        return self.__entityHurt
+    
+

@@ -22,6 +22,23 @@ class ChatSendAfterEventSignal(Events):
         EventListener(self.__eventName, callback, None, None, None, pe.ChatSendAfterEvent)
 
 
+class ChatSendBeforeEventSignal(Events):
+    """
+    Manages callbacks that are connected to an event that fires before chat messages are sent.
+    """
+
+    def __init__(self):
+        self.__eventName = "ServerChatEvent"
+
+    def subscribe(self, callback):
+        # type: (types.FunctionType) -> None
+        """
+        Adds a callback that will be called before new chat messages are sent.
+        """
+        import PlayerEvents as pe
+        EventListener(self.__eventName, callback, None, None, None, pe.ChatSendBeforeEvent)
+
+
 class ItemUseAfterEventSignal(Events):
     """
     Manages callbacks that are connected to an item use event.
