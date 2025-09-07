@@ -142,7 +142,7 @@ class Future:
         self._executor.start()
 
     def wait(self):
-        # type: () -> tuple[InstanceType, Exception]
+        # type: () -> tuple[Any, Exception]
         self._executor.join()
         return self._value, self._error
 
