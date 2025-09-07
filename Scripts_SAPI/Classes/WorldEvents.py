@@ -20,11 +20,11 @@ class WorldAfterEvents(object):
         self.__entityDie = EntityDieAfterEventSignal() #
         self.__effectAdd = EffectAddAfterEventSignal() #
         self.__entityHealthChanged = EntityHealthChangedAfterEventSignal() #
-        self.__entityHitBlock = EntityHitBlockAfterEventSignal()
+        self.__entityHitBlock = 0#EntityHitBlockAfterEventSignal()
         self.__entityHitEntity = EntityHitEntityAfterEventSignal() #
         self.__entityHurt = EntityHurtAfterEventSignal() #
-        self.__entityLoad = EntityLoadAfterEventSignal()
-        self.__entityRemove = EntityRemoveAfterEventSignal()
+        self.__entityLoad = 0#EntityLoadAfterEventSignal()
+        self.__entityRemove = EntityRemoveAfterEventSignal() # 
         self.__entitySpawn = EntitySpawnAfterEventSignal() #
         self.__chatSend = ChatSendAfterEventSignal() #
         self.__itemUse = ItemUseAfterEventSignal() #
@@ -81,6 +81,11 @@ class WorldAfterEvents(object):
         """
         return self.__entitySpawn
 
+    @property
+    def entityRemove(self):
+        """Fires when an entity is removed (for example, potentially unloaded, or removed after being killed)."""
+        return self.__entityRemove
+    
     @property
     def chatSend(self):
         """

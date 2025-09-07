@@ -227,6 +227,62 @@ class EntityHealthChangedAfterEvent(object):
         """
         return self.__newValue
 
+class EntityRemoveAfterEvent(object):
+    """
+    Data for an event that happens when an entity is being removed from the world 
+    (for example, the entity is unloaded because it is not close to players.)
+    """
+
+    def __init__(self, data):
+        self.__removedEntity = Entity(data['id'])
+
+    def __str__(self):
+        data = {
+            "removedEntity": str(self.__removedEntity)
+        }
+        return "<EntityRemoveAfterEvent> %s" % data
+
+    @property
+    def removedEntity(self):
+        # type: () -> Entity
+        """
+        Reference to an entity that is being removed.
+        """
+        return self.__removedEntity
+
+class DataDrivenEntityTriggerAfterEvent(object):
+    """
+    Contains event registration related to firing of a data driven entity event - for example, the minecraft:ageable_grow_up event on a chicken.
+    """
+
+    def __init__(self, data):
+        self.__eventId = data['eventName']
+        self.__entity = Entity(data['entityId'])
+
+    def __str__(self):
+        data = {
+            "entity": str(self.__entity),
+            "eventId": self.__eventId
+        }
+        return "<DataDrivenEntityTriggerAfterEvent> %s" % data
+
+    @property
+    def entity(self):
+        # type: () -> Entity
+        """
+        Entity that the event triggered on.
+        """
+        return self.__entity
+    
+    @property
+    def eventId(self):
+        # type: () -> str
+        """Name of the data driven event being triggered."""
+        return self.__eventId
+
+    def getModifiers(self):
+        pass
+
 
 class EntityHurtBeforeEvent(object):
     """

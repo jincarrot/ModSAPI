@@ -63,7 +63,6 @@ class Container(object):
                 size = 27
             else:
                 size = SComp.CreateItem(serverApi.GetLevelId()).GetContainerSize(self.__location, self.__dimId)
-                print('1', size)
         elif self.__playerId:
             size = 36
         elif self.__entityId:
@@ -188,7 +187,6 @@ class Container(object):
             if not itemDict:
                 return None
             item = ItemStack(itemDict['newItemName'], itemDict['count'])
-            print(itemDict)
             if itemDict['userData']:
                 data = itemDict['userData']
                 if 'minecraft:keep_on_death' in data:

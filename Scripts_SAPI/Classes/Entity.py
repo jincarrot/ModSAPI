@@ -475,18 +475,7 @@ class Entity(object):
         Gets an entity Property value.
         If the property was set using the setProperty function within the same tick, the updated value will not be reflected until the subsequent tick.
         """
-        data = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()['properties']
-        if data:
-            tar = data[identifier]
-            """
-            1-bool 4-long 5-float 8-string
-            """
-            if tar['__type__'] == 1:
-                return True if tar['__value__'] else False
-            else:
-                return tar['__value__']
-        else:
-            return None
+        return SComp.CreateQueryVariable(self.__id).EvalMolangExpression("q.property('%s')" % identifier)['value']
 
     def getViewDirection(self):
         # type: () -> Vector3
@@ -508,7 +497,7 @@ class Entity(object):
         """
         Returns true if the specified component is present on this entity.
         """
-        componentId = componentId.split("minecraft:")[0].lower()
+        componentId = componentId.split("minecraft:")[1].lower() if "minecraft:" in componentId else componentId
         return SComp.CreateEntityComponent(self.__id).HasComponent(getattr(EntityComponentType, componentId)) or False
 
     def hasTag(self, tag):
@@ -583,6 +572,8 @@ class Entity(object):
         Resets an Entity Property back to its default value, as specified in the Entity's definition.
         This property change is not applied until the next tick.
         """
+        ori = SComp.CreateQueryVariable(self.__id).EvalMolangExpression("q.property('%s')" % identifier)['value']
+
         # 获取原nbt
         nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
         # 检测是否存在该值
@@ -649,11 +640,7 @@ class Entity(object):
         Sets an Entity Property to the provided value.
         This property change is not applied until the next tick.
         """
-        nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
-        if 'properties' in nbt and identifier in nbt['properties']:
-            nbt['properties'][identifier]['__value__'] = value
-            self.remove()
-            self.__id = world.CreateEngineEntityByNBT(nbt)
+        SComp.CreateQueryVariable(self.__id).SetPropertyValue(identifier, value)
 
     def setRotation(self, rotation):
         # type: (Union[str, Vector2]) -> None
@@ -743,6 +730,14 @@ class Player(Entity):
         # type: () -> con.Container
         """returns the container of player's inventory"""
         return self.__container
+
+    def applyKnockback(self, horizontalForce, verticalStrength):
+        # type: (Union[dict, VectorXZ], float) -> None
+        """
+        Applies impulse vector to the current velocity of the entity.
+        """
+        vector = VectorXZ(horizontalForce) if type(horizontalForce).__name__ == 'dict' else horizontalForce
+        SComp.CreateActorMotion(self.__id).SetPlayerMotion((vector.x, verticalStrength, vector.z))
 
     def playSound(self, soundID, soundOptions=PlayerSoundOptions):
         # type: (str, dict) -> None

@@ -30,7 +30,7 @@ class BlockPermutation(object):
     BlockType and properties (also sometimes called block state) which describe a block (but does not belong to a specific @minecraft/server.Block).
     """
     
-    def __init__(self, block, blockName=None, states=None):
+    def __init__(self, block=None, blockName=None, states=None):
         # type: (Block, str, dict) -> None
         self.__block = block
         self.__blockName = blockName
@@ -38,6 +38,12 @@ class BlockPermutation(object):
         if block:
             self.__states = SComp.CreateBlockState(serverApi.GetLevelId()).GetBlockStates((self.__block.location.x, self.__block.location.y, self.__block.location.z), self.__block.dimension.dimId)
             self.__blockName = self.__block.typeId
+
+    def __str__(self):
+        data = {
+            "type": self.__blockName
+        }
+        return "<BlockPermutation> %s" % data
 
     @property
     def type(self):
@@ -111,13 +117,39 @@ class BlockPermutation(object):
                     return False
         return True
 
-    def resolve(blockName, states=None):
+    def resolve(self, blockName, states=None):
         # type: (str, dict) -> BlockPermutation
         """
         Given a type identifier and an optional set of properties, will return a BlockPermutation object that is usable in other block APIs (e.g., block.setPermutation)
         """
         return BlockPermutation(None, blockName, states)
         
+    def withState(self, stateName, value):
+        # type: (str, 0) -> BlockPermutation
+        """Returns a derived BlockPermutation with a specific property set."""
+        state = self.__states.copy()
+        state[stateName] = value
+        return BlockPermutation(None, self.__blockName, state)
+
+    def hasState(self, stateName):
+        # type: (str) -> bool
+        """Returns True if this block has a special state."""
+        return stateName in self.__states
+    
+    def setState(self, stateName, value):
+        # type: (str, 0) -> bool
+        """Set value of a state.
+        
+        Note: this method changes the value of self, but not return a new BlockPermutation."""
+        if self.hasState(stateName):
+            if type(value) == type(self.__states[stateName]):
+                self.__states[stateName] = value
+            else:
+                print("type of state \"%s\" is %s, but not %s." % (stateName, type(self.__states[stateName]).__name__, type(value).__name__))
+                return False
+        print("state \"%s\" doesn't exist in block \"%s\"" % (stateName, self.__blockName))
+        return self.hasState(stateName)
+
 
 class Block(object):
     """
@@ -134,9 +166,7 @@ class Block(object):
         data = {
             "dimension": str(self.dimension),
             "location": str(self.location),
-            "type": str(self.type),
-            "typeId": self.typeId,
-            "permutation": str(self.permutation)
+            "typeId": self.typeId
         }
         return "<Block> %s" % data
 
@@ -243,14 +273,14 @@ class Block(object):
         """
         Returns the @minecraft/server.Block above this block (positive in the Y direction).
         """
-        return Block({'dimension': self.dimension, 'location': Vector3(self.location.x, self.location.y + steps, self.location.z)})
+        return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x, "y": self.location.y + steps, "z": self.location.z})})
     
     def below(self, steps):
         # type: (int) -> Block
         """
         Returns the @minecraft/server.Block below this block (negative in the Y direction).
         """
-        return Block({'dimension': self.dimension, 'location': Vector3(self.location.x, self.location.y - steps, self.location.z)})
+        return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x, "y": self.location.y - steps, "z": self.location.z})})
     
     def bottomCenter(self):
         # type: () -> Vector3

@@ -20,6 +20,11 @@ class SAPI_C(ClientSystem):
     def __ListenEvent(self):
         self.ListenForEvent("SAPI", "world", "getData", self, self.getData)
         self.ListenForEvent("SAPI", "world", "sendToast", self, self.sendToast)
+        self.ListenForEvent("SAPI", "world", "showActionForm", self, self.showActionForm)
+        self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
+
+    def initUI(self, data):
+        clientApi.RegisterUI("server_ui", "ActionForm", "Scripts_SAPI.Classes.Forms.ActionForm", "server_forms.action_form")
 
     def getData(self, data):
         """receive request from server"""
@@ -35,6 +40,9 @@ class SAPI_C(ClientSystem):
 
     def sendToast(self, data):
         CComp.CreateGame(clientApi.GetLevelId()).SetPopupNotice(data['message'], data['title'])
+
+    def showActionForm(self, data):
+        clientApi.PushScreen("server_ui", "ActionForm", data)
 
 
 def ClientMethod(func):
@@ -130,4 +138,5 @@ class Client(ServerSystem):
 
     @property
     def afterEvents(self):
-        request.create()
+        # request.create()
+        pass

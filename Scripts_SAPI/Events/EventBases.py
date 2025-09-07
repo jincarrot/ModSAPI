@@ -17,6 +17,7 @@ class EventListener(object):
     def __init__(self, eventName, callback, options=None, detectFunc=None, valueName=None, wrapper=None):
         # type: (str, types.FunctionType, 0, types.FunctionType, str, 0) -> None
         global world
+        self.__eventName = eventName
         self.__callback = callback
         self.__options = options
         self.__check = detectFunc
@@ -36,11 +37,15 @@ class EventListener(object):
             value = self.__wrapper(data)
             self.__callback(value)
 
+    def unListen(self):
+        world.UnListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), self.__eventName, self, self.listen)
+
 
 class Events(object):
 
     def __init__(self):
         self.__eventName = None
+        self._events = {}
 
     def _check(self, obj, data, valueName):
         pass
@@ -49,7 +54,11 @@ class Events(object):
         # type: (types.FunctionType, dict) -> None
         pass
 
-    def unsubscribe(self):
-        pass
+    def unsubscribe(self, callback):
+        event = self._events.get(id(callback), None) # type: EventListener
+        if event:
+            event.unListen()
+        else:
+            print("未监听此函数%s" % callback)
 
 

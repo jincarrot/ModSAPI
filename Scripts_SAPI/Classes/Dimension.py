@@ -23,7 +23,7 @@ class Dimension(object):
         # type: (Union[int, str]) -> None
         if type(dimId).__name__ == 'int':
             self.__dimId = dimId
-            self.__id = MinecraftDimensionTypes[self.__dimId]
+            self.__id = MinecraftDimensionTypes[self.__dimId] if self.__dimId < len(MinecraftDimensionTypes) else "dm%s" % self.__dimId
         else:
             if dimId.find("minecraft:") >= 0:
                 self.__id = dimId
@@ -139,7 +139,7 @@ class Dimension(object):
         global world
         if not world:
             world = getWorld()
-        pos = Vector3(location) if type(location) == dict else pos
+        pos = Vector3(location) if type(location) == dict else location
         if options == SpawnEntityOptions:
             options = {}
         options = SpawnEntityOptions(options) if type(options) == dict else options

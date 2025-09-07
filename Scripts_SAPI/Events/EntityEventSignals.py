@@ -11,6 +11,7 @@ from ..decorators import *
 class EntityEvents(Events):
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = None
 
     def _check(self, obj, data, valueName):
@@ -36,6 +37,10 @@ class EntityEvents(Events):
         # type: (types.FunctionType, dict) -> None
         EventListener(self.eventName, callback, options, self._check, None)
 
+    def unsubscribe(self, callback):
+        # type: (types.FunctionType) -> None
+        Events.unsubscribe(self, callback)
+
 
 class EntityDieAfterEventSignal(EntityEvents):
     """
@@ -50,7 +55,11 @@ class EntityDieAfterEventSignal(EntityEvents):
         # type: (types.FunctionType, dict) -> None
         """Subscribes to an event that fires when an entity dies."""
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityDieAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityDieAfterEvent)
+
+    def unsubscribe(self, callback):
+        # type: (types.FunctionType) -> None
+        Events.unsubscribe(self, callback)
 
 
 class EffectAddAfterEventSignal(EntityEvents):
@@ -85,7 +94,7 @@ class EntityHealthChangedAfterEventSignal(EntityEvents):
         EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHealthChangedAfterEvent)
 
 
-class EntityHitBlockAfterEventSignal(EntityEvents):
+class __EntityHitBlockAfterEventSignal(EntityEvents):
     """
     Manages callbacks that are connected to when an effect is added to an entity.
     """
@@ -179,7 +188,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
         EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtAfterEvent)
 
 
-class EntityLoadAfterEventSignal(EntityEvents):
+class __EntityLoadAfterEventSignal(EntityEvents):
     """
     Manages callbacks that are connected to when an effect is added to an entity.
     """
@@ -195,16 +204,22 @@ class EntityLoadAfterEventSignal(EntityEvents):
 
 class EntityRemoveAfterEventSignal(EntityEvents):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Allows registration for an event that fires when an entity is being removed from the game 
+    
+    (for example, unloaded, or a few seconds after they are dead.)
     """
+
+    def __init__(self):
+        self.__eventName = "EntityRemoveEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
-        Adds a callback that will be called when an effect is added to an entity.
+        Will call your function every time an entity is being removed from the game.
         """
 
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "EntityRemoveEvent", world, callback)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityRemoveAfterEvent)
 
 
 class EntitySpawnAfterEventSignal(EntityEvents):
@@ -224,6 +239,24 @@ class EntitySpawnAfterEventSignal(EntityEvents):
         EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntitySpawnAfterEvent)
 
 
+class DataDrivenEntityTriggerEventSignal(EntityEvents):
+    """
+    Contains event registration related to firing of a data driven entity event - 
+    for example, the minecraft:ageable_grow_up event on a chicken.
+    """
+
+    def __init__(self):
+        self.__eventName = "EntityDefinitionsEventServerEvent"
+
+    def subscribe(self, callback, options=EntityEventOptions):
+        # type: (types.FunctionType, dict) -> None
+        """
+        Adds a callback that will be called after a data driven entity event is triggered.
+        """
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.DataDrivenEntityTriggerAfterEvent)
+
+
 
 class EntityHurtBeforeEventSignal(EntityEvents):
     """
@@ -232,23 +265,6 @@ class EntityHurtBeforeEventSignal(EntityEvents):
 
     def __init__(self):
         self.__eventName = "DamageEvent"
-
-    def subscribe(self, callback, options=EntityEventOptions):
-        # type: (types.FunctionType, dict) -> None
-        """
-        Adds a callback that will be called when an effect is added to an entity.
-        """
-        import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtBeforeEvent)
-
-
-class AbsorbDamageBeforeEventSignal(EntityEvents):
-    """
-    Manages callbacks that are connected to when an entity hurt and absorb damage.
-    """
-
-    def __init__(self):
-        self.__eventName = "ActuallyHurtServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None

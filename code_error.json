@@ -1,0 +1,372 @@
+[
+    {
+        "code_check": [
+            {
+                "message": "Method should have \"self\" as first argument",
+                "obj": "BlockPermutation.resolve",
+                "column": 4,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Classes/Block.py",
+                "line": 114,
+                "message-id": "E0213",
+                "type": "error",
+                "symbol": "no-self-argument",
+                "module": "Scripts_SAPI.Classes.Block"
+            },
+            {
+                "message": "Too many positional arguments for constructor call",
+                "obj": "Block.above",
+                "column": 63,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Classes/Block.py",
+                "line": 246,
+                "message-id": "E1121",
+                "type": "error",
+                "symbol": "too-many-function-args",
+                "module": "Scripts_SAPI.Classes.Block"
+            },
+            {
+                "message": "Too many positional arguments for constructor call",
+                "obj": "Block.below",
+                "column": 63,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Classes/Block.py",
+                "line": 253,
+                "message-id": "E1121",
+                "type": "error",
+                "symbol": "too-many-function-args",
+                "module": "Scripts_SAPI.Classes.Block"
+            }
+        ],
+        "api_check": [
+            "compile",
+            "exec"
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "Using variable 'pos' before assignment",
+                "obj": "Dimension.spawnEntity",
+                "column": 63,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Classes/Dimension.py",
+                "line": 142,
+                "message-id": "E0601",
+                "type": "error",
+                "symbol": "used-before-assignment",
+                "module": "Scripts_SAPI.Classes.Dimension"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "Using variable 'data' before assignment",
+                "obj": "ProjectileHitBlockAfterEvent.getBlockHit",
+                "column": 32,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Events/ProjectileEvents.py",
+                "line": 74,
+                "message-id": "E0601",
+                "type": "error",
+                "symbol": "used-before-assignment",
+                "module": "Scripts_SAPI.Events.ProjectileEvents"
+            },
+            {
+                "message": "Using variable 'data' before assignment",
+                "obj": "ProjectileHitEntityAfterEvent.getEntityHit",
+                "column": 30,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Events/ProjectileEvents.py",
+                "line": 154,
+                "message-id": "E0601",
+                "type": "error",
+                "symbol": "used-before-assignment",
+                "module": "Scripts_SAPI.Events.ProjectileEvents"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "Attempted relative import beyond top-level package",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPart.py",
+                "line": 6,
+                "message-id": "E0402",
+                "type": "error",
+                "symbol": "relative-beyond-top-level",
+                "module": "Action.ActionPart"
+            },
+            {
+                "message": "Method should have \"self\" as first argument",
+                "obj": "ActionPart.TransferValue",
+                "column": 4,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPart.py",
+                "line": 106,
+                "message-id": "E0213",
+                "type": "error",
+                "symbol": "no-self-argument",
+                "module": "Action.ActionPart"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "No name 'PObjectArray' in module 'Meta.TypeMeta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPartMeta.py",
+                "line": 4,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "Action.ActionPartMeta"
+            },
+            {
+                "message": "No name 'PartBaseMeta' in module 'Preset.Model'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPartMeta.py",
+                "line": 5,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "Action.ActionPartMeta"
+            },
+            {
+                "message": "No name 'PresetDataMeta' in module 'Preset.Model'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPartMeta.py",
+                "line": 6,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "Action.ActionPartMeta"
+            },
+            {
+                "message": "Unable to import 'Preset.Model.PresetDataMeta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPartMeta.py",
+                "line": 6,
+                "message-id": "E0401",
+                "type": "error",
+                "symbol": "import-error",
+                "module": "Action.ActionPartMeta"
+            },
+            {
+                "message": "No name 'PropertyObject' in module 'Meta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPartMeta.py",
+                "line": 7,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "Action.ActionPartMeta"
+            },
+            {
+                "message": "Unable to import 'Meta.PropertyObject'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/Action/ActionPartMeta.py",
+                "line": 7,
+                "message-id": "E0401",
+                "type": "error",
+                "symbol": "import-error",
+                "module": "Action.ActionPartMeta"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "Use of super on an old style class",
+                "obj": "Vec2InputEvent.__init__",
+                "column": 4,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPart.py",
+                "line": 236,
+                "message-id": "E1002",
+                "type": "error",
+                "symbol": "super-on-old-class",
+                "module": "EnhancedInput.EnhancedInputPart"
+            },
+            {
+                "message": "Use of super on an old style class",
+                "obj": "FloatInputEvent.__init__",
+                "column": 4,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPart.py",
+                "line": 242,
+                "message-id": "E1002",
+                "type": "error",
+                "symbol": "super-on-old-class",
+                "module": "EnhancedInput.EnhancedInputPart"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "No name 'PObjectArray' in module 'Meta.TypeMeta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPartMeta.py",
+                "line": 4,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInput.EnhancedInputPartMeta"
+            },
+            {
+                "message": "No name 'PartBaseMeta' in module 'Preset.Model'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPartMeta.py",
+                "line": 5,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInput.EnhancedInputPartMeta"
+            },
+            {
+                "message": "No name 'PresetDataMeta' in module 'Preset.Model'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPartMeta.py",
+                "line": 6,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInput.EnhancedInputPartMeta"
+            },
+            {
+                "message": "Unable to import 'Preset.Model.PresetDataMeta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPartMeta.py",
+                "line": 6,
+                "message-id": "E0401",
+                "type": "error",
+                "symbol": "import-error",
+                "module": "EnhancedInput.EnhancedInputPartMeta"
+            },
+            {
+                "message": "No name 'PropertyObject' in module 'Meta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPartMeta.py",
+                "line": 7,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInput.EnhancedInputPartMeta"
+            },
+            {
+                "message": "Unable to import 'Meta.PropertyObject'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInput/EnhancedInputPartMeta.py",
+                "line": 7,
+                "message-id": "E0401",
+                "type": "error",
+                "symbol": "import-error",
+                "module": "EnhancedInput.EnhancedInputPartMeta"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "No name 'PObjectArray' in module 'Meta.TypeMeta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInputMapping/EnhancedInputMappingPartMeta.py",
+                "line": 4,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInputMapping.EnhancedInputMappingPartMeta"
+            },
+            {
+                "message": "No name 'PartBaseMeta' in module 'Preset.Model'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInputMapping/EnhancedInputMappingPartMeta.py",
+                "line": 5,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInputMapping.EnhancedInputMappingPartMeta"
+            },
+            {
+                "message": "No name 'PresetDataMeta' in module 'Preset.Model'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInputMapping/EnhancedInputMappingPartMeta.py",
+                "line": 6,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInputMapping.EnhancedInputMappingPartMeta"
+            },
+            {
+                "message": "Unable to import 'Preset.Model.PresetDataMeta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInputMapping/EnhancedInputMappingPartMeta.py",
+                "line": 6,
+                "message-id": "E0401",
+                "type": "error",
+                "symbol": "import-error",
+                "module": "EnhancedInputMapping.EnhancedInputMappingPartMeta"
+            },
+            {
+                "message": "No name 'PropertyObject' in module 'Meta'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInputMapping/EnhancedInputMappingPartMeta.py",
+                "line": 7,
+                "message-id": "E0611",
+                "type": "error",
+                "symbol": "no-name-in-module",
+                "module": "EnhancedInputMapping.EnhancedInputMappingPartMeta"
+            },
+            {
+                "message": "Unable to import 'Meta.PropertyObject'",
+                "obj": "",
+                "column": 0,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/Extra/EnhancedInput/EnhancedInputMapping/EnhancedInputMappingPartMeta.py",
+                "line": 7,
+                "message-id": "E0401",
+                "type": "error",
+                "symbol": "import-error",
+                "module": "EnhancedInputMapping.EnhancedInputMappingPartMeta"
+            }
+        ]
+    },
+    {
+        "code_check": [
+            {
+                "message": "No value for argument 'target' in method call",
+                "obj": "Client.afterEvents",
+                "column": 8,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/SAPI_C.py",
+                "line": 133,
+                "message-id": "E1120",
+                "type": "error",
+                "symbol": "no-value-for-parameter",
+                "module": "Scripts_SAPI.SAPI_C"
+            },
+            {
+                "message": "No value for argument 'dataName' in method call",
+                "obj": "Client.afterEvents",
+                "column": 8,
+                "path": "/tmp/PackScripts/item_4682187710890845368_1_v1_nesw7sq6/behavior/Scripts_SAPI/SAPI_C.py",
+                "line": 133,
+                "message-id": "E1120",
+                "type": "error",
+                "symbol": "no-value-for-parameter",
+                "module": "Scripts_SAPI.SAPI_C"
+            }
+        ]
+    }
+]

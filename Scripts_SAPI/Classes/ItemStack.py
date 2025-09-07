@@ -43,6 +43,7 @@ class ItemStack(object):
         """Gets or sets the item's lock mode. The default value is ItemLockMode.none."""
         self.nameTag = None
         """Given name of this stack of items. The name tag is displayed when hovering over the item. Setting the name tag to an empty string or undefined will remove the name tag."""
+        self.__lore = []
 
     def __str__(self):
         data = {
@@ -100,6 +101,8 @@ class ItemStack(object):
             SComp.CreateItem(serverApi.GetLevelId()).SetCustomName(data, self.nameTag)
         if userData:
             data['userData'] = userData
+        if self.__lore:
+            data['customTips'] = "\n".join(self.__lore)
         return data
     
     def getLore(self):
@@ -107,7 +110,7 @@ class ItemStack(object):
         """
         Returns the lore value - a secondary display string - for an ItemStack.
         """
-        pass
+        return self.__lore
 
     def setLore(self, loreList=None):
         # type: (List[str]) -> None
@@ -115,4 +118,4 @@ class ItemStack(object):
         Sets the lore value - a secondary display string - for an ItemStack. 
         The lore list is cleared if set to an empty string or undefined.
         """
-        pass
+        self.__lore = loreList

@@ -9,6 +9,7 @@ class ProjectileHitBlockAfterEvent(object):
     """
 
     def __init__(self, data):
+        self.__data = data
         self.__dimension = Dimension(SComp.CreateDimension(data['id']).GetEntityDimensionId())
         dir = serverApi.GetDirFromRot(SComp.CreateRot(data['id']).GetRot())
         self.__hitVector = Vector3({"x": dir[0], "y": dir[1], "z": dir[2]})
@@ -71,13 +72,13 @@ class ProjectileHitBlockAfterEvent(object):
         Contains additional information about the block that was hit by the projectile.
         """
         if not self.__blockHit:
-            loc = Vector3({"x": data['blockPosX'], "y": data['blockPosY'], "z": data['BlockPosZ']})
+            loc = Vector3({"x": self.__data['blockPosX'], "y": self.__data['blockPosY'], "z": self.__data['BlockPosZ']})
             data = {
                 "block": {
                     "dimension": self.__dimension,
                     "location": loc
                 },
-                "face": data['hitFace'],
+                "face": self.__data['hitFace'],
                 "faceLocation": self.location - loc
             }
             self.__blockHit = BlockHitInformation(data)
@@ -89,6 +90,7 @@ class ProjectileHitEntityAfterEvent(object):
     """
 
     def __init__(self, data):
+        self.__data = data
         self.__dimension = Dimension(SComp.CreateDimension(data['id']).GetEntityDimensionId())
         dir = serverApi.GetDirFromRot(SComp.CreateRot(data['id']).GetRot())
         self.__hitVector = Vector3({"x": dir[0], "y": dir[1], "z": dir[2]})
@@ -151,6 +153,6 @@ class ProjectileHitEntityAfterEvent(object):
         Contains additional information about an entity that was hit.
         """
         if not self.__entityHit:
-            data = {"entity": data['targetId']}
+            data = {"entity": self.__data['targetId']}
             self.__entityHit = EntityHitInformation(data)
         return self.__entityHit

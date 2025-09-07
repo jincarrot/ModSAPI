@@ -1,0 +1,108 @@
+# coding=utf-8
+from ..Classes.Entity import *
+from ..Interfaces.Sources import *
+
+class BlockEvent(object):
+    """Contains information regarding an event that impacts a specific block."""
+
+    def __init__(self, data):
+        self.__block = None
+        self.__dimension = None
+    
+    @property
+    def block(self):
+        # type: () -> Block
+        """Block currently in the world at the location of this event."""
+        return self.__block
+    
+    @property
+    def dimension(self):
+        # type: () -> Dimension
+        """Dimension that contains the block that is the subject of this event."""
+        return self.__dimension
+
+
+class BlockExplodeAfterEvent(BlockEvent):
+    """
+    Contains information related to a projectile hitting a block.
+    """
+
+    def __init__(self, data):
+        self.__source = Entity(data['sourceId'])
+        self.__explodedBlockPermutation = data
+
+    def __str__(self):
+        data = {
+            "source": self.__source
+        }
+        return "<BlockExplodeAfterEvent> %s" % data
+    
+    @property
+    def source(self):
+        # type: () -> Entity
+        """
+        Optional source of the explosion.
+        """
+        return self.__source
+    
+class PlayerBreakBlockAfterEvent(BlockEvent):
+    """
+    Contains information regarding an event after a player breaks a block.
+    """
+
+    def __init__(self, data):
+        self.__dimension = Dimension(data['dimensionId'])
+        self.__block = Block({"dimension": self.__dimension, "location": Vector3((data['x'], data['y'], data['z']))})
+        self.__player = Player(data['playerId'])
+
+    def __str__(self):
+        data = {
+            "block": str(self.__block),
+            "player": str(self.__player)
+        }
+        return "<PlayerBreakBlockAfterEvent> %s" % data
+    
+    @property
+    def source(self):
+        # type: () -> Entity
+        """
+        Optional source of the explosion.
+        """
+        return self.__source
+    
+
+class BlockExplodeBeforeEvent(BlockEvent):
+    """
+    Contains information related to a projectile hitting a block.
+    """
+
+    def __init__(self, data):
+        self.__source = Entity(data['sourceId'])
+        self.__data = data
+        self.__cancel = False
+
+    def __str__(self):
+        data = {
+            "source": self.__source
+        }
+        return "<BlockExplodeAfterEvent> %s" % data
+    
+    @property
+    def source(self):
+        # type: () -> Entity
+        """
+        Optional source of the explosion.
+        """
+        return self.__source
+    
+    @property
+    def cancel(self):
+        return self.__cancel
+    
+    @cancel.setter
+    def cancel(self, value):
+        self.__cancel = value
+        if self.__cancel:
+            for block in self.__data['blocks']:
+                block['cancel'] = True
+

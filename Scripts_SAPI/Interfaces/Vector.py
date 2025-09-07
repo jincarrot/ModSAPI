@@ -9,13 +9,18 @@ comp = serverApi.GetEngineCompFactory()
 class Vector3(object):
 
     def __init__(self, data):
-        # type: (dict) -> None
+        # type: (dict | tuple) -> None
         """
         Contains a description of a vector.
         """
-        self.x = data['x'] if 'x' in data else 0 # type: float
-        self.y = data['y'] if 'y' in data else 0 # type: float
-        self.z = data['z'] if 'z' in data else 0 # type: float
+        if type(data) == dict:
+            self.x = data['x'] if 'x' in data else 0 # type: float
+            self.y = data['y'] if 'y' in data else 0 # type: float
+            self.z = data['z'] if 'z' in data else 0 # type: float
+        elif type(data) == tuple:
+            self.x = data[0]
+            self.y = data[1]
+            self.z = data[2]
 
     def __str__(self):
         data = {
@@ -26,7 +31,9 @@ class Vector3(object):
         return "<Vector3> %s" % data
     
     def __sub__(self, data):
-        # type: (Vector3) -> Vector3
+        # type: (Vector3 | dict | tuple) -> Vector3
+        if type(data) != Vector3:
+            data = Vector3(data)
         data = {
             "x": self.x - data.x,
             "y": self.y - data.y,
@@ -46,8 +53,13 @@ class Vector2(object):
     """
 
     def __init__(self, data):
-        self.x = data['x'] if 'x' in data else 0
-        self.y = data['y'] if 'y' in data else 0
+        # type: (dict | tuple) -> None
+        if type(data) == dict:
+            self.x = data['x'] if 'x' in data else 0
+            self.y = data['y'] if 'y' in data else 0
+        else:
+            self.x = data[0]
+            self.y = data[1]
 
     def __str__(self):
         data = {
