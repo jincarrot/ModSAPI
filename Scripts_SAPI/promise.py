@@ -105,6 +105,12 @@ class Promise(Thenable):
             promise2 = Promise(executor)
             return promise2
 
+    def catch(self, onRejected):
+        return self.then(empty_fn, onRejected)
+    
+    def finally_(self, onFinally):
+        return self.then(lambda v: onFinally(), lambda r: onFinally())
+
     @staticmethod
     def withResolvers():
         resolve = ref(None)
