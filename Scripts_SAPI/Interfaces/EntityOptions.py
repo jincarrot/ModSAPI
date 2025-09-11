@@ -65,24 +65,24 @@ class EntityEventOptions(object):
 
     @property
     def entities(self):
-        # type: () -> List[Entity]
+        # type: () -> list[Entity]
         """If this value is set, this event will only fire for entities that match the entities within this collection."""
         return self.__entities
 
     @entities.setter
     def entities(self, data):
-        # type: (List[Entity]) -> None
+        # type: (list[Entity]) -> None
         self.__entities = data
 
     @property
     def entityTypes(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         """If this value is set, this event will only fire if the impacted entities' type matches this parameter."""
         return self.__entityTypes
 
     @entityTypes.setter
     def entityTypes(self, data):
-        # type: (List[str]) -> None
+        # type: (list[str]) -> None
         self.__entityTypes = data
 
 
@@ -142,7 +142,7 @@ class EntityQueryOptions(object):
         return False
 
     def checkLocation(self, entityIds):
-        # type: (List[str]) -> List[str]
+        # type: (list[str]) -> list[str]
         """检查实体是否在指定范围内"""
         if self.minDistance < 0 and self.maxDistance < 0:
             return entityIds
@@ -156,7 +156,7 @@ class EntityQueryOptions(object):
         return checkOuts
 
     def checkDistance(self, entityIds):
-        # type: (List[str]) -> List[str]
+        # type: (list[str]) -> list[str]
         """检查实体距离"""
         if self.closest < 0 and self.farthest < 0:
             return entityIds
@@ -174,7 +174,7 @@ class EntityQueryOptions(object):
         return checkOuts
 
     def checkVolume(self, entityIds):
-        # type: (List[str]) -> List[str]
+        # type: (list[str]) -> list[str]
         """
         检查实体位置是否在范围内
         """

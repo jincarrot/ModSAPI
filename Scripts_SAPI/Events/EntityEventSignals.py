@@ -17,10 +17,12 @@ class EntityEvents(Events):
     def _check(self, obj, data, valueName):
         # type: (EventListener, dict, str) -> bool
         options = obj.options
-        if type(options) != dict:
-            options = None
-        else:
+        if type(options) == dict:
             options = EntityEventOptions(options)
+        elif type(options) == EntityEventOptions:
+            options = options
+        else:
+            options = None
         if options:
             if options.entities:
                 entityIds = []
@@ -188,18 +190,21 @@ class EntityHurtAfterEventSignal(EntityEvents):
         EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtAfterEvent)
 
 
-class __EntityLoadAfterEventSignal(EntityEvents):
+class EntityLoadAfterEventSignal(EntityEvents):
     """
-    Manages callbacks that are connected to when an effect is added to an entity.
+    Registers a script-based event handler for handling what happens when an entity loads.
     """
+
+    def __init__(self):
+        self.__eventName = "AddEntityServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "AddEntityServerEvent", world, callback)
+        import EntityEvents as ee
+        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityLoadAfterEvent)
 
 
 class EntityRemoveAfterEventSignal(EntityEvents):
@@ -228,7 +233,7 @@ class EntitySpawnAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
-        self.__eventName = "ServerSpawnMobEvent"
+        self.__eventName = "AddEntityServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
         # type: (types.FunctionType, dict) -> None
@@ -236,7 +241,7 @@ class EntitySpawnAfterEventSignal(EntityEvents):
         Adds a callback that will be called when an effect is added to an entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntitySpawnAfterEvent)
+        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntitySpawnAfterEvent)
 
 
 class DataDrivenEntityTriggerEventSignal(EntityEvents):

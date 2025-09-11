@@ -47,3 +47,22 @@ class ActionFormResponse(FormResponse):
         """Returns the index of the button that was pushed."""
         return self.__selection
 
+class ModalFormResponse(FormResponse):
+    """Returns data about the player results from a modal action form."""
+
+    def __init__(self, data):
+        FormResponse.__init__(self, data)
+        self.__values = data['data']
+
+    def __str__(self):
+        data = {
+            "canceled": self._canceled,
+            "values": self.__values
+        }
+        return "<ModalFormResponse> %s" % data
+
+    @property
+    def values(self):
+        # type: () -> int
+        """Returns the index of the button that was pushed."""
+        return self.__values

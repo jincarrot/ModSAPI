@@ -108,4 +108,86 @@ class ActionForm(ScreenNode):
         clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId()).CancelTimer(self.refreshId)
 
 class ModalForm(ScreenNode):
-    pass
+    """Modal Form from SAPI"""
+
+    def __init__(self, namespace, name, param):
+        # type: (str, str, dict) -> None
+        ScreenNode.__init__(self, namespace, name, param)
+        self.MAIN_PANEL_MOUSE = "/panel/panel_indent/inside_header_panel/scroll_mouse/scroll_view/stack_panel/background_and_viewport/scrolling_view_port/scrolling_content"
+        """path of main panel (mouse mode)"""
+        self.MAIN_PANEL_TOUCH = "/panel/panel_indent/inside_header_panel/scroll_touch/scroll_view/panel/background_and_viewport/scrolling_view_port/scrolling_content"
+        """path of main panel (touch mode)"""
+        self.mode = "touch"
+        """input mode"""
+        self.data = param or {
+            "title": "vanilla",
+            "elements": [
+                {
+                    "type": "step_slider",
+                    "label": "custom slider"
+                },
+                {
+                    "type": "input",
+                    "label": "custom text field"
+                },
+                {
+                    "type": "toggle",
+                    "label": "custom toggle"
+                }
+            ]
+        }
+        """contains a set of data"""
+        self.main_panel = None
+        self.ID = param['formId'] if 'formId' in param else 0
+
+    def Create(self):
+        # get the input mode
+        self.main_panel = self.GetBaseUIControl(self.MAIN_PANEL_TOUCH)
+        path = self.MAIN_PANEL_TOUCH
+        if not self.main_panel:
+            self.main_panel = self.GetBaseUIControl(self.MAIN_PANEL_MOUSE)
+            self.mode = "mouse"
+            path = self.MAIN_PANEL_MOUSE
+        # set the title
+        self.GetBaseUIControl("/panel/title_label/common_dialogs_0").asLabel().SetText(self.data['title'])
+        # read data and generate ui
+        els = self.data['elements']
+        LABEL_PATH = "/option_generic_core/two_line_layout/option_label_panel/option_label"
+        LABEL_PATH_DROPDOWN = "/dropdown/option_generic_core/two_line_layout/option_label_panel/option_label"
+        LABEL_PATH_ONELINE = "/option_generic_core/one_line_layout/option_label"
+        for id in range(0, len(els)):
+            typeId = els[id]['type']
+            self.CreateChildControl("server_form.custom_%s" % typeId, "%s" % id, self.main_panel)
+            self.GetBaseUIControl(path + "/%s" % id + (LABEL_PATH_ONELINE if typeId == 'toggle' else ( LABEL_PATH_DROPDOWN if typeId =='dropdown' else LABEL_PATH))).asLabel().SetText(els[id]['label'])
+        # refresh the submit button
+        self.Clone(path + "/submit_button", path, "submit")
+        self.RemoveComponent(path + "/submit_button", path)
+        submit = self.GetBaseUIControl(path + '/submit').asButton()
+        submit.AddTouchEventParams({"isSwallow": True})
+        submit.SetButtonTouchUpCallback(self.submit)
+        close = self.GetBaseUIControl("/panel/common_panel/close_button_holder/close").asButton()
+        close.AddTouchEventParams({"isSwallow": True})
+        close.SetButtonTouchUpCallback(self.onClose)
+        for state in ['default', 'hover', 'pressed']:
+                self.GetBaseUIControl(path + "/submit/%s/button_content/common_buttons.new_ui_binding_button_label" % state).asLabel().SetText("确定")
+
+    def submit(self, data):
+        SLIDER_PATH = "/option_generic_core/two_line_layout/settings_common.option_slider_control/slider"
+        TOGGLE_PATH = "/option_generic_core/one_line_layout/settings_common.option_toggle_control"
+        TEXT_EDIT_PATH = "/option_generic_core/two_line_layout/settings_common.option_text_edit_control"
+        els = self.data['elements']
+        path = self.MAIN_PANEL_TOUCH if self.mode == 'touch' else self.MAIN_PANEL_MOUSE
+        values = []
+        for id in range(0, len(els)):
+            if els[id]['type'] == 'toggle':
+                values.append(self.GetBaseUIControl(path + '/%s%s/checked' % (id, TOGGLE_PATH)).GetVisible())
+            elif els[id]['type'] == 'step_slider':
+                values.append(self.GetBaseUIControl(path + '/%s%s' % (id, SLIDER_PATH)).asSlider().GetSliderValue())
+            elif els[id]['type'] == 'input':
+                values.append(self.GetBaseUIControl(path + '/%s%s' % (id, TEXT_EDIT_PATH)).asTextEditBox().GetEditText())
+        clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer("ModalFormResponse", {"id": self.ID, "playerId": clientApi.GetLocalPlayerId(), "data": values, "canceled": False})
+        clientApi.PopScreen()
+
+    def onClose(self, data):
+        clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer("ModalFormResponse", {"id": self.ID, "playerId": clientApi.GetLocalPlayerId(), "data": None, "canceled": True})
+        clientApi.PopScreen()

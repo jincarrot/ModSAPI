@@ -14,8 +14,8 @@ class EventListener(object):
     process event
     """
 
-    def __init__(self, eventName, callback, options=None, detectFunc=None, valueName=None, wrapper=None):
-        # type: (str, types.FunctionType, 0, types.FunctionType, str, 0) -> None
+    def __init__(self, eventName, callback, options=None, detectFunc=None, valueName=None, wrapper=None, namespace=serverApi.GetEngineNamespace(), systemName=serverApi.GetEngineSystemName()):
+        # type: (str, types.FunctionType, 0, types.FunctionType, str, 0, str, str) -> None
         global world
         self.__eventName = eventName
         self.__callback = callback
@@ -25,7 +25,8 @@ class EventListener(object):
         self.__valueName = valueName
         if not world:
             world = getWorld()
-        world.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), eventName, self, self.listen)
+        SComp.CreateItem(serverApi.GetLevelId()).GetUserDataInEvent(eventName)
+        world.ListenForEvent(namespace, systemName, eventName, self, self.listen)
 
     @property
     def options(self):

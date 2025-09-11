@@ -45,6 +45,10 @@ class BlockPermutation(object):
         }
         return "<BlockPermutation> %s" % data
 
+    def __eq__(self, obj):
+        # type: (BlockPermutation) -> bool
+        return self.__blockName == obj.type and self.__states == obj.getAllStates()
+
     @property
     def type(self):
         # type: () -> BlockType
@@ -66,7 +70,7 @@ class BlockPermutation(object):
         """
 
     def getAllStates(self):
-        # type: () -> Dict[str, 0]
+        # type: () -> dict[str, 0]
         """
         Returns all available block states associated with this block.
         """
@@ -87,9 +91,9 @@ class BlockPermutation(object):
         return self.__states[stateName] if stateName in self.__states else None
     
     def getTags(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         """
-        Creates a copy of the permutation.
+        Get all tags of this permutation.
         """
         return SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockTags(self.__blockName)
     
