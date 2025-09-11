@@ -20,7 +20,7 @@ class Dimension(object):
     import Command as c
 
     def __init__(self, dimId):
-        # type: (Union[int, str]) -> None
+        # type: (int | str) -> None
         if type(dimId).__name__ == 'int':
             self.__dimId = dimId
             self.__id = MinecraftDimensionTypes[self.__dimId] if self.__dimId < len(MinecraftDimensionTypes) else "dm%s" % self.__dimId
@@ -59,7 +59,7 @@ class Dimension(object):
         return self.b.Block({"dimension": self, "location": Vector3(location) if type(location) == dict else location})
 
     def getEntities(self, options=EntityQueryOptions):
-        # type: (dict | EntityQueryOptions) -> List[e.Entity]
+        # type: (dict | EntityQueryOptions) -> list[e.Entity]
         """
         Gets the entities in the dimension.
         """
@@ -79,7 +79,7 @@ class Dimension(object):
         return entities
     
     def getEntitiesAtBlockLocation(self, location):
-        # type: (dict | Vector3) -> List[e.Entity]
+        # type: (dict | Vector3) -> list[e.Entity]
         """
         Returns a set of entities at a particular location.
         """
@@ -91,7 +91,7 @@ class Dimension(object):
         return result
 
     def getPlayers(self, options=EntityQueryOptions):
-        # type: (dict | EntityQueryOptions) -> List[e.Player]
+        # type: (dict | EntityQueryOptions) -> list[e.Player]
         playerIds = serverApi.GetPlayerList()
         if options == EntityQueryOptions:
             options = {}

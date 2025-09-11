@@ -106,16 +106,34 @@ class ItemStack(object):
         return data
     
     def getLore(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         """
         Returns the lore value - a secondary display string - for an ItemStack.
         """
         return self.__lore
 
     def setLore(self, loreList=None):
-        # type: (List[str]) -> None
+        # type: (list[str]) -> None
         """
         Sets the lore value - a secondary display string - for an ItemStack. 
         The lore list is cleared if set to an empty string or undefined.
         """
         self.__lore = loreList
+
+def createItemStack(itemDict):
+    # type: (dict) -> ItemStack | None
+    if not itemDict:
+        return None
+    item = ItemStack(itemDict['newItemName'], itemDict['count'])
+    if 'userData' in itemDict:
+        userData = itemDict['userData']
+        if 'minecraft:keep_on_death' in userData:
+            item.keepOnDeath = userData['minecraft:keep_on_death']['__value__'] == 1
+        if 'minecraft:item_lock' in userData:
+            v = userData['minecraft:item_lock']['__value__']
+            item.lockMode = "none" if not v else ("inventory" if v == 2 else "slot")
+        if 'display' in userData:
+            item.nameTag = userData['display']['__value__']
+    if 'customTips' in itemDict:
+        item.setLore(itemDict['customTips'].split("\n"))
+    return item

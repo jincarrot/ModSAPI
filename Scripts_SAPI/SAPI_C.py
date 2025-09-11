@@ -21,10 +21,13 @@ class SAPI_C(ClientSystem):
         self.ListenForEvent("SAPI", "world", "getData", self, self.getData)
         self.ListenForEvent("SAPI", "world", "sendToast", self, self.sendToast)
         self.ListenForEvent("SAPI", "world", "showActionForm", self, self.showActionForm)
+        self.ListenForEvent("SAPI", "world", "showModalForm", self, self.showModalForm)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
+        self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.playerSpawn)
 
     def initUI(self, data):
         clientApi.RegisterUI("server_ui", "ActionForm", "Scripts_SAPI.Classes.Forms.ActionForm", "server_forms.action_form")
+        clientApi.RegisterUI("server_ui", "ModalForm", "Scripts_SAPI.Classes.Forms.ModalForm", "server_forms.modal_form")
 
     def getData(self, data):
         """receive request from server"""
@@ -43,6 +46,12 @@ class SAPI_C(ClientSystem):
 
     def showActionForm(self, data):
         clientApi.PushScreen("server_ui", "ActionForm", data)
+
+    def showModalForm(self, data):
+        clientApi.PushScreen("server_ui", "ModalForm", data)
+
+    def playerSpawn(self, data):
+        self.NotifyToServer("playerSpawn", data)
 
 
 def ClientMethod(func):

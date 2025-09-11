@@ -103,7 +103,7 @@ class CameraPlus(object):
         self.__comp.SetCameraPitchLimit((data[0], data[1]))
     
     def getAllMotions(self):
-        # type: () -> List[Motion]
+        # type: () -> list[Motion]
         """
         获取该摄像机上存在的所有运动器
         """

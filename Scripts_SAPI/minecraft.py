@@ -13,13 +13,19 @@ def getSystem():
     return serverApi.GetSystem("SAPI", "system")
 
 def getActionFormData():
-    # type: () -> fd.ActionFormData
+    # type: () -> type[fd.ActionFormData]
     if serverApi.GetSystem("SAPI", "Base"):
         return serverApi.GetSystem("SAPI", "Base").getActionFormData()
+    
+def getModalFormData():
+    # type: () -> type[fd.ModalFormData]
+    if serverApi.GetSystem("SAPI", "Base"):
+        return serverApi.GetSystem("SAPI", "Base").getModalFormData()
 
 world = getWorld()
 system = getSystem()
 ActionFormData = getActionFormData()
+ModalFormData = getModalFormData()
 
 ServerSystem = serverApi.GetServerSystemCls()
 
@@ -38,6 +44,7 @@ class SAPIS(ServerSystem):
         self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "LoadServerAddonScriptsAfter", self, self.Init)
         self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "CustomCommandTriggerServerEvent", self, self.customCommand)
         self.ListenForEvent("SAPI", "SAPI_C", "ActionFormResponse", self, self.responseActionForm)
+        self.ListenForEvent("SAPI", "SAPI_C", "ModalFormResponse", self, self.responseModalForm)
     
     def debug(self, data):
         global world
@@ -54,6 +61,7 @@ class SAPIS(ServerSystem):
         global world, ActionFormData
         world = getWorld()
         ActionFormData = getActionFormData()
+        ModalFormData = getModalFormData()
 
     def customCommand(self, data):
         if data['command'] == 'modsapi':
@@ -65,11 +73,20 @@ class SAPIS(ServerSystem):
             data['return_failed'] = False
 
     def responseActionForm(self, data):
+        import Classes.FormResponse as fr
         if data['id'] in self.formTasks:
-            self.formTasks[data['id']](fd.ActionFormResponse(data))
+            self.formTasks[data['id']](fr.ActionFormResponse(data))
+
+    def responseModalForm(self, data):
+        import Classes.FormResponse as fr
+        if data['id'] in self.formTasks:
+            self.formTasks[data['id']](fr.ModalFormResponse(data))
 
     def getActionFormData(self):
         return fd.ActionFormData
+    
+    def getModalFormData(self):
+        return fd.ModalFormData
     
     def setFormCallback(self, id, callback):
         self.formTasks[id] = callback

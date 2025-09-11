@@ -80,7 +80,7 @@ class ScoreboardObjective(object):
         return scoreToAdd
     
     def getParticipants(self):
-        # type: () -> List[ScoreboardIdentity]
+        # type: () -> list[ScoreboardIdentity]
         datas = SComp.CreateGame(serverApi.GetLevelId()).GetAllPlayerScoreboardObjects()
         participants = []
         for playerData in datas:
@@ -150,7 +150,7 @@ class Scoreboard(object):
     
     @staticmethod
     def getObjectives():
-        # type: () -> List[ScoreboardObjective]
+        # type: () -> list[ScoreboardObjective]
         """
         Returns all defined objectives.
         """

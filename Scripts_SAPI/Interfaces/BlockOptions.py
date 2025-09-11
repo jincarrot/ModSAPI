@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # from typing import List, Dict, Union
+from ..Classes.Block import *
 
 
 class BlockFilter(object):
@@ -37,3 +38,35 @@ class BlockRaycastOptions(BlockFilter):
         """If true, the raycast will return a passable block if it is the first block hit."""
         self.maxDistance = data['maxDistance'] if 'maxDistance' in data else 32
         """The maximum distance the raycast will check for blocks."""
+
+
+class BlockEventOptions(object):
+    """
+    Contains optional parameters for registering a block event.
+    """
+
+    def __init__(self, data):
+        self.__permutations = data['permutations'] if 'permutations' in data else []
+        self.__blockTypes = data['blockTypes'] if 'blockTypes' in data else []
+
+    @property
+    def permutations(self):
+        # type: () -> list[BlockPermutation]
+        """If this value is set, this event will only fire if the impacted block's permutation matches this parameter."""
+        return self.__permutations
+
+    @permutations.setter
+    def permutations(self, data):
+        # type: (list[BlockPermutation]) -> None
+        self.__permutations = data
+
+    @property
+    def blockTypes(self):
+        # type: () -> list[str]
+        """If this value is set, this event will only fire if the impacted block's type matches this parameter."""
+        return self.__blockTypes
+
+    @blockTypes.setter
+    def blockTypes(self, data):
+        # type: (list[str]) -> None
+        self.__blockTypes = data

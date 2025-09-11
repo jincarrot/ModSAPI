@@ -28,8 +28,8 @@ class BlockExplodeAfterEvent(BlockEvent):
     """
 
     def __init__(self, data):
-        self.__source = Entity(data['sourceId'])
-        self.__explodedBlockPermutation = data
+        self.__source = Entity(data['sourceId']) if data['sourceId'] else None
+        self.__explodedBlockPermutation = BlockPermutation(Block({"dimension": Dimension(data['dimensionId']), "location": Vector3(data['explodePos'])}))
 
     def __str__(self):
         data = {
@@ -44,6 +44,12 @@ class BlockExplodeAfterEvent(BlockEvent):
         Optional source of the explosion.
         """
         return self.__source
+    
+    @property
+    def explodedBlockPermutation(self):
+        # type: () -> BlockPermutation
+        """Description of the block that has exploded."""
+        return self.__explodedBlockPermutation
     
 class PlayerBreakBlockAfterEvent(BlockEvent):
     """
@@ -63,37 +69,76 @@ class PlayerBreakBlockAfterEvent(BlockEvent):
         return "<PlayerBreakBlockAfterEvent> %s" % data
     
     @property
-    def source(self):
-        # type: () -> Entity
+    def player(self):
+        # type: () -> Player
         """
-        Optional source of the explosion.
+        Player that broke the block for this event.
         """
-        return self.__source
+        return self.__player
     
-
-class BlockExplodeBeforeEvent(BlockEvent):
+class PlayerPlaceBlockAfterEvent(BlockEvent):
     """
-    Contains information related to a projectile hitting a block.
+    Contains information regarding an event where a player places a block.
     """
 
     def __init__(self, data):
-        self.__source = Entity(data['sourceId'])
+        self.__dimension = Dimension(data['dimensionId'])
+        self.__block = Block({"dimension": self.__dimension, "location": Vector3((data['x'], data['y'], data['z']))})
+        self.__player = Player(data['entityId'])
+
+    def __str__(self):
+        data = {
+            "block": str(self.__block),
+            "player": str(self.__player)
+        }
+        return "<PlayerPlaceBlockAfterEvent> %s" % data
+    
+    @property
+    def player(self):
+        # type: () -> Player
+        """
+        Player that broke the block for this event.
+        """
+        return self.__player
+    
+ 
+class PlayerBreakBlockBeforeEvent(BlockEvent):
+    """
+    Contains information regarding an event before a player breaks a block.
+    """
+
+    def __init__(self, data):
         self.__data = data
+        self.__dimension = Dimension(data['dimensionId'])
+        self.__block = Block({"dimension": self.__dimension, "location": Vector3((data['x'], data['y'], data['z']))})
+        self.__player = Player(data['playerId'])
+        self.__itemStack = createItemStack()
         self.__cancel = False
 
     def __str__(self):
         data = {
-            "source": self.__source
+            "block": str(self.__block),
+            "player": str(self.__player)
         }
-        return "<BlockExplodeAfterEvent> %s" % data
+        return "<PlayerBreakBlockAfterEvent> %s" % data
     
     @property
-    def source(self):
-        # type: () -> Entity
+    def player(self):
+        # type: () -> Player
         """
-        Optional source of the explosion.
+        Player that broke the block for this event.
         """
-        return self.__source
+        return self.__player
+    
+    @property
+    def brokenBlockPermutation(self):
+        """Returns permutation information about this block before it was broken."""
+        return self.__brokenBlockPermutation
+    
+    @property
+    def itemStackBeforeBreak(self):
+        """The item stack that was used to break the block before the block was broken, or undefined if empty hand."""
+        return self
     
     @property
     def cancel(self):
@@ -101,8 +146,8 @@ class BlockExplodeBeforeEvent(BlockEvent):
     
     @cancel.setter
     def cancel(self, value):
+        # type: (bool) -> None
         self.__cancel = value
-        if self.__cancel:
-            for block in self.__data['blocks']:
-                block['cancel'] = True
-
+        self.__data['cancel'] = value
+    
+    

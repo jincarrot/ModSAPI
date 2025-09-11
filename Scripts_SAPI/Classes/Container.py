@@ -186,43 +186,19 @@ class Container(object):
             itemDict = comp.GetPlayerItem(0, slot, True)
             if not itemDict:
                 return None
-            item = ItemStack(itemDict['newItemName'], itemDict['count'])
-            if itemDict['userData']:
-                data = itemDict['userData']
-                if 'minecraft:keep_on_death' in data:
-                    item.keepOnDeath = True if data['minecraft:keep_on_death']['__value__'] else False
-                if 'minecraft:item_lock' in data:
-                    item.lockMode = 'inventory' if data['minecraft:item_lock']['__value__'] == 2 else 'slot'
-                if 'display' in data:
-                    item.nameTag = data['display']['Name']['__value__']
+            item = createItemStack(itemDict)
             return item
         elif self.__entityId:
             itemDict = comp.GetEntityItem(0, slot, True)
             if not itemDict:
                 return None
-            item = ItemStack(itemDict['newItemName'], item['count'])
-            if itemDict['userData']:
-                data = itemDict['userData']
-                if 'minecraft:keep_on_death' in data:
-                    item.keepOnDeath = True if data['minecraft:keep_on_death']['__value__'] else False
-                if 'minecraft:item_lock' in data:
-                    item.lockMode = 'inventory' if data['minecraft:item_lock']['__value__'] == 2 else 'slot'
-                if 'display' in data:
-                    item.nameTag = data['display']['Name']['__value__']
+            item = createItemStack(itemDict)
             return item
         elif self.__location:
             itemDict = comp.GetContainerItem(self.__location, slot, self.__dimId, True)
             if not itemDict:
                 return None
-            item = ItemStack(itemDict['newItemName'], item['count'])
-            if itemDict['userData']:
-                data = itemDict['userData']
-                if 'minecraft:keep_on_death' in data:
-                    item.keepOnDeath = True if data['minecraft:keep_on_death']['__value__'] else False
-                if 'minecraft:item_lock' in data:
-                    item.lockMode = 'inventory' if data['minecraft:item_lock']['__value__'] == 2 else 'slot'
-                if 'display' in data:
-                    item.nameTag = data['display']['Name']['__value__']
+            item = createItemStack(itemDict)
             return item
         return None
 

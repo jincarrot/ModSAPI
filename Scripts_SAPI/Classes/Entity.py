@@ -343,7 +343,7 @@ class Entity(object):
         return EntityComponent({"entity": self})
 
     def getComponents(self):
-        # type: () -> List[EntityComponent]
+        # type: () -> list[EntityComponent]
         """
         Returns all components that are both present on this entity and supported by the API.
         """
@@ -362,7 +362,7 @@ class Entity(object):
         return DataComp.GetExtraData(identifier)
 
     def getDynamicPropertyIds(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         """
         Returns the available set of dynamic property identifiers that have been used on this entity.
         """
@@ -408,7 +408,7 @@ class Entity(object):
             return effect
 
     def getEffects(self):
-        # type: () -> List[Effect]
+        # type: () -> list[Effect]
         """
         Returns a set of effects applied to this entity.
         """
@@ -421,7 +421,7 @@ class Entity(object):
         return effects
 
     def getEntitiesFromViewDirection(self, options=EntityRaycastOptions):
-        # type: (dict) -> List[EntityRaycastHit]
+        # type: (dict) -> list[EntityRaycastHit]
         """
         Gets the entities that this entity is looking at by performing a ray cast from the view of this entity.
         """
@@ -455,7 +455,7 @@ class Entity(object):
         return Vector2({"x": rot[0], "y": rot[1]})
 
     def getTags(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         """
         Returns all tags associated with the entity.
         """

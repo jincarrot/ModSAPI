@@ -141,16 +141,36 @@ class EntitySpawnAfterEvent(object):
 
     def __init__(self, data):
         self.__cause = None
-        self.__entity = Entity(data['entityId'])
+        self.__entity = Entity(data['id'])
+        if SComp.CreateEntityDefinitions(self.__entity.id).IsNaturallySpawned():
+            self.__cause = 'Spawned'
     
     @property
     def cause(self):
         # type: () -> str
+        """None"""
         return self.__cause
     
     @property
     def entity(self):
         # type: () -> Entity 
+        return self.__entity
+
+class EntityLoadAfterEvent(object):
+    """
+    Contains data related to an entity loaded within the world. 
+    
+    This could happen when an unloaded chunk is reloaded, or when an entity changes dimensions.
+    """
+
+    def __init__(self, data):
+        self.__entity = Entity(data['id'])
+    
+    @property
+    def entity(self):
+        # type: () -> Entity 
+        """Contains data related to an entity loaded within the world. 
+        This could happen when an unloaded chunk is reloaded, or when an entity changes dimensions."""
         return self.__entity
 
 class EffectAddAfterEvent(object):
