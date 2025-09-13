@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # from typing import Union, Dict
-from Components import EntityComponent
+from Scripts_SAPI.Classes.Components import EntityComponent
 import mod.server.extraServerApi as serverApi
 from mod.common.minecraftEnum import EntityComponentType
 
@@ -10,6 +10,8 @@ class EntityAddRiderComponent(EntityComponent):
     """
     When added, this component makes the entity spawn with a rider of the specified entityType.
     """
+
+    __componentId = "minecraft:addrider"
     
     def __init__(self, typeId, data):
         EntityComponent.__init__(self, typeId, data)
@@ -29,8 +31,7 @@ class EntityAddRiderComponent(EntityComponent):
     def entityType(self):
         # type: () -> str
         """
-        The entity that owns this component. 
-        The entity will be undefined if it has been removed.
+        The type of entity that is added as a rider for this entity when spawned under certain conditions.
         """
         return self.__entityType
     
@@ -79,7 +80,7 @@ class EntityAttributeComponent(EntityComponent):
         """
         nbt = SComp.CreateEntityDefinitions(self.entity.id).GetEntityNBTTags()['Attributes']
         for tag in nbt:
-            if tag['Name']['__value__'] == self.__typeId:
+            if tag['Name']['__value__'] == self.__componentId:
                 return tag['Current']['__value__']
     
     @property
@@ -111,21 +112,21 @@ class EntityAttributeComponent(EntityComponent):
         """
         Resets the current value of this attribute to the defined default value.
         """
-        SComp.CreateAttr(self.entity.id).SetAttribute(getattr(EntityComponentType, self.componentId.split("minecraft:")[0]), self.defaultValue)
+        SComp.CreateAttr(self.entity.id).SetAttrValue(getattr(EntityComponentType, self.componentId.split("minecraft:")[1]), self.defaultValue)
 
     def resetToMaxValue(self):
         # type: () -> None
         """
         Resets the current value of this attribute to the defined max value.
         """
-        SComp.CreateAttr(self.entity.id).SetAttribute(getattr(EntityComponentType, self.componentId.split("minecraft:")[0]), self.effectiveMax)
+        SComp.CreateAttr(self.entity.id).SetAttrValue(getattr(EntityComponentType, self.componentId.split("minecraft:")[1]), self.effectiveMax)
 
     def resetToMinValue(self):
         # type: () -> None
         """
         Resets the current value of this attribute to the defined min value.
         """
-        SComp.CreateAttr(self.entity.id).SetAttribute(getattr(EntityComponentType, self.componentId.split("minecraft:")[0]), self.effectiveMin)
+        SComp.CreateAttr(self.entity.id).SetAttrValue(getattr(EntityComponentType, self.componentId.split("minecraft:")[0]), self.effectiveMin)
 
     def setCurrentValue(self, value):
         # type: (float) -> None
@@ -134,12 +135,59 @@ class EntityAttributeComponent(EntityComponent):
         """
         self.__comp.SetAttrValue(self.__attrId, value)
 
-
 class EntityHealthComponent(EntityAttributeComponent):
     """
     Defines the health properties of an entity.
     """
     __componentId = "minecraft:health"
+    import Entity as e
+
+    def __init__(self, data):
+        EntityAttributeComponent.__init__(self, data)
+        self.__entity = data['entity']
+
+    @property
+    def entity(self):
+        # type: () -> e.Entity
+        return self.__entity
+
+class EntityMovementComponent(EntityAttributeComponent):
+    """
+    Defines the base movement speed of this entity.
+    """
+    __componentId = "minecraft:movement"
+    import Entity as e
+
+    def __init__(self, data):
+        EntityAttributeComponent.__init__(self, data)
+        self.__entity = data['entity']
+
+    @property
+    def entity(self):
+        # type: () -> e.Entity
+        return self.__entity
+
+class EntityLavaMovementComponent(EntityAttributeComponent):
+    """
+    Defines the base movement speed in lava of this entity.
+    """
+    __componentId = "minecraft:lava_movement"
+    import Entity as e
+
+    def __init__(self, data):
+        EntityAttributeComponent.__init__(self, data)
+        self.__entity = data['entity']
+
+    @property
+    def entity(self):
+        # type: () -> e.Entity
+        return self.__entity
+
+class EntityUnderwaterMovementComponent(EntityAttributeComponent):
+    """
+    Defines the base movement speed under water of this entity.
+    """
+    __componentId = "minecraft:underwater_movement"
     import Entity as e
 
     def __init__(self, data):
@@ -161,6 +209,7 @@ class EntityInventoryComponent(EntityComponent):
     def __init__(self, data):
         EntityComponent.__init__(self, data)
         self.__entity = data['entity'] # type: EntityInventoryComponent.en.Entity
+        self.__container = self.con.Container(None, self.__entity.id)
 
     def __str__(self):
         data = {
@@ -179,5 +228,5 @@ class EntityInventoryComponent(EntityComponent):
         Defines the container for this entity. 
         The container will be undefined if the entity has been removed.
         """
-        return self.con.Container(None, self.__entity.id)
+        return self.__container
     

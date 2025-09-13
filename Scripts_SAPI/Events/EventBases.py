@@ -8,6 +8,8 @@ from ..minecraft import *
 ServerSystem = serverApi.GetServerSystemCls()
 SComp = serverApi.GetEngineCompFactory()
 
+eventListenData = {}
+
 
 class EventListener(object):
     """

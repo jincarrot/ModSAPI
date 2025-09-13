@@ -162,8 +162,8 @@ class Block(object):
     """
 
     def __init__(self, data):
-        self.__dimension = data['dimension']
-        self.__location = data['location']
+        self.__dimension = data['dimension'] # type: Dimension
+        self.__location = data['location'] # type: Vector3
         self.__permutation = BlockPermutation(self)
 
     def __str__(self):
@@ -272,20 +272,37 @@ class Block(object):
         """
         return self.location.z
     
-    def above(self, steps):
+    def above(self, steps=1):
         # type: (int) -> Block
         """
         Returns the @minecraft/server.Block above this block (positive in the Y direction).
         """
         return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x, "y": self.location.y + steps, "z": self.location.z})})
     
-    def below(self, steps):
+    def below(self, steps=1):
         # type: (int) -> Block
         """
         Returns the @minecraft/server.Block below this block (negative in the Y direction).
         """
         return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x, "y": self.location.y - steps, "z": self.location.z})})
     
+    def east(self, steps=1):
+        # type: (int) -> Block | None
+        """Returns the @minecraft/server.Block to the east of this block (positive in the X direction)."""
+        return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x + steps, "y": self.location.y, "z": self.location.z})})
+
+    def west(self, steps=1):
+        """Returns the @minecraft/server.Block to the east of this block (negative in the X direction)."""
+        return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x - steps, "y": self.location.y, "z": self.location.z})})
+
+    def north(self, steps=1):
+        """Returns the @minecraft/server.Block to the east of this block (negative in the Z direction)."""
+        return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x, "y": self.location.y, "z": self.location.z - steps})})
+
+    def south(self, steps=1):
+        """Returns the @minecraft/server.Block to the east of this block (positive in the Z direction)."""
+        return Block({'dimension': self.dimension, 'location': Vector3({"x": self.location.x, "y": self.location.y, "z": self.location.z + steps})})
+
     def bottomCenter(self):
         # type: () -> Vector3
         """
@@ -298,4 +315,19 @@ class Block(object):
         """
         Sets the block in the dimension to the state of the permutation.
         """
-        pass
+        SComp.CreateBlockState(serverApi.GetLevelId()).SetBlockStates((self.__location.x, self.__location.y, self.__location.z), permutation.getAllStates(), self.__dimension.dimId)
+
+    def getTags(self):
+        # type: () -> list[str]
+        """
+        Returns a set of tags for a block.
+        """
+        return SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockTags(self.typeId)
+    
+    def hasTag(self, tag):
+        # type: (str) -> bool
+        """
+        Checks to see if the permutation of this block has a specific tag.
+        """
+        return tag in self.getTags()
+    

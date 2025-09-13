@@ -30,6 +30,12 @@ class Vector3(object):
         }
         return "<Vector3> %s" % data
     
+    def __eq__(self, data):
+        # type: (Vector3 | dict) -> bool
+        if type(data) == dict:
+            data = Vector3(data)
+        return data.x == self.x and data.y == self.y and data.z == self.z
+
     def __sub__(self, data):
         # type: (Vector3 | dict | tuple) -> Vector3
         if type(data) != Vector3:

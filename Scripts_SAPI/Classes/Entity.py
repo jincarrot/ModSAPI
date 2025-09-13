@@ -16,6 +16,7 @@ from ClientSystemInfo import *
 import mod.server.extraServerApi as serverApi
 from ..minecraft import *
 from Command import *
+import types
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -189,7 +190,7 @@ class Entity(object):
         return SComp.CreateEngineType(self.__id).GetEngineTypeStr()
 
     def addEffect(self, effectType, duration, options=EntityEffectOptions):
-        # type: (Union[str, EffectType], int, Union[EntityEffectOptions, dict]) -> Effect
+        # type: (str | EffectType, int, EntityEffectOptions | dict) -> Effect
         """
         Adds or updates an effect, like poison, to the entity.
         """
@@ -213,7 +214,7 @@ class Entity(object):
         return SComp.CreateTag(self.__id).AddEntityTag(tag)
 
     def applyDamage(self, amount, options=None):
-        # type: (int, Union[dict, EntityApplyDamageByProjectileOptions, EntityApplyDamageOptions]) -> bool
+        # type: (int, dict | EntityApplyDamageByProjectileOptions | EntityApplyDamageOptions) -> bool
         """
         Applies a set of damage to an entity.
         """
@@ -236,7 +237,7 @@ class Entity(object):
                 return SComp.CreateHurt(self.__id).Hurt(amount, options.cause, options.damagingEntity.id, None, False)
 
     def applyImpulse(self, vector):
-        # type: (Union[Vector3, dict]) -> None
+        # type: (Vector3 | dict) -> None
         """
         Applies impulse vector to the current velocity of the entity.
         """
@@ -244,7 +245,7 @@ class Entity(object):
         SComp.CreateActorMotion(self.__id).SetMotion((vector.x, vector.y, vector.z))
 
     def applyKnockback(self, horizontalForce, verticalStrength):
-        # type: (Union[dict, VectorXZ], float) -> None
+        # type: (dict | VectorXZ, float) -> None
         """
         Applies impulse vector to the current velocity of the entity.
         """
@@ -290,7 +291,7 @@ class Entity(object):
             return False
 
     def getBlockFromViewDirection(self, options=BlockRaycastOptions):
-        # type: (Union[dict, BlockRaycastOptions]) -> BlockRaycastHit
+        # type: (dict | BlockRaycastOptions) -> BlockRaycastHit
         """
         note: options is not complete
         Returns the first intersecting block from the direction that this entity is looking at.
@@ -331,16 +332,21 @@ class Entity(object):
         return None
 
     def getComponent(self, componentId):
-        # type: (str) -> EntityComponent
+        # type: (str) -> EntityComponent | None
         """
         Gets a component (that represents additional capabilities) for an entity.
         """
+        if not self.hasComponent(componentId):
+            print("Get entity component error! component '%s' isn't exist in this entity" % componentId)
+            return None
         if componentId.find("minecraft:") >= 0:
-            componentId = componentId.split("minecraft:")[1].lower()
+            componentId = componentId[10::].lower()
         if componentId in vars(EntityComponentType).keys():
-            if componentId == "health":
-                return EntityHealthComponent({"entity": self})
-        return EntityComponent({"entity": self})
+            import Components as comp
+            return comp.EntityComponentGenerater(self, componentId).get()
+        else:
+            print("Get entity component error! No such component name '%s'" % componentId)
+            return None
 
     def getComponents(self):
         # type: () -> list[EntityComponent]
@@ -354,7 +360,7 @@ class Entity(object):
         return components
 
     def getDynamicProperty(self, identifier):
-        # type: (str) -> Any
+        # type: (str) -> 0
         """
         Returns a property value.
         """
@@ -391,7 +397,7 @@ class Entity(object):
         return count
 
     def getEffect(self, effectType):
-        # type: (Union[str, EffectType]) -> Effect
+        # type: (str | EffectType) -> Effect
         """
         Returns the effect for the specified EffectType on the entity,
         undefined if the effect is not present, or throws an error if the effect does not exist.
@@ -470,7 +476,7 @@ class Entity(object):
         return Vector3({"x": v[0], 'y': v[1], 'z': v[2]})
 
     def getProperty(self, identifier):
-        # type: (str) -> Any
+        # type: (str) -> 0
         """
         Gets an entity Property value.
         If the property was set using the setProperty function within the same tick, the updated value will not be reflected until the subsequent tick.
@@ -497,8 +503,8 @@ class Entity(object):
         """
         Returns true if the specified component is present on this entity.
         """
-        componentId = componentId.split("minecraft:")[1].lower() if "minecraft:" in componentId else componentId
-        return SComp.CreateEntityComponent(self.__id).HasComponent(getattr(EntityComponentType, componentId)) or False
+        componentId = componentId[::10].lower() if "minecraft:" in componentId else componentId
+        return SComp.CreateEntityComponent(self.__id).HasComponent(getattr(EntityComponentType, componentId))
 
     def hasTag(self, tag):
         # type: (str) -> bool
@@ -523,7 +529,7 @@ class Entity(object):
         """
         return SComp.CreateGame(serverApi.GetLevelId()).KillEntity(self.__id)
 
-    def matches(self, options=EntityQueryOptions):
+    def matches(self, options=None):
         # type: (dict) -> bool
         """
         Matches the entity against the passed in options.
@@ -535,8 +541,8 @@ class Entity(object):
                 return True
         return False
 
-    def playAnimation(self, animationName, options=PlayAnimationOptions):
-        # type: (str, Union[dict, PlayAnimationOptions]) -> None
+    def playAnimation(self, animationName, options=None):
+        # type: (str, dict | PlayAnimationOptions) -> None
         """
         Cause the entity to play the given animation.
         """
@@ -552,7 +558,7 @@ class Entity(object):
         world.DestroyEntity(self.__id)
 
     def removeEffect(self, effectType):
-        # type: (Union[str, EffectType]) -> bool
+        # type: (str | EffectType) -> bool
         """
         Removes the specified EffectType on the entity, or returns false if the effect is not present.
         """
@@ -567,7 +573,7 @@ class Entity(object):
         return SComp.CreateTag(self.__id).RemoveEntityTag(tag)
 
     def resetProperty(self, identifier):
-        # type: (str) -> Any
+        # type: (str) -> 0
         """
         Resets an Entity Property back to its default value, as specified in the Entity's definition.
         This property change is not applied until the next tick.
@@ -618,7 +624,7 @@ class Entity(object):
         return None
 
     def setDynamicProperty(self, identifier, value):
-        # type: (str, Any) -> None
+        # type: (str, 0) -> None
         """
         Sets a specified property to a value.
         """
@@ -635,7 +641,7 @@ class Entity(object):
         return SComp.CreateAttr(self.__id).SetEntityOnFire(seconds)
 
     def setProperty(self, identifier, value):
-        # type: (str, Any) -> None
+        # type: (str, 0) -> None
         """
         Sets an Entity Property to the provided value.
         This property change is not applied until the next tick.
@@ -643,15 +649,15 @@ class Entity(object):
         SComp.CreateQueryVariable(self.__id).SetPropertyValue(identifier, value)
 
     def setRotation(self, rotation):
-        # type: (Union[str, Vector2]) -> None
+        # type: (str | Vector2) -> None
         """
         Sets the main rotation of the entity.
         """
         rotation = Vector2({rotation}) if type(rotation).__name__ == 'dict' else rotation
         SComp.CreateRot(self.__id).SetRot((rotation.x, rotation.y))
 
-    def teleport(self, location, teleportOptions=TeleportOptions):
-        # type: (Union[Vector3, dict], Union[dict, TeleportOptions]) -> None
+    def teleport(self, location, teleportOptions=None):
+        # type: (Vector3 | dict, dict | TeleportOptions) -> None
         """
         Teleports the selected entity to a new location
         """
@@ -669,11 +675,20 @@ class Entity(object):
         SComp.CreateEntityEvent(self.__id).TriggerCustomEvent(self.__id, eventName)
 
     def tryTeleport(self, location, teleportOptions=TeleportOptions):
-        # type: (Union[dict, Vector3], dict) -> bool
+        # type: (dict | Vector3, dict) -> bool
         """
         Attempts to try a teleport, but may not complete the teleport operation (for example, if there are blocks at the destination.)
         """
         SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("tp @s %s %s %s true" % (location.x, location.y, location.z), self.__id)
+
+    def asPlayer(self):
+        # type: () -> Player
+        """get the player object"""
+        if self.typeId == 'minecraft:player':
+            return Player(self.__id)
+        else:
+            print("error! This entity is not a player.")
+            return None
 
 
 class Player(Entity):
@@ -708,9 +723,33 @@ class Player(Entity):
         # type: () -> Camera
         """
         The player's Camera.
+
+        No use now.
         """
         return Camera(self.__id)
     
+    @property
+    def isFlying(self):
+        # type: () -> bool
+        """Whether the player is flying. For example, in Creative or Spectator mode."""
+        return SComp.CreateFly(self.__id).IsPlayerFlying()
+    
+    @property
+    def level(self):
+        # type: () -> int
+        """The current overall level for the player, based on their experience."""
+        return SComp.CreateLv(self.__id).GetPlayerLevel()
+
+    @property
+    def selectedSlotIndex(self):
+        """the index of selected slot"""
+        return SComp.CreateItem(self.__id).GetSelectSlotId()
+    
+    @selectedSlotIndex.setter
+    def selectedSlotIndex(self, slotId):
+        # type: (int) -> None
+        SComp.CreatePlayer(self.__id).ChangeSelectSlot(slotId)
+
     @property
     def client(self):
         pass
@@ -731,8 +770,19 @@ class Player(Entity):
         """returns the container of player's inventory"""
         return self.__container
 
+    @property
+    def mainHand(self):
+        # type: () -> ItemStack
+        """get the item of main hand"""
+        return self.container.getItem(self.selectedSlotIndex)
+    
+    @mainHand.setter
+    def mainHand(self, item):
+        # type: (ItemStack) -> None
+        self.container.setItem(self.selectedSlotIndex, item)
+    
     def applyKnockback(self, horizontalForce, verticalStrength):
-        # type: (Union[dict, VectorXZ], float) -> None
+        # type: (dict | VectorXZ, float) -> None
         """
         Applies impulse vector to the current velocity of the entity.
         """
@@ -753,6 +803,11 @@ class Player(Entity):
         # type: (str) -> None
         """Sends a message to the player."""
         SComp.CreateMsg(self.__id).NotifyOneMessage(self.__id, message)
+
+    def getSpawnPoint(self):
+        # type: () -> Vector3
+        """Gets the current spawn point of the player."""
+        return Vector3(SComp.CreatePlayer(self.__id).GetPlayerRespawnPos())
 
     def sendToast(self, message, title=""):
         # type: (str, str) -> None

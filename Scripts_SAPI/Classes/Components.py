@@ -79,7 +79,37 @@ class BlockComponent(Component):
         return self.__block
 
 
-class ComponentGenerater(object):
+class ItemComponent(Component):
+    """Base type for components associated with blocks."""
+    __componentId = ""
+    import ItemStack as i
+
+    def __init__(self, data):
+        Component.__init__(self, data)
+        self.__item = data['item']
+    
+    @property
+    def item(self):
+        # type: () -> i.ItemStack
+        """Item instance that this component pertains to."""
+        return self.__item
+
+
+class EntityComponentGenerater(object):
     """
-    组件加载器
+    实体组件加载器
     """
+    import EntityComponents as ec
+    import Entity as e
+
+    def __init__(self, entity, componentId):
+        # type: (e.Entity, str) -> None
+        self.__entity = entity
+        self.__componentId = componentId
+
+    def get(self):
+        # type: () -> ec.EntityComponent
+        if self.__componentId == 'health':
+            return self.ec.EntityHealthComponent({"entity": self.__entity})
+        elif self.__componentId == 'inventory':
+            return self.ec.EntityInventoryComponent({"entity": self.__entity})

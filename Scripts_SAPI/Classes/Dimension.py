@@ -2,12 +2,53 @@
 # from typing import Union, Dict
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
-import mod.client.extraClientApi as clientApi
 from ..Interfaces.Vector import *
 from ..Interfaces.EntityOptions import *
 from ..minecraft import *
+from ..Interfaces.WorldOptions import *
 
 SComp = serverApi.GetEngineCompFactory()
+
+class DimensionLocation(object):
+    """An exact coordinate within the world, including its dimension and location."""
+
+    def __init__(self, dimension, location):
+        # type: (Dimension, Vector3) -> None
+        self.__dimension = dimension
+        self.__location = location
+
+    @property
+    def dimension(self):
+        return self.__dimension
+    
+    @dimension.setter
+    def dimension(self, value):
+        # type: (Dimension) -> None
+        self.__dimension = value
+
+    @property
+    def x(self):
+        return self.__location.x
+
+    @x.setter
+    def x(self, value):
+        self.__location.x = value
+    
+    @property
+    def y(self):
+        return self.__location.y
+    
+    @y.setter
+    def y(self, value):
+        self.__location.y = value
+    
+    @property
+    def z(self):
+        return self.__location.z
+
+    @z.setter
+    def z(self, value):
+        self.__location.z = value
 
 
 class Dimension(object):
@@ -106,6 +147,11 @@ class Dimension(object):
                 players.append(self.e.Player(playerId))
         return players
 
+    def getPlayer(self, playerId):
+        # type: (int | str) -> e.Player
+        """get player by id"""
+        return self.e.Player(playerId)
+    
     def runCommand(self, commandString):
         # type: (str) -> c.CommandResult
         """
@@ -113,7 +159,7 @@ class Dimension(object):
 
         Note: this may return wrong message.
         """
-        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString)
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("execute in %s run %s" % (self.id, commandString))
         index = commandString.find("@")
         if index >= 0:
             selector = ""
@@ -158,9 +204,16 @@ class Dimension(object):
         global world
         if not world:
             world = getWorld()
-        itemDict = {
-            "newItemName": itemStack.typeId,
-            "count": itemStack.amount
-        }
+        itemDict = itemStack.getItemDict()
         location = Vector3(location) if type(location) == dict else location
         return Dimension.e.Entity(world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z)))
+
+    def createExplosion(self, location, radius, explosionOptions={}):
+        # type: (Vector3 | dict, float, dict | ExplosionOptions) -> bool
+        """Creates an explosion at the specified location."""
+        location = Vector3(location) if type(location) == dict else location
+        options = ExplosionOptions(explosionOptions) if type(explosionOptions) == dict else explosionOptions
+        return SComp.CreateExplosion(serverApi.GetLevelId()).CreateExplosion((location.x, location.y, location.z), radius, options.causesFire, options.breaksBlocks, options.source.id, options.source.id)
+    
+    def fillBlocks(self, volume, block, options):
+        pass

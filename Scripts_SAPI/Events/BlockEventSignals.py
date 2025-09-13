@@ -125,7 +125,7 @@ class PlayerBreakBlockBeforeEventSignal(Events):
     """
 
     def __init__(self):
-        BlockEvents.__init__(self)
+        Events.__init__(self)
         self.__eventName = "ServerPlayerTryDestroyBlockEvent"
 
     def subscribe(self, callback, options=None):

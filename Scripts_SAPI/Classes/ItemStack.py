@@ -125,7 +125,7 @@ def createItemStack(itemDict):
     if not itemDict:
         return None
     item = ItemStack(itemDict['newItemName'], itemDict['count'])
-    if 'userData' in itemDict:
+    if 'userData' in itemDict and itemDict['userData']:
         userData = itemDict['userData']
         if 'minecraft:keep_on_death' in userData:
             item.keepOnDeath = userData['minecraft:keep_on_death']['__value__'] == 1

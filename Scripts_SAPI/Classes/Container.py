@@ -258,7 +258,7 @@ class Container(object):
         otherContainer.setItem(otherSlot, item_a)
         self.setItem(slot, item_b)
 
-    def transfreItem(self, fromSlot, toContainer):
+    def transferItem(self, fromSlot, toContainer):
         # type: (int, Container) -> ItemStack
         """
         Moves an item from one slot to another container, 
