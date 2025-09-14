@@ -116,6 +116,7 @@ class EntityHitEntityAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "DamageEvent"
 
     def _check(self, obj, data, valueName):
@@ -179,6 +180,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "ActuallyHurtServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
@@ -196,6 +198,7 @@ class EntityLoadAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "AddEntityServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
@@ -215,6 +218,7 @@ class EntityRemoveAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "EntityRemoveEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
@@ -233,6 +237,7 @@ class EntitySpawnAfterEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "AddEntityServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
@@ -251,6 +256,7 @@ class DataDrivenEntityTriggerEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "EntityDefinitionsEventServerEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):
@@ -269,6 +275,7 @@ class EntityHurtBeforeEventSignal(EntityEvents):
     """
 
     def __init__(self):
+        EntityEvents.__init__(self)
         self.__eventName = "DamageEvent"
 
     def subscribe(self, callback, options=EntityEventOptions):

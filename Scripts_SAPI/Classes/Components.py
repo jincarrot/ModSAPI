@@ -29,7 +29,6 @@ class EntityComponent(Component):
     """
     __componentId = ""
     import Entity as en
-    import EntityComponents as ec
     
     def __init__(self, data):
         Component.__init__(self, data)
@@ -52,15 +51,14 @@ class EntityComponent(Component):
         return self.__entity
 
     def asHealthComponent(self): 
-        # type: () -> ec.EntityHealthComponent
-        return self
+        import EntityComponents as ec
+        return ec.EntityHealthComponent({"entity": self.__entity})
 
 
 class BlockComponent(Component):
     """Base type for components associated with blocks."""
     __componentId = ""
     import Block as bl
-    import BlockComponents as bc
 
     def __init__(self, data):
         Component.__init__(self, data)
@@ -80,8 +78,8 @@ class BlockComponent(Component):
         return self.__block
     
     def asInventoryComponent(self):
-        # type: () -> bc.BlockInventoryComponent
-        return self
+        import BlockComponents as bc
+        return bc.BlockInventoryComponent({"block": self.__block})
 
 
 class ItemComponent(Component):

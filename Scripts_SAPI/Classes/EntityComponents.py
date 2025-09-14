@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # from typing import Union, Dict
-from Scripts_SAPI.Classes.Components import EntityComponent
+from Components import *
 import mod.server.extraServerApi as serverApi
 from mod.common.minecraftEnum import EntityComponentType
 
