@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # from typing import Any, List, Union, Dict
-from Dimension import *
 from ..Interfaces.Vector import *
 from ..Classes.ItemStack import *
 
@@ -163,9 +162,10 @@ class Block(object):
     import Components as c
     import BlockComponents as bc
     import Container as con
+    import Dimension as d
 
     def __init__(self, data):
-        self.__dimension = data['dimension'] # type: Dimension
+        self.__dimension = data['dimension'] # type: Block.d.Dimension
         self.__location = data['location'] # type: Vector3
         self.__permutation = BlockPermutation(self)
 
@@ -179,7 +179,7 @@ class Block(object):
 
     @property
     def dimension(self):
-        # type: () -> Dimension
+        # type: () -> d.Dimension
         """
         Returns the dimension that the block is within.
         """

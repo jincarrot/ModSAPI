@@ -19,7 +19,7 @@ class ChatSendAfterEventSignal(Events):
         Adds a callback that will be called when new chat messages are sent.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.ChatSendAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.ChatSendAfterEvent)
 
 class ItemUseAfterEventSignal(Events):
     """
@@ -35,7 +35,7 @@ class ItemUseAfterEventSignal(Events):
         Adds a callback that will be called when an item is used.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.ItemUseAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.ItemUseAfterEvent)
 
 class ItemStartUseOnAfterEventSignal(Events):
     """
@@ -51,7 +51,7 @@ class ItemStartUseOnAfterEventSignal(Events):
         Adds a callback that will be called when an item is used.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.ItemStartUseOnAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.ItemStartUseOnAfterEvent)
 
 class ItemCompleteUseAfterEventSignal(Events):
     """
@@ -67,7 +67,7 @@ class ItemCompleteUseAfterEventSignal(Events):
         Adds a callback that will be called when a chargeable item completes charging.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.ItemCompleteUseAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.ItemCompleteUseAfterEvent)
 
 class PlayerDimensionChangeAfterEventSignal(Events):
     """
@@ -83,7 +83,7 @@ class PlayerDimensionChangeAfterEventSignal(Events):
         Subscribes the specified callback to a player dimension change after event.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerDimensionChangeAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerDimensionChangeAfterEvent)
 
 class PlayerInteractWithEntityAfterEventSignal(Events):
     """
@@ -100,7 +100,7 @@ class PlayerInteractWithEntityAfterEventSignal(Events):
         """
         import PlayerEvents as pe
         EventListener("PlayerInteractServerEvent", callback, None, None, None, pe.InteractEvent)
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerInteractWithEntityAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerInteractWithEntityAfterEvent)
 
 class PlayerInventoryItemChangeAfterEventSignal(Events):
     """
@@ -116,7 +116,7 @@ class PlayerInventoryItemChangeAfterEventSignal(Events):
         Adds a callback that will be called after a player's inventory item is changed.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerInventoryItemChangeAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerInventoryItemChangeAfterEvent)
 
 class PlayerSpawnAfterEventSignal(Events):
     """
@@ -133,7 +133,7 @@ class PlayerSpawnAfterEventSignal(Events):
         """
         import PlayerEvents as pe
         EventListener("playerSpawn", callback, None, None, None, pe.PlayerSpawnEvent, "SAPI", "SAPI_C")
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerSpawnAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerSpawnAfterEvent)
 
 class PlayerJoinAfterEventSignal(Events):
     """
@@ -149,7 +149,7 @@ class PlayerJoinAfterEventSignal(Events):
         Adds a callback that will be called when a player joins the world.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerJoinAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerJoinAfterEvent)
 
 class PlayerLeaveAfterEventSignal(Events):
     """
@@ -165,7 +165,7 @@ class PlayerLeaveAfterEventSignal(Events):
         Adds a callback that will be called when a player leaves the world.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerLeaveAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerLeaveAfterEvent)
 
 
 class ChatSendBeforeEventSignal(Events):
@@ -182,7 +182,7 @@ class ChatSendBeforeEventSignal(Events):
         Adds a callback that will be called before new chat messages are sent.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.ChatSendBeforeEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.ChatSendBeforeEvent)
 
 class PlayerInteractWithEntityBeforeEventSignal(Events):
     """
@@ -198,4 +198,4 @@ class PlayerInteractWithEntityBeforeEventSignal(Events):
         Adds a callback that will be called after a player interacts with an entity.
         """
         import PlayerEvents as pe
-        EventListener(self.__eventName, callback, None, None, None, pe.PlayerInteractWithEntityBeforeEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.PlayerInteractWithEntityBeforeEvent)

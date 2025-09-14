@@ -26,7 +26,7 @@ class ProjectileHitBlockAfterEventSignal(Events):
         Adds a callback that will be called when a projectile hits a block.
         """
         import ProjectileEvents as pe
-        EventListener(self.__eventName, callback, None, self._check, None, pe.ProjectileHitBlockAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, self._check, None, pe.ProjectileHitBlockAfterEvent)
 
 class ProjectileHitEntityAfterEventSignal(Events):
     """
@@ -49,4 +49,4 @@ class ProjectileHitEntityAfterEventSignal(Events):
         Adds a callback that will be called when a projectile hits an entity.
         """
         import ProjectileEvents as pe
-        EventListener(self.__eventName, callback, None, self._check, None, pe.ProjectileHitEntityAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, self._check, None, pe.ProjectileHitEntityAfterEvent)

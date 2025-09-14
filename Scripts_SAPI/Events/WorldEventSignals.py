@@ -19,7 +19,7 @@ class ExplosionAfterEventSignal(Events):
         Adds a callback that will be called when an explosion occurs.
         """
         import WorldEvents as be
-        EventListener(self.__eventName, callback, None, None, None, be.ExplosionAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, be.ExplosionAfterEvent)
 
 class ScriptEventCommandMessageAfterEventSignal(Events):
     """
@@ -39,7 +39,7 @@ class ScriptEventCommandMessageAfterEventSignal(Events):
         Registers a new ScriptEvent handler.
         """
         import BlockEvents as be
-        EventListener(self.__eventName, callback, options, self._check, None, be.ExplosionAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, None, be.ExplosionAfterEvent)
 
 
 class ExplosionBeforeEventSignal(Events):
@@ -57,4 +57,4 @@ class ExplosionBeforeEventSignal(Events):
         Adds a callback that will be called when an explosion occurs, as it impacts individual blocks.
         """
         import WorldEvents as be
-        EventListener(self.__eventName, callback, None, None, None, be.ExplosionBeforeEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, be.ExplosionBeforeEvent)

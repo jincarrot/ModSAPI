@@ -53,7 +53,7 @@ class BlockExplodeAfterEventSignal(BlockEvents):
         Adds a callback that will be called when an explosion occurs, as it impacts individual blocks.
         """
         import BlockEvents as be
-        EventListener(self.__eventName, callback, options, self._check, ('dimensionId', 'explodePos'), be.BlockExplodeAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, ('dimensionId', 'explodePos'), be.BlockExplodeAfterEvent)
 
 class PlayerBreakBlockAfterEventSignal(BlockEvents):
     """
@@ -70,7 +70,7 @@ class PlayerBreakBlockAfterEventSignal(BlockEvents):
         Adds a callback that will be called when a block is broken by a player.
         """
         import BlockEvents as be
-        EventListener(self.__eventName, callback, options, self._check, ('dimensionId', ('x', 'y', 'z')), be.PlayerBreakBlockAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, ('dimensionId', ('x', 'y', 'z')), be.PlayerBreakBlockAfterEvent)
 
     def unsubscribe(self, callback):
         Events.unsubscribe(self, callback)
@@ -116,7 +116,7 @@ class PlayerPlaceBlockAfterEventSignal(BlockEvents):
         Adds a callback that will be called when a block is placed by a player.
         """
         import BlockEvents as be
-        EventListener(self.__eventName, callback, options, self._check, ('dimensionId', ('x', 'y', 'z')), be.PlayerBreakBlockAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, ('dimensionId', ('x', 'y', 'z')), be.PlayerBreakBlockAfterEvent)
 
 
 class PlayerBreakBlockBeforeEventSignal(Events):
@@ -134,7 +134,7 @@ class PlayerBreakBlockBeforeEventSignal(Events):
         Adds a callback that will be called when a block is broken by a player.
         """
         import BlockEvents as be
-        EventListener(self.__eventName, callback, options, self._check, ('dimensionId', ('x', 'y', 'z')), be.PlayerPlaceBlockBeforeEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, ('dimensionId', ('x', 'y', 'z')), be.PlayerPlaceBlockBeforeEvent)
 
     def unsubscribe(self, callback):
         Events.unsubscribe(self, callback)

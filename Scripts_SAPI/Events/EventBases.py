@@ -11,6 +11,45 @@ SComp = serverApi.GetEngineCompFactory()
 eventListenData = {}
 
 
+class EventManager(object):
+
+    def __init__(self, eventName):
+        self.__name = eventName
+        self.callbacks = []
+
+    def listen(self, data):
+        for callback in self.callbacks:
+            callback(data)
+
+    def add(self, callback):
+        self.callbacks.append(callback)
+
+    def remove(self, callback):
+        self.callbacks.remove(callback)
+
+    @property
+    def empty(self):
+        # type: () -> bool
+        return True if len(self.callbacks) else False
+
+
+class LisenerManager(object):
+    """manage listener"""
+
+    def __init__(self):
+        self.__data = {}
+
+    def get(self, eventName):
+        # type: (str) -> EventManager
+        if eventName not in self.__data:
+            event = EventManager(eventName)
+            self.__data[eventName] = event
+        return self.__data[eventName]
+
+
+listenerManager = LisenerManager()
+
+
 class EventListener(object):
     """
     process event
@@ -28,7 +67,10 @@ class EventListener(object):
         if not world:
             world = getWorld()
         SComp.CreateItem(serverApi.GetLevelId()).GetUserDataInEvent(eventName)
-        world.ListenForEvent(namespace, systemName, eventName, self, self.listen)
+        event = listenerManager.get(wrapper.__name__)
+        if event.empty:
+            world.ListenForEvent(namespace, systemName, eventName, event, event.listen)
+        event.add(self.listen)
 
     @property
     def options(self):
@@ -41,7 +83,7 @@ class EventListener(object):
             self.__callback(value)
 
     def unListen(self):
-        world.UnListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), self.__eventName, self, self.listen)
+        listenerManager.get(self.__wrapper.__name__).remove(self.listen)
 
 
 class Events(object):

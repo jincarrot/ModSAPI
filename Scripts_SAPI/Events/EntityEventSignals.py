@@ -37,7 +37,7 @@ class EntityEvents(Events):
                 
     def subscribe(self, callback, options=None):
         # type: (types.FunctionType, dict) -> None
-        EventListener(self.eventName, callback, options, self._check, None)
+        self._events[id(callback)] = EventListener(self.eventName, callback, options, self._check, None)
 
     def unsubscribe(self, callback):
         # type: (types.FunctionType) -> None
@@ -77,7 +77,7 @@ class EffectAddAfterEventSignal(EntityEvents):
         # type: (types.FunctionType, dict) -> None
         """Adds a callback that will be called when an effect is added to an entity."""
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EffectAddAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EffectAddAfterEvent)
 
 
 class EntityHealthChangedAfterEventSignal(EntityEvents):
@@ -93,7 +93,7 @@ class EntityHealthChangedAfterEventSignal(EntityEvents):
         # type: (types.FunctionType, dict) -> None
         """Adds a callback that will be called when the health of an entity changes."""
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHealthChangedAfterEvent)
+        self._events[id(callback)] =  EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHealthChangedAfterEvent)
 
 
 class __EntityHitBlockAfterEventSignal(EntityEvents):
@@ -168,7 +168,7 @@ class EntityHitEntityAfterEventSignal(EntityEvents):
         Adds a callback that will be called when an entity hits another entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHitEntityAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHitEntityAfterEvent)
         # 实体与玩家分开
         EventListener("PlayerAttackEntityEvent", callback, options, self._checkPlayer, "entityId", ee.EntityHitEntityAfterEvent)
 
@@ -187,7 +187,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
         Adds a callback that will be called when an effect is added to an entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtAfterEvent)
 
 
 class EntityLoadAfterEventSignal(EntityEvents):
@@ -204,7 +204,7 @@ class EntityLoadAfterEventSignal(EntityEvents):
         Adds a callback that will be called when an effect is added to an entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityLoadAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityLoadAfterEvent)
 
 
 class EntityRemoveAfterEventSignal(EntityEvents):
@@ -224,7 +224,7 @@ class EntityRemoveAfterEventSignal(EntityEvents):
         """
 
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityRemoveAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "id", ee.EntityRemoveAfterEvent)
 
 
 class EntitySpawnAfterEventSignal(EntityEvents):
@@ -241,7 +241,7 @@ class EntitySpawnAfterEventSignal(EntityEvents):
         Adds a callback that will be called when an effect is added to an entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "id", ee.EntitySpawnAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "id", ee.EntitySpawnAfterEvent)
 
 
 class DataDrivenEntityTriggerEventSignal(EntityEvents):
@@ -259,7 +259,7 @@ class DataDrivenEntityTriggerEventSignal(EntityEvents):
         Adds a callback that will be called after a data driven entity event is triggered.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.DataDrivenEntityTriggerAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", ee.DataDrivenEntityTriggerAfterEvent)
 
 
 
@@ -277,4 +277,4 @@ class EntityHurtBeforeEventSignal(EntityEvents):
         Adds a callback that will be called when an effect is added to an entity.
         """
         import EntityEvents as ee
-        EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtBeforeEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", ee.EntityHurtBeforeEvent)
