@@ -60,6 +60,7 @@ class BlockComponent(Component):
     """Base type for components associated with blocks."""
     __componentId = ""
     import Block as bl
+    import BlockComponents as bc
 
     def __init__(self, data):
         Component.__init__(self, data)
@@ -77,6 +78,10 @@ class BlockComponent(Component):
         # type: () -> bl.Block
         """Block instance that this component pertains to."""
         return self.__block
+    
+    def asInventoryComponent(self):
+        # type: () -> bc.BlockInventoryComponent
+        return self
 
 
 class ItemComponent(Component):

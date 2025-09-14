@@ -120,6 +120,11 @@ class ItemStack(object):
         """
         self.__lore = loreList
 
+    def getComponent(self, componentId):
+        # type: (str) -> None
+        pass
+
+
 def createItemStack(itemDict):
     # type: (dict) -> ItemStack | None
     if not itemDict:

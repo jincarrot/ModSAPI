@@ -48,7 +48,7 @@ class Container(object):
 
     @property
     def size(self):
-        # type: () -> int
+        # type: () -> int | None
         """
         The number of slots in this container. 
         For example, a standard single-block chest has a size of 27. 

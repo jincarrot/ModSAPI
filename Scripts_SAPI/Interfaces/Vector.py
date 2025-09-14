@@ -51,6 +51,9 @@ class Vector3(object):
         # type: () -> dict
         """获取字典数据"""
         return {"x": self.x, "y": self.y, "z": self.z}
+    
+    def getTuple(self):
+        return (self.x, self.y, self.z)
 
 
 class Vector2(object):

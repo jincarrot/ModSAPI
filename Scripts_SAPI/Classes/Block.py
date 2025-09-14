@@ -84,7 +84,7 @@ class BlockPermutation(object):
         return ItemStack(self.__blockName, amount)
     
     def getState(self, stateName):
-        # type: (str) -> Any
+        # type: (str) -> 0
         """
         Gets a state for the permutation.
         """
@@ -160,6 +160,9 @@ class Block(object):
     Represents a block in a dimension. 
     A block represents a unique X, Y, and Z within a dimension and get/sets the state of the block at that location.
     """
+    import Components as c
+    import BlockComponents as bc
+    import Container as con
 
     def __init__(self, data):
         self.__dimension = data['dimension'] # type: Dimension
@@ -331,3 +334,16 @@ class Block(object):
         """
         return tag in self.getTags()
     
+    def hasComponent(self, componentId):
+        # type: (str) -> bool
+        """Returns true if the specified component is present on this block."""
+        if componentId in ['netease:block_container', "minecraft:inventory", "inventory"]:
+            container = self.con.Container(self.__location.getTuple(), dimId=self.__dimension.dimId)
+            return container.isValid
+
+    def getComponent(self, componentId):
+        # type: (str) -> c.BlockComponent
+        """Gets a component (that represents additional capabilities) for an entity."""
+        if self.hasComponent(componentId):
+            if componentId in ['netease:block_container', "minecraft:inventory", "inventory"]:
+                return self.bc.BlockInventoryComponent({"block": self})

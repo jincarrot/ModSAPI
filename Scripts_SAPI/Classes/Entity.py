@@ -26,6 +26,7 @@ class Entity(object):
     Represents the state of an entity (a mob, the player, or other moving objects like mine carts) in the world.
     """
     import Dimension as d
+    import Block as b
 
     def __init__(self, entityId):
         self.__id = entityId
@@ -324,7 +325,7 @@ class Entity(object):
                 else:
                     face = Direction.South
             data = {
-                "block": Block({"location": Vector3({"x": block['pos'][0], "y": block['pos'][1], "z": block['pos'][2]}), "dimension": self.dimension}),
+                "block": self.b.Block({"location": Vector3({"x": block['pos'][0], "y": block['pos'][1], "z": block['pos'][2]}), "dimension": self.dimension}),
                 "face": face,
                 "faceLocation": Vector3({"x": block['hitPos'][0], "y": block['hitPos'][1], "z": block['hitPos'][2]})
             }
