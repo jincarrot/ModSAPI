@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
-from ItemStack import *
 
 SComp = serverApi.GetEngineCompFactory()
 
 
 class Container(object):
     """Represents a container that can hold sets of items. Used with entities such as Players, Chest Minecarts, Llamas, and more."""
-
+    import ItemStack as i
     def __init__(self, location=None, entityId=None, dimId=None):
         # type: (tuple, str, int) -> None
         self.__location = location
@@ -85,7 +84,7 @@ class Container(object):
             return False
 
     def addItem(self, itemStack):
-        # type: (ItemStack) -> ItemStack | None
+        # type: (i.ItemStack) -> i.ItemStack | None
         """
         Adds an item to the container. 
         The item is placed in the first available slot(s) and can be stacked with existing items of the same type. 
@@ -172,7 +171,7 @@ class Container(object):
             SComp.CreateBlockInfo(serverApi.GetLevelId()).SetBlockEntityData(self.__dimId, self.__location, nbt)
 
     def getItem(self, slot):
-        # type: (int) -> ItemStack | None
+        # type: (int) -> i.ItemStack | None
         """
         Gets an @minecraft/server.ItemStack of the item at the specified slot. 
         If the slot is empty, returns undefined. 
@@ -186,19 +185,19 @@ class Container(object):
             itemDict = comp.GetPlayerItem(0, slot, True)
             if not itemDict:
                 return None
-            item = createItemStack(itemDict)
+            item = self.i.createItemStack(itemDict)
             return item
         elif self.__entityId:
             itemDict = comp.GetEntityItem(0, slot, True)
             if not itemDict:
                 return None
-            item = createItemStack(itemDict)
+            item = self.i.createItemStack(itemDict)
             return item
         elif self.__location:
             itemDict = comp.GetContainerItem(self.__location, slot, self.__dimId, True)
             if not itemDict:
                 return None
-            item = createItemStack(itemDict)
+            item = self.i.createItemStack(itemDict)
             return item
         return None
 
@@ -213,14 +212,14 @@ class Container(object):
         toContainer.setItem(toSlot, item)
 
     def setItem(self, slot, itemStack):
-        # type: (int, ItemStack) -> None
+        # type: (int, i.ItemStack) -> None
         """
         Sets an item stack within a particular slot.
         """
         if not self.isValid:
             return None
         if not itemStack:
-            return None
+            itemStack = self.i.ItemStack("minecraft:air", 0)
         itemDict = itemStack.getItemDict()
         if self.__playerId:
             SComp.CreateItem(self.__entityId).SpawnItemToPlayerInv(itemDict, self.__playerId, slot)
@@ -259,7 +258,7 @@ class Container(object):
         self.setItem(slot, item_b)
 
     def transferItem(self, fromSlot, toContainer):
-        # type: (int, Container) -> ItemStack
+        # type: (int, Container) -> i.ItemStack
         """
         Moves an item from one slot to another container, 
         or to the first available slot in the same container.

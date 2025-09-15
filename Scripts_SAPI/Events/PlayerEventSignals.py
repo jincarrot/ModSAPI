@@ -11,6 +11,7 @@ class ChatSendAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ServerChatEvent"
 
     def subscribe(self, callback):
@@ -27,6 +28,7 @@ class ItemUseAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ItemUseAfterServerEvent"
 
     def subscribe(self, callback):
@@ -43,6 +45,7 @@ class ItemStartUseOnAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ItemUseOnAfterServerEvent"
 
     def subscribe(self, callback):
@@ -59,6 +62,7 @@ class ItemCompleteUseAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ItemReleaseUsingServerEvent"
 
     def subscribe(self, callback):
@@ -75,6 +79,7 @@ class PlayerDimensionChangeAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "DimensionChangeServerEvent"
 
     def subscribe(self, callback):
@@ -91,6 +96,7 @@ class PlayerInteractWithEntityAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "PlayerDoInteractServerEvent"
 
     def subscribe(self, callback):
@@ -108,6 +114,7 @@ class PlayerInventoryItemChangeAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "InventoryItemChangedServerEvent"
 
     def subscribe(self, callback):
@@ -124,6 +131,7 @@ class PlayerSpawnAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "PlayerRespawnFinishServerEvent"
 
     def subscribe(self, callback):
@@ -141,6 +149,7 @@ class PlayerJoinAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "PlayerJoinMessageEvent"
 
     def subscribe(self, callback):
@@ -157,6 +166,7 @@ class PlayerLeaveAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "PlayerLeftMessageServerEvent"
 
     def subscribe(self, callback):
@@ -174,6 +184,7 @@ class ChatSendBeforeEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ServerChatEvent"
 
     def subscribe(self, callback):
@@ -190,6 +201,7 @@ class PlayerInteractWithEntityBeforeEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "PlayerInteractServerEvent"
 
     def subscribe(self, callback):

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
-import mod.client.extraClientApi as clientApi
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -29,10 +28,12 @@ class ItemStack(object):
     Defines a collection of items.
     """
 
+    import ItemComponents as ic
+    
     def __init__(self, itemType, amount):
         # type: (str, int) -> None
         self.__typeId = itemType
-        self.__maxAmount = SComp.CreateItem(self.__typeId).GetItemBasicInfo(self.__typeId)['maxStackSize']
+        self.__maxAmount = (SComp.CreateItem(self.__typeId).GetItemBasicInfo(self.__typeId) or {}).get('maxStackSize', 1)
         """The maximum stack size. This value varies depending on the type of item. For example, torches have a maximum stack size of 64, while eggs have a maximum stack size of 16."""
         self.amount = amount
         """Number of the items in the stack. Valid values range between 1-255. The provided value will be clamped to the item's maximum stack size."""
@@ -44,6 +45,8 @@ class ItemStack(object):
         self.nameTag = None
         """Given name of this stack of items. The name tag is displayed when hovering over the item. Setting the name tag to an empty string or undefined will remove the name tag."""
         self.__lore = []
+        self.__components = {}
+        self.__generateComponents()
 
     def __str__(self):
         data = {
@@ -51,6 +54,14 @@ class ItemStack(object):
             "amount": self.amount
         }
         return "<ItemStack> %s" % data
+
+    def __generateComponents(self):
+        # generate components
+        itemData = SComp.CreateItem(serverApi.GetLevelId()).GetItemBasicInfo(self.__typeId) or {}
+        if itemData.get("enchant_slot_type", 0):
+            self.__components["minecraft:enchantable"] = self.ic.ItemEnchantableComponent({"slots": itemData.get("enchant_slot_type")})
+        if itemData.get("maxDurability", 0):
+            self.__components['minecraft:durability'] = self.ic.ItemDurabilityComponent({"maxDurability": itemData['maxDurability']})
 
     @property
     def typeId(self):
@@ -102,7 +113,19 @@ class ItemStack(object):
         if userData:
             data['userData'] = userData
         if self.__lore:
-            data['customTips'] = "\n".join(self.__lore)
+            baseInfo = "%name%%category%%enchanting%%attack_damage%\n"
+            data['customTips'] = baseInfo + "\n".join(self.__lore)
+        for componentId in self.__components:
+            if componentId == 'minecraft:enchantable':
+                enchantmentList = self.__components['minecraft:enchantable'].getEnchantments()
+                enchantData = []
+                customEnchantData = []
+                for enchantment in enchantmentList:
+                    enchantData.append((enchantment._id, enchantment.level)) if self._id >= 0 else customEnchantData.append((enchantment.typeId, enchantment.level))
+                data['enchantData'] = enchantData
+                data['modEnchantData'] = customEnchantData
+            elif componentId == 'minecraft:durability':
+                data['durability'] = self.__components['minecraft:durability'].remain
         return data
     
     def getLore(self):
@@ -120,9 +143,16 @@ class ItemStack(object):
         """
         self.__lore = loreList
 
+    def hasComponent(self, componentId):
+        # type: (str) -> bool
+        """Returns true if the specified component is present on this item stack."""
+        return componentId in self.__components
+
     def getComponent(self, componentId):
-        # type: (str) -> None
-        pass
+        # type: (str) -> None | ic.ItemComponent
+        """Gets a component (that represents additional capabilities) for an item stack."""
+        if self.hasComponent(componentId):
+            return self.__components[componentId]
 
 
 def createItemStack(itemDict):
@@ -141,4 +171,16 @@ def createItemStack(itemDict):
             item.nameTag = userData['display']['__value__']
     if 'customTips' in itemDict:
         item.setLore(itemDict['customTips'].split("\n"))
+    if item.hasComponent("minecraft:enchantable"):
+        enchantData = itemDict['enchantData']
+        customEnchantData = itemDict['modEnchantData']
+        enchantList = []
+        for enchant in enchantData:
+            enchantList.append({"type": EnchantTypes[enchant[0]], "level": enchant[1]})
+        for enchant in customEnchantData:
+            enchantList.append({"type": enchant[0], 'level': enchant[1]})
+        item.getComponent("minecraft:enchantable").asEnchantableComponent().addEnchantments(enchantList)
+    if item.hasComponent("minecraft:durability"):
+        remain = itemDict['durability']
+        item.getComponent("minecraft:durability").asDurabilityComponent().remain = remain
     return item

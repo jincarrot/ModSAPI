@@ -6,6 +6,38 @@ from mod.common.minecraftEnum import EntityComponentType
 
 SComp = serverApi.GetEngineCompFactory()
 
+class EntityComponent(Component):
+    """
+    Base class for downstream entity components.
+    """
+    __componentId = ""
+    import Entity as en
+    
+    def __init__(self, data):
+        Component.__init__(self, data)
+        self.__entity = data['entity']
+    
+    def __str__(self):
+        data = {
+            "typeId": self.__componentId,
+            "entity": str(self.__entity)
+        }
+        return "<EntityComponent> %s" % data
+    
+    @property
+    def entity(self):
+        # type: () -> en.Entity
+        """
+        The entity that owns this component. 
+        The entity will be undefined if it has been removed.
+        """
+        return self.__entity
+
+    def asHealthComponent(self): 
+        # type: () -> EntityHealthComponent
+        return self
+
+
 class EntityAddRiderComponent(EntityComponent):
     """
     When added, this component makes the entity spawn with a rider of the specified entityType.

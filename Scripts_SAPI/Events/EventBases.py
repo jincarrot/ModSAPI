@@ -30,7 +30,7 @@ class EventManager(object):
     @property
     def empty(self):
         # type: () -> bool
-        return True if len(self.callbacks) else False
+        return True if not len(self.callbacks) else False
 
 
 class LisenerManager(object):

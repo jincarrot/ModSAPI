@@ -159,7 +159,6 @@ class Block(object):
     Represents a block in a dimension. 
     A block represents a unique X, Y, and Z within a dimension and get/sets the state of the block at that location.
     """
-    import Components as c
     import BlockComponents as bc
     import Container as con
     import Dimension as d
@@ -342,7 +341,7 @@ class Block(object):
             return container.isValid
 
     def getComponent(self, componentId):
-        # type: (str) -> c.BlockComponent
+        # type: (str) -> bc.BlockComponent
         """Gets a component (that represents additional capabilities) for an entity."""
         if self.hasComponent(componentId):
             if componentId in ['netease:block_container', "minecraft:inventory", "inventory"]:

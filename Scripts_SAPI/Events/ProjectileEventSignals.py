@@ -11,6 +11,7 @@ class ProjectileHitBlockAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ProjectileDoHitEffectEvent"
 
     def _check(self, __obj, data, __valueName):
@@ -34,6 +35,7 @@ class ProjectileHitEntityAfterEventSignal(Events):
     """
 
     def __init__(self):
+        Events.__init__(self)
         self.__eventName = "ProjectileDoHitEffectEvent"
 
     def _check(self, __obj, data, __valueName):
