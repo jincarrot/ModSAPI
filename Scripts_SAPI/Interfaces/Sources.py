@@ -95,4 +95,4 @@ class EntityHitInformation(object):
     """
 
     def __init__(self, data):
-        self.entity = Entity(data['entity']) # type: Entity
+        self.entity = createEntity(data['entity']) # type: Entity

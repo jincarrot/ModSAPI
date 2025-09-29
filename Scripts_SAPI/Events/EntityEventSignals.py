@@ -145,6 +145,7 @@ class EntityHitEntityAfterEventSignal(EntityEvents):
     def _checkPlayer(self, obj, data, valueName):
         # type: (EventListener, dict, str) -> bool
         options = obj.options
+        print(data)
         if SComp.CreateEngineType(data['playerId']).GetEngineTypeStr() != 'minecraft:player':
             return False
         if type(options) != dict:

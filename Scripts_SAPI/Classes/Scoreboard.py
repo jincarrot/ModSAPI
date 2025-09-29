@@ -39,7 +39,7 @@ class ScoreboardIdentity(object):
     
     def getEntity(self):
         # type: () -> Entity
-        return Entity(self.__entityId)
+        return createEntity(self.__entityId)
 
 
 class ScoreboardObjective(object):

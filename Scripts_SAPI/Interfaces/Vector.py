@@ -47,6 +47,17 @@ class Vector3(object):
         }
         return Vector3(data)
     
+    def __add__(self, data):
+        # type: (Vector3 | dict | tuple) -> Vector3
+        if type(data) != Vector3:
+            data = Vector3(data)
+        data = {
+            "x": self.x + data.x,
+            "y": self.y + data.y,
+            "z": self.z + data.z
+        }
+        return Vector3(data)
+    
     def getData(self):
         # type: () -> dict
         """获取字典数据"""

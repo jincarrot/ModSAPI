@@ -184,7 +184,7 @@ class PlayerDimensionChangeAfterEvent(object):
         self.__fromDimension = Dimension(data['fromDimensionId'])
         self.__fromLocation = Vector3((data['fromX'], data['fromY'], data['fromZ']))
         self.__toDimension = Dimension(data['toDimensionId'])
-        y = SComp.CreateBlockInfo(serverApi.GetLevelId()).GetTopBlockHeight((data['toX'], data['toZ'])) or y
+        y = SComp.CreateBlockInfo(serverApi.GetLevelId()).GetTopBlockHeight((data['toX'], data['toZ'])) or self.__fromLocation.y
         self.__toLocation = Vector3((data['toX'], y, data['toZ']))
         self.__player = Player(data['playerId'])
 
@@ -234,7 +234,7 @@ class PlayerInteractWithEntityAfterEvent(object):
             del eventData['playerInteractWithEntity'][(data['playerId'], data['interactEntityId'])]
         self.__itemStack = createItemStack(data['itemDict'])
         self.__player = Player(data['playerId'])
-        self.__target = Entity(data['interactEntityId'])
+        self.__target = createEntity(data['interactEntityId'])
 
     def __str__(self):
         data = {
@@ -490,7 +490,7 @@ class PlayerInteractWithEntityBeforeEvent(object):
         self.__data = data
         self.__itemStack = createItemStack(data['itemDict'])
         self.__player = Player(data['playerId'])
-        self.__target = Entity(data['interactEntityId'])
+        self.__target = createEntity(data['interactEntityId'])
         self.__cancel = False
 
     def __str__(self):

@@ -67,7 +67,7 @@ class EventListener(object):
         if not world:
             world = getWorld()
         SComp.CreateItem(serverApi.GetLevelId()).GetUserDataInEvent(eventName)
-        event = listenerManager.get(wrapper.__name__)
+        event = listenerManager.get(eventName)
         if event.empty:
             world.ListenForEvent(namespace, systemName, eventName, event, event.listen)
         event.add(self.listen)

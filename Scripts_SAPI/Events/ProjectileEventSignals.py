@@ -40,7 +40,7 @@ class ProjectileHitEntityAfterEventSignal(Events):
 
     def _check(self, __obj, data, __valueName):
         # type: (EventListener, dict, str) -> bool
-        if data['hitTargetType'] == "Entity":
+        if data['hitTargetType'] == "ENTITY":
             return True
         else:
             return False

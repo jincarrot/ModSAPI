@@ -6,8 +6,8 @@ class BlockEvent(object):
     """Contains information regarding an event that impacts a specific block."""
 
     def __init__(self, data):
-        self.__block = None
-        self.__dimension = None
+        self.__block = data.get("block", None)
+        self.__dimension = data.get("dimension", None)
     
     @property
     def block(self):
@@ -28,7 +28,7 @@ class BlockExplodeAfterEvent(BlockEvent):
     """
 
     def __init__(self, data):
-        self.__source = Entity(data['sourceId']) if data['sourceId'] else None
+        self.__source = createEntity(data['sourceId']) if data['sourceId'] else None
         self.__explodedBlockPermutation = BlockPermutation(Block({"dimension": Dimension(data['dimensionId']), "location": Vector3(data['explodePos'])}))
 
     def __str__(self):
@@ -60,6 +60,7 @@ class PlayerBreakBlockAfterEvent(BlockEvent):
         self.__dimension = Dimension(data['dimensionId'])
         self.__block = Block({"dimension": self.__dimension, "location": Vector3((data['x'], data['y'], data['z']))})
         self.__player = Player(data['playerId'])
+        BlockEvent.__init__(self, {"block": self.__block, "dimension": self.__dimension})
 
     def __str__(self):
         data = {
@@ -112,7 +113,6 @@ class PlayerBreakBlockBeforeEvent(BlockEvent):
         self.__dimension = Dimension(data['dimensionId'])
         self.__block = Block({"dimension": self.__dimension, "location": Vector3((data['x'], data['y'], data['z']))})
         self.__player = Player(data['playerId'])
-        self.__itemStack = createItemStack()
         self.__cancel = False
 
     def __str__(self):

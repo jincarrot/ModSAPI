@@ -22,6 +22,7 @@ class SAPI_C(ClientSystem):
         self.ListenForEvent("SAPI", "world", "sendToast", self, self.sendToast)
         self.ListenForEvent("SAPI", "world", "showActionForm", self, self.showActionForm)
         self.ListenForEvent("SAPI", "world", "showModalForm", self, self.showModalForm)
+        self.ListenForEvent("SAPI", "world", "setMusicState", self, self.setMusicState)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.playerSpawn)
 
@@ -52,6 +53,9 @@ class SAPI_C(ClientSystem):
 
     def playerSpawn(self, data):
         self.NotifyToServer("playerSpawn", data)
+    
+    def setMusicState(self, data):
+        CComp.CreateCustomAudio(clientApi.GetLevelId()).DisableOriginMusic(not data['state'])
 
 
 def ClientMethod(func):

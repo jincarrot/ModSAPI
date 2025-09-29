@@ -8,41 +8,41 @@ class EntityDamageCause(object):
     """
     Describes the source of damage from an Entity.
     """
-    anvil = 'anvil',
-    blockExplosion = 'blockExplosion',
-    charging = 'charging',
-    contact = 'contact',
-    drowning = 'drowning',
-    entityAttack = 'entityAttack',
-    entityExplosion = 'entityExplosion',
-    fall = 'fall',
-    fallingBlock = 'fallingBlock',
-    fire = 'fire',
-    fireTick = 'fireTick',
-    fireworks = 'fireworks',
-    flyIntoWall = 'flyIntoWall',
-    freezing = 'freezing',
-    lava = 'lava',
-    lightning = 'lightning',
-    maceSmash = 'maceSmash',
-    magic = 'magic',
-    magma = 'magma',
-    none = 'none',
-    override = 'override',
-    piston = 'piston',
-    projectile = 'projectile',
-    ramAttack = 'ramAttack',
-    selfDestruct = 'selfDestruct',
-    sonicBoom = 'sonicBoom',
-    soulCampfire = 'soulCampfire',
-    stalactite = 'stalactite',
-    stalagmite = 'stalagmite',
-    starve = 'starve',
-    suffocation = 'suffocation',
-    suicide = 'suicide',
-    temperature = 'temperature',
-    thorns = 'thorns',
-    void = 'void',
+    anvil = 'anvil'
+    blockExplosion = 'block_explosion'
+    charging = 'charging'
+    contact = 'contact'
+    drowning = 'drowning'
+    entityAttack = 'entity_attack'
+    entityExplosion = 'entity_explosion'
+    fall = 'fall'
+    fallingBlock = 'falling_block'
+    fire = 'fire'
+    fireTick = 'fire_tick'
+    fireworks = 'fireworks'
+    flyIntoWall = 'fly_into_wall'
+    freezing = 'freezing'
+    lava = 'lava'
+    lightning = 'lightning'
+    maceSmash = 'mace_smash'
+    magic = 'magic'
+    magma = 'magma'
+    none = 'none'
+    override = 'override'
+    piston = 'piston'
+    projectile = 'projectile'
+    ramAttack = 'ram_attack'
+    selfDestruct = 'self_destruct'
+    sonicBoom = 'sonic_boom'
+    soulCampfire = 'soul_campfire'
+    stalactite = 'stalactite'
+    stalagmite = 'stalagmite'
+    starve = 'starve'
+    suffocation = 'suffocation'
+    suicide = 'suicide'
+    temperature = 'temperature'
+    thorns = 'thorns'
+    void = 'void'
     wither = 'wither'
 
 
@@ -55,8 +55,8 @@ class ItemLockMode(object):
     """
     Describes how an an item can be moved within a container.
     """
-    none = "none",
-    inventory = "inventory",
+    none = "none"
+    inventory = "inventory"
     slot = "slot"
 
 

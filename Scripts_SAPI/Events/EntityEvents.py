@@ -16,11 +16,11 @@ class EntityDieAfterEvent(object):
             damagingProjectile = damagingEntity
             damagingEntity = SComp.CreateActorOwner(damagingProjectile).GetEntityOwner()
         if damagingEntity:
-            temp['damagingEntity'] = Entity(damagingEntity)
+            temp['damagingEntity'] = createEntity(damagingEntity)
         if damagingProjectile:
-            temp['damagingProjectile'] = Entity(damagingProjectile)
+            temp['damagingProjectile'] = createEntity(damagingProjectile)
         self.__damageSource = EntityDamageSource(temp)
-        self.__deadEntity = Entity(data['id'])
+        self.__deadEntity = createEntity(data['id'])
 
     def __str__(self):
         data = {
@@ -56,12 +56,12 @@ class EntityHurtAfterEvent(object):
         damagingEntity = data['srcId'] if data['srcId'] else None
         damagingProjectile = data['projectileId']
         if damagingEntity:
-            temp['damagingEntity'] = Entity(damagingEntity)
+            temp['damagingEntity'] = createEntity(damagingEntity)
         if damagingProjectile:
-            temp['damagingProjectile'] = Entity(damagingProjectile)
+            temp['damagingProjectile'] = createEntity(damagingProjectile)
         self.__damage = data['damage']
         self.__damageSource = EntityDamageSource(temp)
-        self.__hurtEntity = Entity(data['entityId'])
+        self.__hurtEntity = createEntity(data['entityId'])
 
     def __str__(self):
         data = {
@@ -87,7 +87,7 @@ class EntityHurtAfterEvent(object):
 
     @property
     def damageSource(self):
-        # type: () -> EntityDamageCause
+        # type: () -> EntityDamageSource
         """
         Source information on the entity that may have applied this damage.
         """
@@ -107,8 +107,8 @@ class EntityHitEntityAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__damagingEntity = Entity(data['srcId'] if 'cause' in data else data['playerId'])
-        self.__hitEntity = Entity(data['entityId'] if 'cause' in data else data['victimId'])
+        self.__damagingEntity = createEntity(data['srcId'] if 'cause' in data else data['playerId'])
+        self.__hitEntity = createEntity(data['entityId'] if 'cause' in data else data['victimId'])
 
     def __str__(self):
         data = {
@@ -141,7 +141,7 @@ class EntitySpawnAfterEvent(object):
 
     def __init__(self, data):
         self.__cause = None
-        self.__entity = Entity(data['id'])
+        self.__entity = createEntity(data['id'])
         if SComp.CreateEntityDefinitions(self.__entity.id).IsNaturallySpawned():
             self.__cause = 'Spawned'
     
@@ -164,7 +164,7 @@ class EntityLoadAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__entity = Entity(data['id'])
+        self.__entity = createEntity(data['id'])
     
     @property
     def entity(self):
@@ -180,7 +180,7 @@ class EffectAddAfterEvent(object):
 
     def __init__(self, data):
         self.__effect = Effect(data['effectName'], data['effectDuration'], data['effectAmplifier'])
-        self.__entity = Entity(data['entityId'])
+        self.__entity = createEntity(data['entityId'])
 
     def __str__(self):
         data = {
@@ -214,7 +214,7 @@ class EntityHealthChangedAfterEvent(object):
 
     def __init__(self, data):
         self.__newValue = data['to']
-        self.__entity = Entity(data['entityId'])
+        self.__entity = createEntity(data['entityId'])
         self.__oldValue = data['from']
 
     def __str__(self):
@@ -254,7 +254,7 @@ class EntityRemoveAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__removedEntity = Entity(data['id'])
+        self.__removedEntity = createEntity(data['id'])
 
     def __str__(self):
         data = {
@@ -277,7 +277,7 @@ class DataDrivenEntityTriggerAfterEvent(object):
 
     def __init__(self, data):
         self.__eventId = data['eventName']
-        self.__entity = Entity(data['entityId'])
+        self.__entity = createEntity(data['entityId'])
 
     def __str__(self):
         data = {
@@ -315,12 +315,12 @@ class EntityHurtBeforeEvent(object):
         damagingEntity = data['srcId'] if data['srcId'] else None
         damagingProjectile = data['projectileId']
         if damagingEntity:
-            temp['damagingEntity'] = Entity(damagingEntity)
+            temp['damagingEntity'] = createEntity(damagingEntity)
         if damagingProjectile:
-            temp['damagingProjectile'] = Entity(damagingProjectile)
+            temp['damagingProjectile'] = createEntity(damagingProjectile)
         self.__damage = data['damage']
         self.__damageSource = EntityDamageSource(temp)
-        self.__hurtEntity = Entity(data['entityId'])
+        self.__hurtEntity = createEntity(data['entityId'])
 
     def __str__(self):
         data = {

@@ -52,7 +52,7 @@ class Promise(Thenable):
         except Exception as e:
             reject(e)
 
-    def __resolve(promise, x, re, rej):
+    def __resolve(self, promise, x, re, rej):
         if promise == x:
             return rej(TypeError('Promise and x refer to the same object'))
 

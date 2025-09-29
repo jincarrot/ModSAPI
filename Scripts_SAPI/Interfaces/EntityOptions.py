@@ -230,6 +230,7 @@ class EntityApplyDamageOptions(object):
         # type: (Dict[str, Union[str, Entity]]) -> None
         self.cause = data['cause'] if 'cause' in data else 'none'
         """Underlying cause of the damage."""
+        self.cause = getattr(EntityDamageCause, self.cause)
         self.damagingEntity = data['damagingEntity'] if 'damagingEntity' in data else None
         """Optional entity that caused the damage."""
 
