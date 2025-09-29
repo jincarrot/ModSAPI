@@ -133,7 +133,7 @@ class ItemDurabilityComponent(ItemComponent):
         # type: (dict) -> None
         ItemComponent.__init__(self, data)
         self.__maxDurability = data.get('maxDurability', 0)
-        self.__currentDurability = data.get('remain', self.__currentDurability)
+        self.__currentDurability = data.get('remain', self.__maxDurability)
         self.__damage = self.__maxDurability - self.__currentDurability
 
     @property

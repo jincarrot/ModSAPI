@@ -140,7 +140,7 @@ class World(ServerSystem):
         Returns an entity based on the provided id.
         """
         if SComp.CreateGame(serverApi.GetLevelId()).IsEntityAlive(id):
-            return Entity(id)
+            return createEntity(id)
         else:
             return None
         
@@ -150,9 +150,44 @@ class World(ServerSystem):
         Returns the time of day. (In ticks, between 0 and 24000)
         """
         return SComp.CreateTime(serverApi.GetLevelId()).GetTime() % 24000
+    
+    @staticmethod
+    def getAbsoluteTime():
+        """
+        Returns the absolute time since the start of the world.
+        """
+        return SComp.CreateTime(serverApi.GetLevelId()).GetTime()
+    
+    @staticmethod
+    def setTimeOfDay(timeOfDay):
+        # type: (int) -> None
+        """
+        Sets the time of day.
+        """
+        SComp.CreateTime(serverApi.GetLevelId()).SetTimeOfDay(timeOfDay)
 
-    def listen(self, eventName, callback):
-        # type: (str, types.FunctionType) -> None
+    @staticmethod
+    def setAbsoluteTime(absoluteTime):
+        # type: (int) -> None
+        """Sets the world time."""
+        SComp.CreateTime(serverApi.GetLevelId()).SetTime(absoluteTime)
+
+    def __stopMusic(self):
+        """Stops any music tracks from playing."""
+        self.BroadcastToAllClient("setMusicState", {"state": False})
+
+    def sendMessage(self, message):
+        # type: (str) -> None
+        """Sends a message to all players."""
+        SComp.CreateMsg(serverApi.GetLevelId()).SendMsg("服务器", message)
+
+    @staticmethod
+    def getLootTableManager():
+        """Returns a manager capable of generating loot from an assortment of sources."""
+        return
+    
+    def listen(self, eventName, callback, namesapce=serverApi.GetEngineNamespace(), systemName=serverApi.GetEngineSystemName()):
+        # type: (str, types.FunctionType, str, str) -> None
         """
         listen for an event
         """

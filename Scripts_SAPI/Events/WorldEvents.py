@@ -9,7 +9,7 @@ class ExplosionAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__source = Entity(data['sourceId']) if data['sourceId'] else None
+        self.__source = createEntity(data['sourceId']) if data['sourceId'] else None
         self.__dimension = Dimension(data['dimensionId'])
         self.__data = data
 

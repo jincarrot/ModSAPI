@@ -55,10 +55,10 @@ class Dimension(object):
     """
     A class that represents a particular dimension (e.g., The End) within a world.
     """
-    import Entity as e
-    import ItemStack as i
-    import Block as b
-    import Command as c
+    import Entity as __e
+    import ItemStack as __i
+    import Block as __b
+    import Command as __c
 
     def __init__(self, dimId):
         # type: (int | str) -> None
@@ -93,14 +93,14 @@ class Dimension(object):
         return self.__dimId
 
     def getBlock(self, location):
-        # type: (dict | Vector3) -> b.Block
+        # type: (dict | Vector3) -> __b.Block
         """
         Returns a block instance at the given location.
         """
-        return self.b.Block({"dimension": self, "location": Vector3(location) if type(location) == dict else location})
+        return self.__b.Block({"dimension": self, "location": Vector3(location) if type(location) == dict else location})
 
     def getEntities(self, options=EntityQueryOptions):
-        # type: (dict | EntityQueryOptions) -> list[e.Entity]
+        # type: (dict | EntityQueryOptions) -> list[__e.Entity]
         """
         Gets the entities in the dimension.
         """
@@ -116,11 +116,11 @@ class Dimension(object):
                     entityIds.append(entityId)
             entityIds = options.check(entityIds)
             for entityId in entityIds:
-                entities.append(self.e.Entity(entityId))
+                entities.append(self.__e.Entity(entityId))
         return entities
     
     def getEntitiesAtBlockLocation(self, location):
-        # type: (dict | Vector3) -> list[e.Entity]
+        # type: (dict | Vector3) -> list[__e.Entity]
         """
         Returns a set of entities at a particular location.
         """
@@ -128,7 +128,7 @@ class Dimension(object):
         pos = Vector3(location) if type(location) == dict else location
         entityIds = SComp.CreateGame(serverApi.GetLevelId()).GetEntitiesInSquareArea(None, (int(pos.x), int(pos.y), int(pos.z)), (int(pos.x), int(pos.y), int(pos.z)), self.dimId)
         for entityId in entityIds:
-            result.append(self.e.Entity(entityId))
+            result.append(self.__e.Entity(entityId))
         return result
 
     def getPlayers(self, options=EntityQueryOptions):
@@ -153,7 +153,7 @@ class Dimension(object):
         return self.e.Player(playerId)
     
     def runCommand(self, commandString):
-        # type: (str) -> c.CommandResult
+        # type: (str) -> __c.CommandResult
         """
         Runs a command synchronously using the context of the broader dimenion.
 
@@ -174,11 +174,11 @@ class Dimension(object):
                     break
                 selector += commandString[index]
                 index += 1
-            return self.c.CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
+            return self.__c.CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
         return None
 
     def spawnEntity(self, identifier, location, options=SpawnEntityOptions):
-        # type: (str, dict | Vector3, dict | SpawnEntityOptions) -> Dimension.e.Entity
+        # type: (str, dict | Vector3, dict | SpawnEntityOptions) -> Dimension.__e.Entity
         """
         Creates a new entity (e.g., a mob) at the specified location.
         """
@@ -194,10 +194,10 @@ class Dimension(object):
             SComp.CreateEntityEvent(serverApi.GetLevelId()).TriggerCustomEvent(entityId, options.spawnEvent)
         if options.initialPersistence:
             SComp.CreateAttr(entityId).SetPersistent(options.initialPersistence)
-        return self.e.Entity(entityId)
+        return self.__e.Entity(entityId)
 
     def spawnItem(self, itemStack, location):
-        # type: (Dimension.i.ItemStack, Vector3 | dict) -> Dimension.e.Entity
+        # type: (Dimension.__i.ItemStack, Vector3 | dict) -> Dimension.__e.Entity
         """
         Creates a new item stack as an entity at the specified location.
         """
@@ -206,7 +206,7 @@ class Dimension(object):
             world = getWorld()
         itemDict = itemStack.getItemDict()
         location = Vector3(location) if type(location) == dict else location
-        return Dimension.e.Entity(world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z)))
+        return Dimension.__e.Entity(world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z)))
 
     def createExplosion(self, location, radius, explosionOptions={}):
         # type: (Vector3 | dict, float, dict | ExplosionOptions) -> bool
@@ -216,4 +216,8 @@ class Dimension(object):
         return SComp.CreateExplosion(serverApi.GetLevelId()).CreateExplosion((location.x, location.y, location.z), radius, options.causesFire, options.breaksBlocks, options.source.id, options.source.id)
     
     def fillBlocks(self, volume, block, options):
+        # type: (BlockVolumeBase, BlockPermutation | str, 0) -> 0 
+        pass
+
+    def setBlock(self, type):
         pass

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
+import ast
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -46,6 +47,7 @@ class ItemStack(object):
         """Given name of this stack of items. The name tag is displayed when hovering over the item. Setting the name tag to an empty string or undefined will remove the name tag."""
         self.__lore = []
         self.__components = {}
+        self.__dynamicProperties = {}
         self.__generateComponents()
 
     def __str__(self):
@@ -113,15 +115,17 @@ class ItemStack(object):
         if userData:
             data['userData'] = userData
         if self.__lore:
-            baseInfo = "%name%%category%%enchanting%%attack_damage%\n"
-            data['customTips'] = baseInfo + "\n".join(self.__lore)
+            baseInfo = "%name%%category%%enchanting%\n%attack_damage%\n§5"
+            data['customTips'] = baseInfo + "§r\n§5".join(self.__lore) + "§r"
+        if self.__dynamicProperties:
+            data['extraId'] = str(self.__dynamicProperties)
         for componentId in self.__components:
             if componentId == 'minecraft:enchantable':
                 enchantmentList = self.__components['minecraft:enchantable'].getEnchantments()
                 enchantData = []
                 customEnchantData = []
                 for enchantment in enchantmentList:
-                    enchantData.append((enchantment._id, enchantment.level)) if self._id >= 0 else customEnchantData.append((enchantment.typeId, enchantment.level))
+                    enchantData.append((enchantment._id, enchantment.level)) if enchantment._id >= 0 else customEnchantData.append((enchantment.typeId, enchantment.level))
                 data['enchantData'] = enchantData
                 data['modEnchantData'] = customEnchantData
             elif componentId == 'minecraft:durability':
@@ -154,6 +158,28 @@ class ItemStack(object):
         if self.hasComponent(componentId):
             return self.__components[componentId]
 
+    def getDynamicProperty(self, identifier):
+        # type: (str) -> 0
+        """Returns a property value."""
+        return self.__dynamicProperties.get(identifier, None)
+    
+    def getDynamicPropertyIds(self):
+        # type: () -> list[str]
+        """Returns the available set of dynamic property identifiers that have been used on this entity."""
+        return self.__dynamicProperties.keys()
+    
+    def setDynamicProperty(self, identifier, value=None):
+        # type: (str, 0) -> None
+        """Sets a specified property to a value. Note: This function only works with non-stackable items."""
+        self.__dynamicProperties[identifier] = value
+
+    def setDynamicProperties(self, values):
+        # type: (dict) -> None
+        """Sets multiple dynamic properties with specific values."""
+        if type(values) == dict:
+            self.__dynamicProperties = values
+        else:
+            print('value error! cannot set dynamic properties')
 
 def createItemStack(itemDict):
     # type: (dict) -> ItemStack | None
@@ -171,6 +197,11 @@ def createItemStack(itemDict):
             item.nameTag = userData['display']['__value__']
     if 'customTips' in itemDict:
         item.setLore(itemDict['customTips'].split("\n"))
+    if 'extraId' in itemDict and itemDict['extraId'] and itemDict['extraId'][0] == '{' and itemDict['extraId'][-1] == '}':
+        try:
+            item.setDynamicProperties(ast.literal_eval(itemDict['extraId']))
+        finally:
+            pass
     if item.hasComponent("minecraft:enchantable"):
         enchantData = itemDict['enchantData']
         customEnchantData = itemDict['modEnchantData']

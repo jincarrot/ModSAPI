@@ -65,13 +65,16 @@ class ItemCompleteUseAfterEventSignal(Events):
         Events.__init__(self)
         self.__eventName = "ItemReleaseUsingServerEvent"
 
+    def _check(self, obj, data, valueName):
+        return data['durationLeft'] <= 0
+
     def subscribe(self, callback):
         # type: (types.FunctionType) -> None
         """
         Adds a callback that will be called when a chargeable item completes charging.
         """
         import PlayerEvents as pe
-        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, pe.ItemCompleteUseAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, None, self._check, None, pe.ItemCompleteUseAfterEvent)
 
 class PlayerDimensionChangeAfterEventSignal(Events):
     """

@@ -86,7 +86,7 @@ class PlayerPlaceBlockAfterEventSignal(BlockEvents):
     
     def _check(self, obj, data, valueName):
         # type: (EventListener, dict, tuple) -> bool
-        if Entity(data['entityId']).typeId != "minecraft:player":
+        if createEntity(data['entityId']).typeId != "minecraft:player":
             return False
         options = obj.options
         if type(options) == dict:

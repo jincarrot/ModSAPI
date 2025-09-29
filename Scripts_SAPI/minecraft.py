@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
 import SAPI_S as SAPI
-from Classes.ItemStack import *
+import Classes.ItemStack as i
 import Classes.FormData as fd
 
 def getWorld():
@@ -22,6 +22,11 @@ def getModalFormData():
     if serverApi.GetSystem("SAPI", "Base"):
         return serverApi.GetSystem("SAPI", "Base").getModalFormData()
 
+def getItemStack():
+    # type: () -> type[i.ItemStack]
+    if serverApi.GetSystem("SAPI", "Base"):
+        return serverApi.GetSystem("SAPI", "Base").getItemStack()
+    
 world = getWorld()
 system = getSystem()
 ActionFormData = getActionFormData()
@@ -87,6 +92,9 @@ class SAPIS(ServerSystem):
     
     def getModalFormData(self):
         return fd.ModalFormData
+    
+    def getItemStack(self):
+        return i.ItemStack
     
     def setFormCallback(self, id, callback):
         self.formTasks[id] = callback

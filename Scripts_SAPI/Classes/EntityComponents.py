@@ -89,12 +89,12 @@ class EntityAttributeComponent(EntityComponent):
         self.__comp = SComp.CreateAttr(self.__entity.id)
         nbt = SComp.CreateEntityDefinitions(self.entity.id).GetEntityNBTTags()['Attributes']
         for tag in nbt:
-            if tag['Name']['__value__'] == self.__componentId:
+            if tag['Name']['__value__'] == data['componentId']:
                 self.__defaultValue = tag['Base']['__value__']
                 self.__effectiveMax = tag['Max']['__value__']
                 self.__effectiveMin = tag['Min']['__value__']
                 break
-        self.__attrId = getattr(EntityComponentType, self.__componentId.split("minecraft:")[1])
+        self.__attrId = getattr(EntityComponentType, data['componentId'][10::])
 
     @property
     def componentId(self):
@@ -175,6 +175,23 @@ class EntityHealthComponent(EntityAttributeComponent):
     import Entity as e
 
     def __init__(self, data):
+        self._entity = data['entity']
+        data['componentId'] = "minecraft:health"
+        EntityAttributeComponent.__init__(self, data)
+
+    @property
+    def entity(self):
+        # type: () -> e.Entity
+        return self._entity
+
+class EntityMovementComponent(EntityAttributeComponent):
+    """
+    Defines the base movement speed of this entity.
+    """
+    __componentId = "minecraft:movement"
+    import Entity as e
+
+    def __init__(self, data):
         EntityAttributeComponent.__init__(self, data)
         self.__entity = data['entity']
 
@@ -183,11 +200,11 @@ class EntityHealthComponent(EntityAttributeComponent):
         # type: () -> e.Entity
         return self.__entity
 
-class EntityMovementComponent(EntityAttributeComponent):
+class EntityJumpComponent(EntityAttributeComponent):
     """
     Defines the base movement speed of this entity.
     """
-    __componentId = "minecraft:movement"
+    __componentId = "minecraft:movement.jump"
     import Entity as e
 
     def __init__(self, data):

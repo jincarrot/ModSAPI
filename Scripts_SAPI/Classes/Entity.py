@@ -25,8 +25,8 @@ class Entity(object):
     """
     Represents the state of an entity (a mob, the player, or other moving objects like mine carts) in the world.
     """
-    import Dimension as d
-    import Block as b
+    import Dimension as __d
+    import Block as __b
 
     def __init__(self, entityId):
         self.__id = entityId
@@ -50,14 +50,20 @@ class Entity(object):
         This property is accessible even if Entity.isValid is false.
         """
         return self.__id
+    
+    @property
+    def isValid(self):
+        # type: () -> bool
+        """"""
+        return SComp.CreateGame(serverApi.GetLevelId()).IsEntityAlive(self.__id)
 
     @property
     def dimension(self):
-        # type: () -> Entity.d.Dimension
+        # type: () -> Entity.__d.Dimension
         """
         Dimension that the entity is currently within.
         """
-        dim = self.d.Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
+        dim = self.__d.Dimension(SComp.CreateDimension(self.__id).GetEntityDimensionId())
         return dim
 
     @property
@@ -112,6 +118,14 @@ class Entity(object):
         if SComp.CreateQueryVariable(self.__id).EvalMolangExpression("query.is_sleeping")['value']:
             return True
         return False
+    
+    @property
+    def isSitting(self):
+        # type: () -> bool
+        """
+        If true, the entity is currently sitting.
+        """
+        return SComp.CreateEntityDefinitions(self.__id).IsSitting()
 
     @property
     def isSneaking(self):
@@ -227,7 +241,7 @@ class Entity(object):
                 return SComp.CreateHurt(self.__id).Hurt(amount, cause, options.damagingEntity.id, options.damagingProjectile.id, False)
             else:
                 options = EntityApplyDamageOptions(options)
-                return SComp.CreateHurt(self.__id).Hurt(amount, options.cause, options.damagingEntity.id, None, False)
+                return SComp.CreateHurt(self.__id).Hurt(amount, options.cause, options.damagingEntity.id if options.damagingEntity else None, None, False)
         elif not options:
             cause = "none"
             return SComp.CreateHurt(self.__id).Hurt(amount, cause, None, None, False)
@@ -325,7 +339,7 @@ class Entity(object):
                 else:
                     face = Direction.South
             data = {
-                "block": self.b.Block({"location": Vector3({"x": block['pos'][0], "y": block['pos'][1], "z": block['pos'][2]}), "dimension": self.dimension}),
+                "block": self.__b.Block({"location": Vector3({"x": block['pos'][0], "y": block['pos'][1], "z": block['pos'][2]}), "dimension": self.dimension}),
                 "face": face,
                 "faceLocation": Vector3({"x": block['hitPos'][0], "y": block['hitPos'][1], "z": block['hitPos'][2]})
             }
@@ -366,7 +380,7 @@ class Entity(object):
         Returns a property value.
         """
         DataComp = SComp.CreateExtraData(self.__id)
-        return DataComp.GetExtraData(identifier)
+        return DataComp.GetExtraData(identifier) if identifier in self.getDynamicPropertyIds() else None
 
     def getDynamicPropertyIds(self):
         # type: () -> list[str]
@@ -440,7 +454,7 @@ class Entity(object):
             results = []
             for entity in entities:
                 distance = math.sqrt((entity['hitPos'][0] - location.x) ** 2 + (entity['hitPos'][1] - location.y) ** 2 + (entity['hitPos'][2] - location.z) ** 2)
-                results.append(EntityRaycastHit({"entity": Entity(entity['entityId']), "distance": distance}))
+                results.append(EntityRaycastHit({"entity": createEntity(entity['entityId']), "distance": distance}))
             return results
 
     def getHeadLocation(self):
@@ -504,7 +518,7 @@ class Entity(object):
         """
         Returns true if the specified component is present on this entity.
         """
-        componentId = componentId[::10].lower() if "minecraft:" in componentId else componentId
+        componentId = componentId[10::].lower() if "minecraft:" in componentId else componentId
         return SComp.CreateEntityComponent(self.__id).HasComponent(getattr(EntityComponentType, componentId))
 
     def hasTag(self, tag):
@@ -513,6 +527,24 @@ class Entity(object):
         Returns whether an entity has a particular tag.
         """
         return SComp.CreateTag(self.__id).EntityHasTag(tag)
+
+    def hasTarget(self):
+        # type: () -> bool
+        """Returns True if entity has a target"""
+        targetId = SComp.CreateAction(self.__id).GetAttackTarget()
+        if targetId == -1 or not targetId:
+            return False
+        else:
+            return True
+        
+    def getTarget(self):
+        # type: () -> Entity | None
+        """Returns the target if entity has a target"""
+        targetId = SComp.CreateAction(self.__id).GetAttackTarget()
+        if targetId == -1 or not targetId:
+            return None
+        else:
+            return createEntity(targetId)
 
     def hasFamily(self, familyName):
         # type: (str) -> bool
@@ -556,6 +588,9 @@ class Entity(object):
         Immediately removes the entity from the world.
         The removed entity will not perform a death animation or drop loot upon removal.
         """
+        global world
+        if not world:
+            world = getWorld()
         world.DestroyEntity(self.__id)
 
     def removeEffect(self, effectType):
@@ -590,7 +625,7 @@ class Entity(object):
             tempLoc = (tempLoc.x, tempLoc.y + 100, tempLoc.z)
             tempDim = SComp.CreateDimension(self.__id).GetEntityDimensionId()
             tempEntity = world.CreateEngineEntityByTypeStr(self.typeId, tempLoc, (0, 0), tempDim)
-            tempEntity = Entity(tempEntity)
+            tempEntity = createEntity(tempEntity)
             # 获取默认值并存入原数据
             value = tempEntity.getProperty(identifier)
             nbt['properties'][identifier]['__value__'] = value if type(value).__name__ != 'bool' else int(value)
@@ -796,7 +831,7 @@ class Player(Entity):
             soundOptions = {}
         if 'location' not in soundOptions:
             pos = SComp.CreatePos(self.__id).GetPos()
-            soundOptions['location'] = Vector3({"x": pos.x, "y": pos.y, "z": pos.z})
+            soundOptions['location'] = Vector3({"x": pos[0], "y": pos[1], "z": pos[2]})
         options = PlayerSoundOptions(soundOptions) if type(soundOptions) == dict else soundOptions
         SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("playsound %s @s %s %s %s %s %s" % (soundID, options.location.x, options.location.y, options.location.z, options.volume, options.pitch), self.__id)
 
@@ -823,3 +858,14 @@ class Player(Entity):
         if not world:
             world = getWorld()
         world.NotifyToClient(self.__id, "sendToast", data)
+
+
+def createEntity(entityId):
+    # type: (str) -> Entity | Player | None
+    en = Entity(entityId)
+    if en.isValid:
+        if en.typeId == 'minecraft:player':
+            return en.asPlayer()
+        else:
+            return en
+    return en

@@ -3,6 +3,9 @@
 from ..Interfaces.Vector import *
 from ..Classes.ItemStack import *
 
+class BlockVolumeBase(object):
+    pass
+
 
 class BlockType(object):
     """
