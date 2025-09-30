@@ -17,6 +17,7 @@ import mod.server.extraServerApi as serverApi
 from ..minecraft import *
 from Command import *
 import types
+from UI import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -859,6 +860,12 @@ class Player(Entity):
             world = getWorld()
         world.NotifyToClient(self.__id, "sendToast", data)
 
+    def showUI(self, customUI):
+        # type: (UI) -> None
+        global world
+        if not world:
+            world = getWorld()
+        world.NotifyToClient(self.id, "showUI", )
 
 def createEntity(entityId):
     # type: (str) -> Entity | Player | None

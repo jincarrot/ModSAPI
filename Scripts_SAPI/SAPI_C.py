@@ -29,6 +29,7 @@ class SAPI_C(ClientSystem):
     def initUI(self, data):
         clientApi.RegisterUI("server_ui", "ActionForm", "Scripts_SAPI.Classes.Forms.ActionForm", "server_forms.action_form")
         clientApi.RegisterUI("server_ui", "ModalForm", "Scripts_SAPI.Classes.Forms.ModalForm", "server_forms.modal_form")
+        clientApi.RegisterUI("modsapi", "CustomUI", "Scripts_SAPI.Classes.UI._CustomUI", "server_forms.custom_ui")
 
     def getData(self, data):
         """receive request from server"""
