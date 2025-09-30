@@ -52,15 +52,16 @@ class Promise(Thenable):
         except Exception as e:
             reject(e)
 
-    def __resolve(self, promise, x, re, rej):
+    @staticmethod
+    def __resolve(promise, x, resolve_func, reject_func):
         if promise == x:
-            return rej(TypeError('Promise and x refer to the same object'))
+            return reject_func(TypeError('Promise and x refer to the same object'))
 
         if isinstance(x, Promise):
-            x.then(re, rej)
+            x.then(resolve_func, reject_func)
             return
         
-        re(x)
+        resolve_func(x)
 
     def then(self, onFulfilled, onRejected):
         # type: (FunctionType, FunctionType) -> Promise
@@ -80,8 +81,6 @@ class Promise(Thenable):
                     else:
                         v = realFullfilled(self._value)
                         Promise.__resolve(promise2, v, res, rej)
-
-                    res(self._value)
                 except Exception as e:
                     rej(e)
 
@@ -97,8 +96,6 @@ class Promise(Thenable):
                     else:
                         v = realRejected(self._value)
                         Promise.__resolve(promise2, v, res, rej)
-
-                    res(self._value)
                 except Exception as e:
                     rej(e)
 
