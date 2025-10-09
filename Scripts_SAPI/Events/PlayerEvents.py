@@ -142,7 +142,7 @@ class ItemCompleteUseAfterEvent(object):
         itemData = data['itemDict']
         self.__itemStack = createItemStack(itemData)
         self.__source = Player(data['playerId'])
-        self.__useDuration = data['durationLeft']
+        self.__useDuration = 0
 
     def __str__(self):
         data = {

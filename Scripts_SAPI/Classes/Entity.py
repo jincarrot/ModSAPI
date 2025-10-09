@@ -865,7 +865,9 @@ class Player(Entity):
         global world
         if not world:
             world = getWorld()
-        world.NotifyToClient(self.id, "showUI", )
+        from ..SAPI_C import Screens
+        Screens[id(customUI)] = customUI
+        world.NotifyToClient(self.id, "showUI", {"screenId": id(customUI)})
 
 def createEntity(entityId):
     # type: (str) -> Entity | Player | None

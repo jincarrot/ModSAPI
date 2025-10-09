@@ -3,12 +3,15 @@ import mod.client.extraClientApi as clientApi
 import math, time
 from Classes.ClientEvents import *
 from Classes.Request import *
+from Classes.UI import *
 from scheduler import Scheduler
 from minecraft import *
 
 ClientSystem = clientApi.GetClientSystemCls()
 
 CComp = clientApi.GetEngineCompFactory()
+
+Screens = {}
 
 
 class SAPI_C(ClientSystem):
@@ -22,6 +25,7 @@ class SAPI_C(ClientSystem):
         self.ListenForEvent("SAPI", "world", "sendToast", self, self.sendToast)
         self.ListenForEvent("SAPI", "world", "showActionForm", self, self.showActionForm)
         self.ListenForEvent("SAPI", "world", "showModalForm", self, self.showModalForm)
+        self.ListenForEvent("SAPI", "world", "showUI", self, self.showUI)
         self.ListenForEvent("SAPI", "world", "setMusicState", self, self.setMusicState)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.playerSpawn)
@@ -57,6 +61,13 @@ class SAPI_C(ClientSystem):
     
     def setMusicState(self, data):
         CComp.CreateCustomAudio(clientApi.GetLevelId()).DisableOriginMusic(not data['state'])
+
+    def showUI(self, data):
+        ui = Screens.get(data['screenId'], None) # type: UI
+        if not ui:
+            print("Show UI error! Cannot find ui!")
+            return
+        clientApi.PushScreen("modsapi", "CustomUI", {"screenId": data['screenId']})
 
 
 def ClientMethod(func):

@@ -3,6 +3,7 @@ import mod.server.extraServerApi as serverApi
 import SAPI_S as SAPI
 import Classes.ItemStack as i
 import Classes.FormData as fd
+import Classes.UI as ui
 
 def getWorld():
     # type: () -> SAPI.World
@@ -27,10 +28,16 @@ def getItemStack():
     if serverApi.GetSystem("SAPI", "Base"):
         return serverApi.GetSystem("SAPI", "Base").getItemStack()
     
+def getUI():
+    # type: () -> type[ui.UI]
+    if serverApi.GetSystem("SAPI", "Base"):
+        return serverApi.GetSystem("SAPI", "Base").getUI()
+    
 world = getWorld()
 system = getSystem()
 ActionFormData = getActionFormData()
 ModalFormData = getModalFormData()
+CustomUI = getUI()
 
 ServerSystem = serverApi.GetServerSystemCls()
 
@@ -53,7 +60,7 @@ class SAPIS(ServerSystem):
     
     def debug(self, data):
         global world
-        msg = data['message']
+        msg = data['message'] # type: str
         if msg.find('debug ') == 0:
             msg = msg[6:]
             if not world:
@@ -95,6 +102,9 @@ class SAPIS(ServerSystem):
     
     def getItemStack(self):
         return i.ItemStack
+    
+    def getUI(self):
+        return ui.UI
     
     def setFormCallback(self, id, callback):
         self.formTasks[id] = callback

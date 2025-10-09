@@ -63,7 +63,7 @@ class ItemCompleteUseAfterEventSignal(Events):
 
     def __init__(self):
         Events.__init__(self)
-        self.__eventName = "ItemReleaseUsingServerEvent"
+        self.__eventName = "ActorUseItemServerEvent"
 
     def _check(self, obj, data, valueName):
         return data['durationLeft'] <= 0
