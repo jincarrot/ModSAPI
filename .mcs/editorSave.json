@@ -1,0 +1,41 @@
+{
+    "Addon": {
+        "EnchantSetting": {
+            "amplifier": 1
+        },
+        "PackResourceSortData": {
+
+        },
+        "PlayerEffectSetting": {
+            "amplifier": 1,
+            "duration": 10
+        },
+        "PresetInstanceTreeData": [
+
+        ]
+    },
+    "UI": {
+        "customPrefabGroupExpand": [
+
+        ],
+        "expandData": {
+            "prefab": {
+
+            },
+            "screen": {
+                "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\base_controls.json": [
+                    "/custom_ui"
+                ],
+                "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\debug.json": [
+                    "/main",
+                    "/main/panel"
+                ],
+                "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\server_forms.json": [
+                    "/action_form",
+                    "/custom_ui",
+                    "/custom_ui/screen"
+                ]
+            }
+        }
+    }
+}

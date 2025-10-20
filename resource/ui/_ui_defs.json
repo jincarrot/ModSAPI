@@ -1,0 +1,7 @@
+{
+    "ui_defs": [
+        "ui/base_controls.json",
+        "ui/debug.json",
+        "ui/server_forms.json"
+    ]
+}

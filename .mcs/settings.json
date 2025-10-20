@@ -1,0 +1,14 @@
+{
+    "Arena.Component.Namespace": "kgeef",
+    "FirstTabSetting": 0,
+    "ShortItemSettings": [
+        "resource\\ui",
+        "resource\\models",
+        "resource\\textures"
+    ],
+    "Uluru.autoLayerDict": {
+        "debug": true,
+        "server_forms": true
+    },
+    "Uluru.checkSuspectOldUI": true
+}

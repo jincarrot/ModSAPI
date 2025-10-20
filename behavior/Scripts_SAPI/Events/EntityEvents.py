@@ -321,6 +321,7 @@ class EntityHurtBeforeEvent(object):
         self.__damage = data['damage']
         self.__damageSource = EntityDamageSource(temp)
         self.__hurtEntity = createEntity(data['entityId'])
+        self.__cancel = False
 
     def __str__(self):
         data = {
@@ -364,14 +365,16 @@ class EntityHurtBeforeEvent(object):
     def cancel(self):
         # type: () -> bool
         """returns whether the event is canceled."""
-        return self.__data['cancel']
+        return self.__cancel
     
     @cancel.setter
     def cancel(self, value):
         # type: (bool) -> None
-        self.__data['damage'] = 0
-        self.__data['knock'] = False
-        self.__data['ignite'] = False
+        self.__cancel = value
+        if value:
+            self.__data['damage'] = 0
+            self.__data['knock'] = False
+            self.__data['ignite'] = False
 
     @property
     def cancelKnock(self):

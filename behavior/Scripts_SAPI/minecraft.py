@@ -4,6 +4,7 @@ import SAPI_S as SAPI
 import Classes.ItemStack as i
 import Classes.FormData as fd
 import Classes.UI as ui
+import Utils.Expression
 
 def getWorld():
     # type: () -> SAPI.World
@@ -66,7 +67,7 @@ class SAPIS(ServerSystem):
             if not world:
                 world = getWorld()
             print(msg)
-            exec(compile(msg, "<string>", "exec"))
+            # exec(compile(msg, "<string>", "exec"))
 
     @staticmethod
     def Init(__data):

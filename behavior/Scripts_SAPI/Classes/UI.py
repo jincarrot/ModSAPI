@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
+# from mod.client.ui.controls.baseUIControl import *
+import types
 
 from ControlData import *
 from ..Utils.Expression import *
 
 ScreenNode = clientApi.GetScreenNodeCls()
 ViewBinder = clientApi.GetViewBinderCls()
+CComp = clientApi.GetEngineCompFactory()
+
+RefreshSigns = {}
 
 class Variables(object):
 
@@ -38,6 +43,8 @@ class _CustomUI(ScreenNode):
         from ..SAPI_C import Screens
         self.ui = Screens.get(param['screenId'], None) # type: UI
         self.screenData = self.ui._controlData._generate()
+        self.drawingData = {}
+        self.traceData = {}
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, '#custom_ui_close')
     def Close(self, __args):
@@ -50,20 +57,113 @@ class _CustomUI(ScreenNode):
             print("Error! Parent control '%s' dosen't exist!" % path)
             return
         controlName = controlData.keys()[0]
-        controlData = controlData[controlName]
-        controlType = controlData['type']
+        data = controlData[controlName]
+        if not data:
+            return
+        controlType = data['type']
         c = self.CreateChildControl("base_controls.custom_%s" % controlType, controlName, parentControl)
         bg = self.CreateChildControl("base_controls.background", "custom_ui_background_auto_generate", c).asImage()
-        bg.SetSprite(controlData['bg']['texture'])
-        bg.SetAlpha(controlData['bg']['alpha'])
-        bg.SetSpriteColor((float(controlData['bg']['color'][0]) / 255.0, float(controlData['bg']['color'][1]) / 255.0, float(controlData['bg']['color'][2] / 255.0)))
-        c.SetAnchorFrom(controlData['anchor'][0])
-        c.SetAnchorTo(controlData['anchor'][1])
-        if controlData['controls']:
-            for control in controlData['controls']:
-                self.createControl(control, path + "/" + controlName)
+        bg.SetSprite(data['bg'].texture)
+        bg.SetAlpha(float(data['bg'].alpha))
+        bg.SetSpriteColor(data['bg'].color)
+        if not c:
+            return
+        if type(data['size'][0]) != str:
+            size = (float(data['size'][0]), float(data['size'][1]))
+            c.SetFullSize("x", {"absoluteValue": size[0]})
+            c.SetFullSize("y", {"absoluteValue": size[1]})
+        else:
+            relativeSize = [0, 0]
+            size = [0, 0]
+            ori = data['size'] # type: list[str]
+            oriX = ori[0]
+            oriY = ori[1]
+            if "+" in oriX:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[0] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[0] = int(el.split("px")[0])
+            elif "-" in oriX:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[0] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[0] = int(el.split("px")[0])
+            if "+" in oriY:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[1] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[1] = int(el.split("px")[0])
+            elif "-" in oriY:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[1] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[1] = int(el.split("px")[0])
+            c.SetFullSize("x", {"fit": True, "followType": "parent", "absoluteValue": size[0], "relativeValue": relativeSize[0]})
+            c.SetFullSize("y", {"fit": True, "followType": "parent", "absoluteValue": size[1], "relativeValue": relativeSize[1]})
+        if type(data['offset'][0]) != str:
+            offset = (float(data['offset'][0]), float(data['offset'][1]))
+            c.SetFullPosition("x", {"absoluteValue": offset[0]})
+            c.SetFullPosition("y", {"absoluteValue": offset[1]})
+        else:
+            relativeSize = [0, 0]
+            size = [0, 0]
+            ori = data['offset'] # type: list[str]
+            oriX = ori[0]
+            oriY = ori[1]
+            if "+" in oriX:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[0] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[0] = int(el.split("px")[0])
+            elif "-" in oriX:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[0] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[0] = int(el.split("px")[0])
+            if "+" in oriY:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[1] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[1] = int(el.split("px")[0])
+            elif "-" in oriY:
+                temp = oriX.split("+")
+                for el in temp:
+                    if "%" in el:
+                        relativeSize[1] = int(el.split("%")[0])
+                    elif "px" in el:
+                        size[1] = int(el.split("px")[0])
+            c.SetFullPosition("x", {"fit": True, "followType": "parent", "absoluteValue": size[0], "relativeValue": relativeSize[0]})
+            c.SetFullPosition("y", {"fit": True, "followType": "parent", "absoluteValue": size[1], "relativeValue": relativeSize[1]})
+
+        c.SetAnchorFrom(data['anchor'][0])
+        c.SetAnchorTo(data['anchor'][1])
+        alpha = data['alpha']
+        c.SetAlpha(float(alpha))
+        c.SetVisible(data['visible'])
         if controlType == "image":
-            c.asImage().SetSprite(controlData['texture'])
+            c.asImage().SetSprite(data['texture'])
+        elif controlType == 'label':
+            c.asLabel().SetText(data['text'])
+        if data['isStatic']:
+            controlData[controlName] = None
+            return
+        if data['controls']:
+            for control in data['controls']:
+                self.createControl(control, path + "/" + controlName)
 
     def Create(self):
         # type: () -> None
@@ -74,7 +174,7 @@ class _CustomUI(ScreenNode):
             # set background style
             bg = self.GetBaseUIControl("/screen/custom_ui_background_auto_generate").asImage()
             bg.SetSprite(self.ui.background.texture)
-            bg.SetAlpha(self.ui.background.alpha)
+            bg.SetAlpha(float(self.ui.background.alpha))
             bg.SetSpriteColor((float(self.ui.background.color[0]) / 255.0, float(self.ui.background.color[1]) / 255.0, float(self.ui.background.color[2] / 255.0)))
             baseSize = self.GetBaseUIControl("/screen").GetSize()
             # get base size
@@ -86,10 +186,39 @@ class _CustomUI(ScreenNode):
 
     def Update(self):
         self.ui.age._change(int(self.ui.age + 1))
+        if self.ui._controlData.updateCallback:
+            self.ui._controlData.updateCallback(self)
+        if self.drawingData:
+            for key in self.drawingData:
+                data = self.drawingData[key]
+                for p in data['lst']:
+                    alpha = float(data['params']['alpha'])
+                    color = data['params']['color']
+                    c = self.GetBaseUIControl(p).asImage()
+                    c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
+                    c.SetSpriteColor((float(color[0] if 0 <= float(color[0]) <= 255 else (255 if float(color[0]) > 255 else 0)) / 255.0, float(color[1] if 0 <= float(color[1]) <= 255 else (1 if float(color[1]) > 255 else 0)) / 255.0, float(color[2] if 0 <= float(color[2]) <= 255 else (1 if float(color[2]) > 255 else 0)) / 255.0))
         if self.screenData:
             basePath = "/screen"
             controls = self.screenData['screen']['controls']
             self.updateControl(basePath, controls)
+            bg = self.GetBaseUIControl("/screen/custom_ui_background_auto_generate")
+            if bg:
+                bg = bg.asImage()
+                alpha = float(self.ui.background.alpha)
+                color = self.ui.background.color
+                bg.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
+                bg.SetSpriteColor((float(color[0] if 0 <= int(color[0]) <= 255 else 1 if int(color[0]) > 255 else 0) / 255.0, float(color[1] if 0 <= int(color[1]) <= 255 else 1 if int(color[1]) > 255 else 0) / 255.0, float(color[2] if 0 <= int(color[2]) <= 255 else 1 if int(color[2]) > 255 else 0)/ 255.0))
+        if RefreshSigns.get(id(self.ui), 0):
+            RefreshSigns[id(self.ui)] = 0
+            newData = self.ui._controlData._generate()
+            controls = newData['screen']['controls']
+            for control in controls:
+                if control not in self.screenData['screen']['controls']:
+                    self.createControl(control)
+            for control in self.screenData['screen']['controls']:
+                if control not in controls:
+                    self.RemoveChildControl(self.GetBaseUIControl("/screen/%s" % control.keys()[0]))
+            self.screenData = newData
 
     def updateControl(self, path, controls):
         # type: (str, list[dict]) -> None
@@ -97,9 +226,13 @@ class _CustomUI(ScreenNode):
             for control in controls:
                 controlName = control.keys()[0]
                 controlData = control[controlName]
+                if not controlData:
+                    return
                 c = self.GetBaseUIControl(path + "/" + controlName)
                 if not c:
                     return
+                if controlData['shouldTrace']:
+                    self.draw(c, controlData)
                 if type(controlData['size'][0]) != str:
                     size = (float(controlData['size'][0]), float(controlData['size'][1]))
                     c.SetFullSize("x", {"absoluteValue": size[0]})
@@ -181,16 +314,55 @@ class _CustomUI(ScreenNode):
                     c.SetFullPosition("x", {"fit": True, "followType": "parent", "absoluteValue": size[0], "relativeValue": relativeSize[0]})
                     c.SetFullPosition("y", {"fit": True, "followType": "parent", "absoluteValue": size[1], "relativeValue": relativeSize[1]})
 
-                alpha = controlData['alpha']
-                c.SetAlpha(float(alpha))
+                alpha = float(controlData['alpha'])
+                c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
+                c.SetVisible(controlData['visible'])
+                bg = c.GetChildByName("custom_ui_background_auto_generate").asImage()
+                bg.SetAlpha(controlData['bg'].alpha)
+                bg.SetSpriteColor((float(controlData['bg'].color[0]) / 255.0, float(controlData['bg'].color[1]) / 255.0, float(controlData['bg'].color[2] / 255.0)))
                 self.updateControl(path + "/" + controlName, controlData['controls'])
+
+    def draw(self, control, controlData):
+        # type: (BaseUIControl, dict) -> None
+        params = controlData['shouldTrace']
+        if float(self.ui.age % params['interval']):
+            return
+        if not self.drawingData.get(control.GetPath(), None):
+            self.drawingData[control.GetPath()] = {
+                "expression": controlData['offset'],
+                "params": params,
+                "lst": []
+            }
+        else:
+            name = '%s_p:%s' % (control.GetPath().split("/")[-1], int(self.ui.age))
+            def dist(old, new):
+                return math.sqrt((old[0] - new[0]) * (old[0] - new[0]) + (old[1] - new[1]) * (old[1] - new[1]))
+            line = self.CreateChildControl("base_controls.background", name, self.GetBaseUIControl("/screen")).asImage()
+            self.ui.age._change(float(self.ui.age) - params['interval'])
+            oldPos = (self.drawingData[control.GetPath()]['expression'][0].staticValue, self.drawingData[control.GetPath()]['expression'][1].staticValue)
+            self.ui.age._change(float(self.ui.age) + params['interval'])
+            newPos = (self.drawingData[control.GetPath()]['expression'][0].staticValue, self.drawingData[control.GetPath()]['expression'][1].staticValue)
+            line.SetFullSize("y", {"fit": False, "followType": "parent", "absoluteValue": params['width']})
+            line.SetFullSize("x", {"fit": False, "followType": "parent", "absoluteValue": dist(oldPos, newPos)})
+            line.SetFullPosition("x", {"fit": False, "followType": "none", "absoluteValue": (oldPos[0] + newPos[0]) / 2.0})
+            line.SetFullPosition("y", {"fit": False, "followType": "none", "absoluteValue": (oldPos[1] + newPos[1]) / 2.0})
+            if dist(oldPos, newPos):
+                line.Rotate(math.asin((newPos[1] - oldPos[1]) / dist(oldPos, newPos)) * 180.0 / math.pi * (-1 if newPos[0] > oldPos[0] else 1))
+            line.SetAlpha(params['alpha'])
+            line.SetSpriteColor(params['color'])
+            line.SetLayer(0)
+            self.drawingData[control.GetPath()]['lst'].append("/screen/%s" % name)
+            if len(self.drawingData[control.GetPath()]['lst']) > params['maxAmount']:
+                path = self.drawingData[control.GetPath()]['lst'][0]
+                self.RemoveChildControl(self.GetBaseUIControl(path))
+                self.drawingData[control.GetPath()]['lst'].remove(path)
 
     def Destroy(self):
         self.ui.age._change(-1)
 
 
 class Control(object):
-    """Base class of all controls"""
+    """控件基类"""
 
     def __init__(self, parent=None):
         # type: (Control | UI) -> None
@@ -401,11 +573,18 @@ class Control(object):
         self._controlData.addControl(image._controlData)
         return image
     
+    def addLabel(self, labelData={}):
+        # type: (dict) -> Label
+        """添加文本控件"""
+        label = Label(self)
+        self._controlData.addControl(label._controlData)
+        return label
+    
     def addControl(self, control):
         # type: (Control) -> bool
         temp = self
         while temp:
-            if id(temp) == id(control):
+            if id(temp) == control.GetPath():
                 print("add control error! cannot add a parent control.")
                 return False
             temp = temp.parent if isinstance(temp, Control) else None
@@ -419,10 +598,19 @@ class Control(object):
         newControl._controlData = self._controlData.copy()
         return newControl
     
-    def refresh(self):
+    def __refresh(self):
         """刷新控件，重新生成子控件，计算值等"""
         pass
+
+    def trace(self, interval=1, maxAmount=50, width=2, alpha=1, color=(1, 1, 1)):
+        # type: (int, int, int, int, tuple) -> None
+        """记录轨迹"""
+        self._controlData.shouldTrace = {"interval": interval, "maxAmount": maxAmount, "width": width, "alpha": alpha, "color": color}
     
+    def asStaticControl(self):
+        """将此控件作为静态控件，即不会更新size等表达式。主要用于降低性能消耗。"""
+        self._controlData.isStatic = True
+
 class Panel(Control):
     """Panel class"""
 
@@ -524,6 +712,13 @@ class UI(object):
         self._controlData.addControl(image._controlData)
         return image
     
+    def addLabel(self, labelData={}):
+        # type: (dict) -> Label
+        """添加文本控件"""
+        label = Label(self)
+        self._controlData.addControl(label._controlData)
+        return label
+    
     def show(self, player):
         # type: (_CustomUI.Player) -> None
         player.showUI(self)
@@ -531,3 +726,13 @@ class UI(object):
     def addControl(self, control):
         # type: (Control) -> None
         self._controlData.addControl(control._controlData)
+
+    def onUpdate(self, callback):
+        # type: (types.FunctionType) -> None
+        """设置界面刷新时要执行的函数"""
+        self._controlData.updateCallback = callback
+
+    def __refresh(self):
+        RefreshSigns[id(self)] = 1
+
+

@@ -35,8 +35,8 @@ class BackgroundData(object):
     def color(self, value):
         # type: (tuple[int | Expression] | list[int | Expression]) -> None
         if type(value) in [list, tuple]:
-            if len(value) != 2:
-                print("[Error][ModSAPI][TypeError] 属性 color 长度为2")
+            if len(value) != 3:
+                print("[Error][ModSAPI][TypeError] 属性 color 长度为3")
                 return
             # process value
             temp = [0, 0, 0]
@@ -100,6 +100,10 @@ class ControlData(object):
         """alpha of this control."""
         self.background = BackgroundData()
         """background of this control"""
+        self.visible = True
+        """visblibity of this control"""
+        self.isStatic = False
+        self.shouldTrace = False
 
     def __str__(self):
         controlStr = []
@@ -143,7 +147,10 @@ class ControlData(object):
                 "offset": self.offset,
                 "anchor": self.anchor,
                 "alpha": self.alpha,
-                "bg": self.background
+                "bg": self.background,
+                "visible": self.visible,
+                "isStatic": self.isStatic,
+                "shouldTrace": self.shouldTrace
             }
         }
         return data
@@ -191,7 +198,9 @@ class ScreenData(object):
         self.controls = [] # type: list[ControlData]
         """child controls"""
         self.size = [Expression(0), Expression(0)]
+        self.alpha = Expression(1.0)
         self.background = BackgroundData()
+        self.updateCallback = None
 
     def __str__(self):
         controlStr = []

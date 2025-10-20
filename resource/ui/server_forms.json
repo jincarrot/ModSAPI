@@ -1,0 +1,72 @@
+{
+    "action_form": {
+        "type": "screen",
+        "controls": [
+            {
+                "panel@server_form.long_form": {
+                    "layer": 1
+                }
+            }
+        ]
+    },
+    "custom_ui": {
+        "type": "screen",
+        "button_mappings": [
+            {
+                "to_button_id": "#custom_ui_close",
+                "from_button_id": "button.menu_cancel",
+                "mapping_type": "global"
+            },
+            {
+                "to_button_id": "#custom_ui_close",
+                "from_button_id": "button.menu_inventory_cancel",
+                "mapping_type": "global"
+            }
+        ],
+        "controls": [
+            {
+                "screen": {
+                    "type": "panel",
+                    "anchor_to": "center",
+                    "size": [
+                        "100%",
+                        "100%"
+                    ],
+                    "layer": 0,
+                    "controls": [
+                        {
+                            "custom_ui_background_auto_generate": {
+                                "type": "image",
+                                "anchor_from": "center",
+                                "anchor_to": "center",
+                                "offset": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "size": [
+                                    "100%",
+                                    "100%"
+                                ],
+                                "layer": 0,
+                                "visible": true,
+                                "fill": true,
+                                "texture": "textures/ui/white_bg"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "modal_form": {
+        "type": "screen",
+        "controls": [
+            {
+                "panel@server_form.custom_form": {
+                    "layer": 1
+                }
+            }
+        ]
+    },
+    "namespace": "server_forms"
+}

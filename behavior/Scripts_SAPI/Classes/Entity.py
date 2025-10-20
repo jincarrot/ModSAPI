@@ -18,6 +18,7 @@ from ..minecraft import *
 from Command import *
 import types
 from UI import *
+from Screen import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -739,6 +740,7 @@ class Player(Entity):
         Entity.__init__(self, playerId)
         self.__id = playerId
         self.__container = self.con.Container(None, self.__id)
+        self.__screen = Screen(self.__id)
 
     def __str__(self):
         data = {
@@ -818,6 +820,11 @@ class Player(Entity):
         # type: (ItemStack) -> None
         self.container.setItem(self.selectedSlotIndex, item)
     
+    @property
+    def screen(self):
+        """The screen of this player."""
+        return self.__screen
+
     def applyKnockback(self, horizontalForce, verticalStrength):
         # type: (dict | VectorXZ, float) -> None
         """
@@ -868,6 +875,9 @@ class Player(Entity):
         from ..SAPI_C import Screens
         Screens[id(customUI)] = customUI
         world.NotifyToClient(self.id, "showUI", {"screenId": id(customUI)})
+
+    def popScreen(self):
+        world.NotifyToClient(self.id, "popScreen", {})
 
 def createEntity(entityId):
     # type: (str) -> Entity | Player | None

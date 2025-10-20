@@ -26,7 +26,7 @@ class New:
             return old.sin(x)
         
     def cos(self, x):
-        if Expression and isinstance(x, Expression):
+        if isinstance(x, Expression):
             return x._cos()
         else:
             return old.cos(x)
@@ -96,8 +96,6 @@ class Expression(object):
     
     def __add__(self, value):
         # type: (float | Expression) -> Expression
-        if not Expression:
-            return None
         result = Expression(self, 1, value)
         return result
     

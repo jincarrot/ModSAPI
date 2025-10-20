@@ -27,6 +27,7 @@ class SAPI_C(ClientSystem):
         self.ListenForEvent("SAPI", "world", "showModalForm", self, self.showModalForm)
         self.ListenForEvent("SAPI", "world", "showUI", self, self.showUI)
         self.ListenForEvent("SAPI", "world", "setMusicState", self, self.setMusicState)
+        self.ListenForEvent("SAPI", "world", "popScreen", self, self.popScreen)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.playerSpawn)
 
@@ -68,6 +69,12 @@ class SAPI_C(ClientSystem):
             print("Show UI error! Cannot find ui!")
             return
         clientApi.PushScreen("modsapi", "CustomUI", {"screenId": data['screenId']})
+
+    def popScreen(self, data):
+        screen = clientApi.GetTopScreen()
+        if hasattr(screen, "Close"):
+            screen.Close({})
+        clientApi.PopScreen()
 
 
 def ClientMethod(func):

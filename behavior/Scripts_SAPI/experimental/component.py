@@ -16,7 +16,7 @@ def component(name, singleton=False, autoInstance=False):
         clientApi.RegisterComponent(
             componentNamespace,
             name,
-            
+            None
         )
         return cls
     return decorator
