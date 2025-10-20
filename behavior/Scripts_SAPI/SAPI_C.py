@@ -162,6 +162,8 @@ class Client(ServerSystem):
     A class that provides client system.
     """
 
+    viewComp = CComp.CreatePlayerView(clientApi.GetLocalPlayerId())
+
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
         self.__afterEvents = ClientAfterEvents()
@@ -172,3 +174,15 @@ class Client(ServerSystem):
     def afterEvents(self):
         # request.create()
         pass
+
+    @classmethod
+    def isMouseInput(cls):
+        return cls.viewComp.GetToggleOption("INPUT_MODE") == 0
+
+    @classmethod
+    def isTouchInput(cls):
+        return cls.viewComp.GetToggleOption("INPUT_MODE") == 1
+
+    @classmethod
+    def isGamepadInput(cls):
+        return cls.viewComp.GetToggleOption("INPUT_MODE") == 2
