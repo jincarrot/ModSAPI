@@ -65,7 +65,8 @@ class _CustomUI(ScreenNode):
         bg = self.CreateChildControl("base_controls.background", "custom_ui_background_auto_generate", c).asImage()
         bg.SetSprite(data['bg'].texture)
         bg.SetAlpha(float(data['bg'].alpha))
-        bg.SetSpriteColor(data['bg'].color)
+        # bg.SetSpriteColor(data['bg'].color)
+        bg.SetLayer(0)
         if not c:
             return
         if type(data['size'][0]) != str:
@@ -318,8 +319,8 @@ class _CustomUI(ScreenNode):
                 c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
                 c.SetVisible(controlData['visible'])
                 bg = c.GetChildByName("custom_ui_background_auto_generate").asImage()
-                bg.SetAlpha(controlData['bg'].alpha)
                 bg.SetSpriteColor((float(controlData['bg'].color[0]) / 255.0, float(controlData['bg'].color[1]) / 255.0, float(controlData['bg'].color[2] / 255.0)))
+                bg.SetAlpha(float(controlData['bg'].alpha))
                 self.updateControl(path + "/" + controlName, controlData['controls'])
 
     def draw(self, control, controlData):

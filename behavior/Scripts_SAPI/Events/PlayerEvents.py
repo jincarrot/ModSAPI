@@ -305,32 +305,6 @@ class PlayerInventoryItemChangeAfterEvent(object):
         """Inventory type."""
         return self.__inventoryType
     
-class PlayerBreakBlockAfterEvent(object):
-    """Contains information regarding a player that has left the world.    """
-
-    def __init__(self, data):
-        self.__playerId = data['id']
-        self.__playerName = data['name']
-
-    def __str__(self):
-        data = {
-            "playerId": str(self.__playerId),
-            "playerName": str(self.__playerName)
-        }
-        return "<PlayerBreakBlockAfterEvent> %s" % data
-    
-    @property
-    def playerId(self):
-        # type: () -> str
-        """Opaque string identifier of the player that left the game."""
-        return self.__playerId
-    
-    @property
-    def playerName(self):
-        # type: () -> str
-        """Name of the player that has left."""
-        return self.__playerName
-
 class PlayerSpawnAfterEvent(object):
     """
     Contains information regarding a player that has joined. 
