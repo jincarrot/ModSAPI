@@ -720,9 +720,11 @@ class UI(object):
         self._controlData.addControl(label._controlData)
         return label
     
-    def show(self, player):
-        # type: (_CustomUI.Player) -> None
-        player.showUI(self)
+    def show(self):
+        # type: () -> None
+        from ..SAPI_C import Screens
+        Screens[id(self)] = self
+        clientApi.PushScreen("modsapi", "CustomUI", {"screenId": id(self)})
 
     def addControl(self, control):
         # type: (Control) -> None
@@ -736,4 +738,23 @@ class UI(object):
     def __refresh(self):
         RefreshSigns[id(self)] = 1
 
+
+class ScreenUI(UI):
+
+    def __init__(self):
+        self._controlData = ScreenData()
+        self.__age = Expression(-1)
+        UI.__init__(self)
+
+    @property
+    def age(self):
+        # type: () -> Expression
+        """
+        UI寿命(从弹出界面开始),单位: tick(1秒30tick)
+
+        未弹出界面时返回-1
+
+        支持表达式
+        """
+        return self.__age
 

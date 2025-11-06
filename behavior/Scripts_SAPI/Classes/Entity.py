@@ -14,7 +14,7 @@ from Camara import *
 from Request import *
 from ClientSystemInfo import *
 import mod.server.extraServerApi as serverApi
-from ..minecraft import *
+from ..packs.server import *
 from Command import *
 import types
 from UI import *
@@ -820,11 +820,6 @@ class Player(Entity):
         # type: (ItemStack) -> None
         self.container.setItem(self.selectedSlotIndex, item)
     
-    @property
-    def screen(self):
-        """The screen of this player."""
-        return self.__screen
-
     def applyKnockback(self, horizontalForce, verticalStrength):
         # type: (dict | VectorXZ, float) -> None
         """
@@ -878,6 +873,21 @@ class Player(Entity):
 
     def popScreen(self):
         world.NotifyToClient(self.id, "popScreen", {})
+
+
+class ClientPlayer(object):
+    """client-side player"""
+
+    def __init__(self, playerId):
+        self.__id = playerId
+        self.__screen = Screen(self.__id)
+
+    @property
+    def id(self):
+        # type: () -> str
+        """player's unique id"""
+        return self.__id
+
 
 def createEntity(entityId):
     # type: (str) -> Entity | Player | None

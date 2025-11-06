@@ -38,7 +38,6 @@ world = getWorld()
 system = getSystem()
 ActionFormData = getActionFormData()
 ModalFormData = getModalFormData()
-CustomUI = getUI()
 
 ServerSystem = serverApi.GetServerSystemCls()
 

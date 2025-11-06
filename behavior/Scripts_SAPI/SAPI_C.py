@@ -4,14 +4,27 @@ import math, time
 from Classes.ClientEvents import *
 from Classes.Request import *
 from Classes.UI import *
+from Classes.Entity import *
+from Classes.Screen import *
 from scheduler import Scheduler
-from minecraft import *
+# from minecraft import *
 
 ClientSystem = clientApi.GetClientSystemCls()
 
 CComp = clientApi.GetEngineCompFactory()
 
 Screens = {}
+
+def getUI():
+    # type: () -> type[UI]
+    return clientApi.GetSystem("SAPI", "SAPI_C").getUI() if clientApi.GetSystem("SAPI", "SAPI_C") else None
+
+def getManager():
+    # type: () -> type[UI]
+    return clientApi.GetSystem("SAPI", "manager")
+
+CustomUI = getUI()
+manager = getManager()
 
 
 class SAPI_C(ClientSystem):
@@ -76,16 +89,11 @@ class SAPI_C(ClientSystem):
             screen.Close({})
         clientApi.PopScreen()
 
+    @staticmethod
+    def getUI():
+        from Classes.UI import UI
+        return UI
 
-def ClientMethod(func):
-    """client method"""
-    def wrapper(*args, **kwargs):
-        global system
-        if not system:
-            system = getSystem()
-        result = func(*args, **kwargs)
-        return result
-    return wrapper
 
 class ClientP(ClientSystem):
 
@@ -186,3 +194,21 @@ class Client(ServerSystem):
     @classmethod
     def isGamepadInput(cls):
         return cls.viewComp.GetToggleOption("INPUT_MODE") == 2
+    
+
+class Manager(ClientSystem):
+    
+    def __init__(self, namespace, systemName):
+        ClientSystem.__init__(self, namespace, systemName)
+        self.__localPlayer = ClientPlayer(clientApi.GetLocalPlayerId())
+        self.__screen = Screen()
+
+    @property
+    def localPlayer(self):
+        """本地玩家"""
+        return self.__localPlayer
+    
+    @property
+    def screen(self):
+        """屏幕管理类"""
+        return self.__screen
