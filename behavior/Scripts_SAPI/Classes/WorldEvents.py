@@ -29,6 +29,7 @@ class WorldAfterEvents(object):
         self.__entityLoad = EntityLoadAfterEventSignal()
         self.__entityRemove = EntityRemoveAfterEventSignal() # 
         self.__entitySpawn = EntitySpawnAfterEventSignal() #
+        self.__dataDrivenEntityTriger = DataDrivenEntityTriggerEventSignal()
         self.__chatSend = ChatSendAfterEventSignal() #
         self.__itemUse = ItemUseAfterEventSignal() #
         self.__itemCompleteUse = ItemCompleteUseAfterEventSignal() #
@@ -44,6 +45,13 @@ class WorldAfterEvents(object):
         self.__playerInventoryItemChange = PlayerInventoryItemChangeAfterEventSignal()
         self.__playerBreakBlock = PlayerBreakBlockAfterEventSignal()
         self.__playerPlaceBlock = PlayerPlaceBlockAfterEventSignal()
+
+    @property
+    def dataDrivenEntityTrigger(self):
+        """
+        This event is fired when an entity event has been triggered that will update the component definition state of an entity.
+        """
+        return self.__dataDrivenEntityTriger
 
     @property
     def entityDie(self):

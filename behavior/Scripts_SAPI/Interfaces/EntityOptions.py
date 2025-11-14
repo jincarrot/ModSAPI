@@ -279,3 +279,17 @@ class PlayerSoundOptions(object):
         """Optional pitch of the sound."""
         self.volume = data['volume'] if 'volume' in data else 1.0
         """Optional volume of the sound."""
+
+
+class MusicOptions(object):
+    """
+    Additional options for how a sound plays for a player.
+    """
+
+    def __init__(self, data):
+        self.loop = data['loop'] if 'loop' in data else False
+        """If set to true, this music track will play repeatedly."""
+        self.fade = data['fade'] if 'fade' in data else 1.0
+        """Specifies a fade overlap for music at the end of play."""
+        self.volume = data['volume'] if 'volume' in data else 1.0
+        """Relative volume level of the music."""

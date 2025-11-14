@@ -6,6 +6,8 @@ from Classes.Request import *
 from Classes.UI import *
 from Classes.Entity import *
 from Classes.Screen import *
+from Classes.Audio import *
+from Classes.Particle import *
 from scheduler import Scheduler
 # from minecraft import *
 
@@ -20,7 +22,7 @@ def getUI():
     return clientApi.GetSystem("SAPI", "SAPI_C").getUI() if clientApi.GetSystem("SAPI", "SAPI_C") else None
 
 def getManager():
-    # type: () -> type[UI]
+    # type: () -> Manager
     return clientApi.GetSystem("SAPI", "manager")
 
 CustomUI = getUI()
@@ -165,7 +167,7 @@ class ClientP(ClientSystem):
         ClientP._frameScheduler.removeTask(stage, id)
 
 
-class Client(ServerSystem):
+class Client(ClientSystem):
     """
     A class that provides client system.
     """
@@ -173,7 +175,7 @@ class Client(ServerSystem):
     viewComp = CComp.CreatePlayerView(clientApi.GetLocalPlayerId())
 
     def __init__(self, namespace, systemName):
-        ServerSystem.__init__(self, namespace, systemName)
+        ClientSystem.__init__(self, namespace, systemName)
         self.__afterEvents = ClientAfterEvents()
         self.__beforeEvents = ClientBeforeEvents()
         print("ModSAPI: client-loader loaded")
@@ -202,6 +204,9 @@ class Manager(ClientSystem):
         ClientSystem.__init__(self, namespace, systemName)
         self.__localPlayer = ClientPlayer(clientApi.GetLocalPlayerId())
         self.__screen = Screen()
+        self.__audio = Audio()
+        self.__particle = Particle()
+        self.__afterEvents = ClientAfterEvents()
 
     @property
     def localPlayer(self):
@@ -212,3 +217,18 @@ class Manager(ClientSystem):
     def screen(self):
         """屏幕管理类"""
         return self.__screen
+    
+    @property
+    def audio(self):
+        """音频管理类"""
+        return self.__audio
+    
+    @property
+    def particle(self):
+        """粒子管理类"""
+        return self.__particle
+    
+    @property
+    def afterEvents(self):
+        """events"""
+        return self.__afterEvents

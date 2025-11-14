@@ -13,6 +13,10 @@ class ClientAfterEvents(object):
     def __init__(self):
         pass
 
+    @property
+    def tapRelease(self):
+        return
+
 class ClientBeforeEvents(object):
     """
     Contains a set of events that are available across the scope of the Client System.

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import random
 import mod.client.extraClientApi as clientApi
 # from mod.client.ui.controls.baseUIControl import *
 import types
 
 from ControlData import *
+from ..Interfaces.Vector import Vector2
 from ..Utils.Expression import *
 
 ScreenNode = clientApi.GetScreenNodeCls()
@@ -30,6 +32,50 @@ class Variables(object):
 v = Variables()
 
 
+class ButtonCallbackManager:
+
+    def __init__(self, button, ui, callbacks):
+        # type: (Button, UI, ButtonTouchCallbacks) -> None
+        self.arg = ButtonCallbackArgument(button, ui)
+        self.callbacks = callbacks
+
+    def onTouchUp(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.touchUp(self.arg)
+
+    def onTouchDown(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.touchDown(self.arg)
+
+    def onMoveIn(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.touchMoveIn(self.arg)
+
+    def onMove(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.touchMove(self.arg)
+
+    def onMoveOut(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.touchMoveOut(self.arg)
+
+    def onScreenExit(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.screenExit(self.arg)
+
+    def onTouchCancel(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.touchCancel(self.arg)
+
+    def onHoverIn(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.hoverIn(self.arg)
+
+    def onHoverOut(self, data):
+        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
+        self.callbacks.hoverOut(self.arg)
+
+
 class _CustomUI(ScreenNode):
     """Custom UI"""
 
@@ -43,6 +89,7 @@ class _CustomUI(ScreenNode):
         from ..SAPI_C import Screens
         self.ui = Screens.get(param['screenId'], None) # type: UI
         self.screenData = self.ui._controlData._generate()
+        self.buttonCallbackManagers = {}
         self.drawingData = {}
         self.traceData = {}
 
@@ -159,6 +206,27 @@ class _CustomUI(ScreenNode):
             c.asImage().SetSprite(data['texture'])
         elif controlType == 'label':
             c.asLabel().SetText(data['text'])
+        elif controlType == 'button':
+            button = c.asButton()
+            callbackManager = ButtonCallbackManager(data['base'], self.ui, data['callbacks'])
+            self.buttonCallbackManagers[data['path']] = callbackManager
+            button.AddTouchEventParams({"isSwallow": True})
+            button.AddHoverEventParams({"isSwallow": True})
+            button.SetButtonHoverInCallback(callbackManager.onHoverIn)
+            button.SetButtonHoverOutCallback(callbackManager.onHoverOut)
+            button.SetButtonTouchMoveInCallback(callbackManager.onMoveIn)
+            button.SetButtonTouchMoveOutCallback(callbackManager.onMoveOut)
+            button.SetButtonTouchMoveCallback(callbackManager.onMove)
+            button.SetButtonScreenExitCallback(callbackManager.onScreenExit)
+            button.SetButtonTouchCancelCallback(callbackManager.onTouchCancel)
+            button.SetButtonTouchDownCallback(callbackManager.onTouchDown)
+            button.SetButtonTouchUpCallback(callbackManager.onTouchUp)
+            Data = []
+            Data.append(data['textures'].default._generate())
+            Data.append(data['textures'].hover._generate())
+            Data.append(data['textures'].pressed._generate())
+            Data.append(data['label']._generate())
+            self.updateControl(path + "/" + controlName, Data)
         if data['isStatic']:
             controlData[controlName] = None
             return
@@ -193,7 +261,7 @@ class _CustomUI(ScreenNode):
             for key in self.drawingData:
                 data = self.drawingData[key]
                 for p in data['lst']:
-                    alpha = float(data['params']['alpha'])
+                    alpha = float(data['params']['alpha']) * float(data['parent']['alpha'])
                     color = data['params']['color']
                     c = self.GetBaseUIControl(p).asImage()
                     c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
@@ -232,6 +300,7 @@ class _CustomUI(ScreenNode):
                 c = self.GetBaseUIControl(path + "/" + controlName)
                 if not c:
                     return
+                controlType = controlData['type']
                 if controlData['shouldTrace']:
                     self.draw(c, controlData)
                 if type(controlData['size'][0]) != str:
@@ -318,9 +387,19 @@ class _CustomUI(ScreenNode):
                 alpha = float(controlData['alpha'])
                 c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
                 c.SetVisible(controlData['visible'])
-                bg = c.GetChildByName("custom_ui_background_auto_generate").asImage()
-                bg.SetSpriteColor((float(controlData['bg'].color[0]) / 255.0, float(controlData['bg'].color[1]) / 255.0, float(controlData['bg'].color[2] / 255.0)))
-                bg.SetAlpha(float(controlData['bg'].alpha))
+                if c.GetChildByName("custom_ui_background_auto_generate"):
+                    bg = c.GetChildByName("custom_ui_background_auto_generate").asImage()
+                    bg.SetSpriteColor((float(controlData['bg'].color[0]) / 255.0, float(controlData['bg'].color[1]) / 255.0, float(controlData['bg'].color[2] / 255.0)))
+                    bg.SetAlpha(float(controlData['bg'].alpha))
+                if controlType == 'button':
+                    data = []
+                    data.append(controlData['textures'].default._generate())
+                    data.append(controlData['textures'].hover._generate())
+                    data.append(controlData['textures'].pressed._generate())
+                    data.append(controlData['label']._generate())
+                    self.updateControl(path + "/" + controlName, data)
+                if controlType == 'label':
+                    c.asLabel().SetText(controlData['text'])
                 self.updateControl(path + "/" + controlName, controlData['controls'])
 
     def draw(self, control, controlData):
@@ -332,6 +411,9 @@ class _CustomUI(ScreenNode):
             self.drawingData[control.GetPath()] = {
                 "expression": controlData['offset'],
                 "params": params,
+                "parent": {
+                    "alpha": controlData['alpha']
+                },
                 "lst": []
             }
         else:
@@ -562,6 +644,7 @@ class Control(object):
         Add a new panel.
         """
         panel = Panel(self)
+        panel.name = "panel%s" % random.randint(0, 2147483648)
         self._controlData.addControl(panel._controlData)
         return panel
     
@@ -571,6 +654,7 @@ class Control(object):
         Add a new image.
         """
         image = Image(self)
+        image.name = "image%s" % random.randint(0, 2147483648)
         self._controlData.addControl(image._controlData)
         return image
     
@@ -578,8 +662,17 @@ class Control(object):
         # type: (dict) -> Label
         """添加文本控件"""
         label = Label(self)
+        label.name = "label%s" % random.randint(0, 2147483648)
         self._controlData.addControl(label._controlData)
         return label
+    
+    def addButton(self, buttonData={}):
+        # type: (dict) -> Button
+        """添加文本控件"""
+        button = Button(self)
+        button.name = "button%s" % random.randint(0, 2147483648)
+        self._controlData.addControl(button._controlData)
+        return button
     
     def addControl(self, control):
         # type: (Control) -> bool
@@ -656,6 +749,47 @@ class Label(Control):
         # type: (str) -> None
         self._controlData.text = value
 
+class Button(Control):
+    """button class."""
+    
+    def __init__(self, parent=None):
+        # type: (Control | UI) -> None
+        self._controlData = ButtonData(parent._controlData if parent else None, self)
+        self._parent = parent
+
+    @property
+    def callbacks(self):
+        """按钮回调函数"""
+        return self._controlData.callbacks
+    
+    @property
+    def textures(self):
+        """贴图集"""
+        return self._controlData.textures
+    
+    @property
+    def label(self):
+        """文本"""
+        return self._controlData.label
+    
+class DragableButton(Button):
+    """dragable button class."""
+    
+    def __init__(self, parent=None):
+        # type: (Control | UI) -> None
+        self._controlData = DragableButtonData(parent._controlData if parent else None, self)
+        self._parent = parent
+
+
+class ButtonCallbackArgument(object):
+    """按钮回调函数参数"""
+
+    def __init__(self, button, ui, pos=(0, 0)):
+        # type: (Button, UI, tuple) -> None
+        self.button = button
+        self.ui = ui
+        self.pos = Vector2(pos)
+
 
 class UI(object):
     """Custom UI (ModSAPI only)"""
@@ -698,9 +832,10 @@ class UI(object):
     def addPanel(self, panelData={}):
         # type: (dict) -> Panel
         """
-        Add a new panel
+        Add a new panel.
         """
         panel = Panel(self)
+        panel.name = "panel%s" % random.randint(0, 2147483648)
         self._controlData.addControl(panel._controlData)
         return panel
     
@@ -710,6 +845,7 @@ class UI(object):
         Add a new image.
         """
         image = Image(self)
+        image.name = "image%s" % random.randint(0, 2147483648)
         self._controlData.addControl(image._controlData)
         return image
     
@@ -717,8 +853,17 @@ class UI(object):
         # type: (dict) -> Label
         """添加文本控件"""
         label = Label(self)
+        label.name = "label%s" % random.randint(0, 2147483648)
         self._controlData.addControl(label._controlData)
         return label
+    
+    def addButton(self, buttonData={}):
+        # type: (dict) -> Button
+        """添加文本控件"""
+        button = Button(self)
+        button.name = "button%s" % random.randint(0, 2147483648)
+        self._controlData.addControl(button._controlData)
+        return button
     
     def show(self):
         # type: () -> None

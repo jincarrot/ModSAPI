@@ -1,4 +1,4 @@
-from ..minecraft import world, system
+from ..minecraft import *
 from ..Classes.FormResponse import *
 from ..Events.BlockEventSignals import *
 from ..Events.PlayerEventSignals import *

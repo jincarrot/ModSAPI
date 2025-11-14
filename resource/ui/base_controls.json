@@ -1,4 +1,25 @@
 {
+    "background": {
+        "type": "image",
+        "anchor_from": "center",
+        "anchor_to": "center",
+        "offset": [
+            0.0,
+            0.0
+        ],
+        "size": [
+            "100%",
+            "100%"
+        ],
+        "layer": 0,
+        "alpha": 0.0,
+        "fill": true,
+        "rotate_pivot": [
+            0.5,
+            0.5
+        ],
+        "texture": "textures/ui/white_bg"
+    },
     "custom_button@common.button": {
         "type": "button",
         "$control_alpha": 1.0,
@@ -28,6 +49,71 @@
             0,
             0
         ],
+        "$pressed_button_name": "%netease_editor_template_namespace.click",
+        "$pressed_texture": "textures/netease/common/button/pressed",
+        "$texture_layer": 2,
+        "size": [
+            100,
+            50
+        ],
+        "layer": 2,
+        "button_mappings": [],
+        "default_control": "default",
+        "hover_control": "hover",
+        "is_handle_button_move_event": true,
+        "pressed_control": "pressed",
+        "bindings": [
+            {
+                "binding_type": "collection_details",
+                "binding_collection_name": "",
+                "binding_condition": "always_when_visible"
+            }
+        ],
+        "controls": [
+            {
+                "default@netease_editor_template_namespace.default": {}
+            },
+            {
+                "hover@netease_editor_template_namespace.hover": {}
+            },
+            {
+                "pressed@netease_editor_template_namespace.pressed": {}
+            },
+            {
+                "button_label@netease_editor_template_namespace.button_label": {}
+            }
+        ]
+    },
+    "custom_dragablebutton@common.button": {
+        "type": "button",
+        "$control_alpha": 1.0,
+        "$default_texture": "textures/netease/common/button/default",
+        "$hover_texture": "textures/netease/common/button/hover",
+        "$is_new_nine_slice": false,
+        "$label_color": [
+            1,
+            1,
+            1
+        ],
+        "$label_font_scale_factor": 1.0,
+        "$label_font_size": "large",
+        "$label_layer": 3,
+        "$label_offset": [
+            0,
+            0
+        ],
+        "$label_text": "Button",
+        "$nine_slice_buttom": 0,
+        "$nine_slice_left": 0,
+        "$nine_slice_right": 0,
+        "$nine_slice_top": 0,
+        "$nineslice_size": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "draggable": "both",
         "$pressed_button_name": "%netease_editor_template_namespace.click",
         "$pressed_texture": "textures/netease/common/button/pressed",
         "$texture_layer": 2,
@@ -126,10 +212,10 @@
             100,
             100
         ],
+        "layer": 2,
         "font_type": "default",
         "text": "Hello World!",
-        "text_alignment": "center",
-        "layer": 2
+        "text_alignment": "center"
     },
     "custom_panel": {
         "type": "panel",
@@ -172,27 +258,6 @@
                 "binding_condition": "always_when_visible"
             }
         ]
-    },
-    "background": {
-        "type": "image",
-        "offset": [
-            0.0,
-            0.0
-        ],
-        "size": [
-            "100%",
-            "100%"
-        ],
-        "layer": 0,
-        "rotate_pivot": [
-            0.5,
-            0.5
-        ],
-        "fill": true,
-        "anchor_from": "center",
-        "anchor_to": "center",
-        "alpha": 0.0,
-        "texture": "textures/ui/white_bg"
     },
     "namespace": "base_controls"
 }

@@ -114,6 +114,16 @@ class ControlData(object):
         }
         return "%s" % data
 
+    @property
+    def path(self):
+        """控件路径"""
+        p = "/%s" % self.controlName
+        cur = self
+        while(hasattr(cur, "parent") and getattr(cur, "parent")):
+            p = ("/%s" % cur.parent.controlName) + p
+            cur = cur.parent
+        return p
+    
     def addControl(self, controlData):
         # type: (ControlData) -> None
         """add a new control to current control"""
@@ -150,7 +160,8 @@ class ControlData(object):
                 "bg": self.background,
                 "visible": self.visible,
                 "isStatic": self.isStatic,
-                "shouldTrace": self.shouldTrace
+                "shouldTrace": self.shouldTrace,
+                "path": self.path
             }
         }
         return data
@@ -178,9 +189,182 @@ class ImageData(ControlData):
         baseData = ControlData._generate(self)
         baseData[self.controlName]['texture'] = self.texture
         return baseData
+    
+class ButtonTouchCallbacks:
 
+    def __init__(self):
+        def default(arg):
+            pass
+        self.__hoverIn = default
+        """鼠标挪入按钮区域时触发函数"""
+        self.__hoverOut = default
+        """鼠标挪出按钮区域时触发函数"""
+        self.__screenExit = default
+        """按钮所在画布退出时触发函数"""
+        self.__touchCancel = default
+        """按下按钮后在按钮区域外抬起时触发函数"""
+        self.__touchDown = default
+        """按下按钮（未抬起）时触发函数"""
+        self.__touchUp = default
+        """按下按钮并抬起时触发"""
+        self.__touchMove = default
+        """手指在按钮区域内挪动时触发"""
+        self.__touchMoveIn = default
+        """手指挪入按钮区域时触发函数"""
+        self.__touchMoveOut = default
+        """手指挪出按钮区域时触发函数"""
+
+    @property
+    def hoverIn(self):
+        """鼠标挪入按钮区域时触发函数"""
+        return self.__hoverIn
+
+    @hoverIn.setter
+    def hoverIn(self, value):
+        if callable(value):
+            self.__hoverIn = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 hoverIn 必须为可调用对象")
+
+    @property
+    def hoverOut(self):
+        """鼠标挪出按钮区域时触发函数"""
+        return self.__hoverOut
+
+    @hoverOut.setter
+    def hoverOut(self, value):
+        if callable(value):
+            self.__hoverOut = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 hoverOut 必须为可调用对象")
+
+    @property
+    def screenExit(self):
+        """按钮所在画布退出时触发函数"""
+        return self.__screenExit
+
+    @screenExit.setter
+    def screenExit(self, value):
+        if callable(value):
+            self.__screenExit = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 screenExit 必须为可调用对象")
+
+    @property
+    def touchCancel(self):
+        """按下按钮后在按钮区域外抬起时触发函数"""
+        return self.__touchCancel
+
+    @touchCancel.setter
+    def touchCancel(self, value):
+        if callable(value):
+            self.__touchCancel = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 touchCancel 必须为可调用对象")
+
+    @property
+    def touchDown(self):
+        """按下按钮（未抬起）时触发函数"""
+        return self.__touchDown
+
+    @touchDown.setter
+    def touchDown(self, value):
+        if callable(value):
+            self.__touchDown = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 touchDown 必须为可调用对象")
+
+    @property
+    def touchUp(self):
+        """按下按钮并抬起时触发"""
+        return self.__touchUp
+
+    @touchUp.setter
+    def touchUp(self, value):
+        if callable(value):
+            self.__touchUp = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 touchUp 必须为可调用对象")
+
+    @property
+    def touchMove(self):
+        """手指在按钮区域内挪动时触发"""
+        return self.__touchMove
+
+    @touchMove.setter
+    def touchMove(self, value):
+        if callable(value):
+            self.__touchMove = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 touchMove 必须为可调用对象")
+
+    @property
+    def touchMoveIn(self):
+        """手指挪入按钮区域时触发函数"""
+        return self.__touchMoveIn
+
+    @touchMoveIn.setter
+    def touchMoveIn(self, value):
+        if callable(value):
+            self.__touchMoveIn = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 touchMoveIn 必须为可调用对象")
+
+    @property
+    def touchMoveOut(self):
+        """手指挪出按钮区域时触发函数"""
+        return self.__touchMoveOut
+
+    @touchMoveOut.setter
+    def touchMoveOut(self, value):
+        if callable(value):
+            self.__touchMoveOut = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 touchMoveOut 必须为可调用对象")
+
+class ButtonTextures:
+
+    def __init__(self):
+        self.default = ImageData()
+        self.default.texture = "textures/netease/common/button/default"
+        self.default.controlName = "default"
+        self.hover = ImageData()
+        self.hover.texture = "textures/netease/common/button/hover"
+        self.hover.controlName = "hover"
+        self.pressed = ImageData()
+        self.pressed.texture = "textures/netease/common/button/pressed"
+        self.pressed.controlName = "pressed"
+
+class ButtonData(ControlData):
+    """Button class"""
+
+    def __init__(self, parentData=None, buttonInstance=None):
+        ControlData.__init__(self, parentData)
+        self.buttonInstance = buttonInstance
+        self.callbacks = ButtonTouchCallbacks()
+        """按钮回调函数"""
+        self.label = LabelData()
+        """按钮文本"""
+        self.label.controlName = "button_label"
+        self.textures = ButtonTextures()
+        """按钮贴图"""
+
+    def _generate(self):
+        baseData = ControlData._generate(self)
+        baseData[self.controlName]['callbacks'] = self.callbacks
+        baseData[self.controlName]['label'] = self.label
+        baseData[self.controlName]['textures'] = self.textures
+        baseData[self.controlName]['base'] = self.buttonInstance
+        return baseData
+    
+class DragableButtonData(ButtonData):
+    """Dragable button data"""
+
+    def __init__(self, parentData=None):
+        ButtonData.__init__(self, parentData)
+    
 class LabelData(ControlData):
-    """Image class"""
+    """Lable class"""
 
     def __init__(self, parentData=None):
         ControlData.__init__(self, parentData)
@@ -201,6 +385,7 @@ class ScreenData(object):
         self.alpha = Expression(1.0)
         self.background = BackgroundData()
         self.updateCallback = None
+        self.controlName = "screen"
 
     def __str__(self):
         controlStr = []
