@@ -7,25 +7,27 @@ from types import *
 class Task:
     taskId = 0
 
-    def __init__(self, fn, once):
-        self.thread = Thread(target=fn)  # type: Thread
-        self.once = once  # type: bool
+    def __init__(self, fn):
+        self.fn = fn  # type: FunctionType
         self.id = Task.taskId
+        self.finished = False  # type: bool
         Task.taskId += 1
-
 
 class Scheduler:
     def __init__(self):
-        pass
+        self._sequenceExecuting = False
+        self._lastExecutedTime = time()
+        self._skippedUpdates = 0
+        self._innerTicks = 0
+        self._scheduleQueues = {}  # type: dict[str, list[Task]]
+        self._executingThreads = []  # type: list[Task]
+        self.scheduleSequence = (
+            'BeforeUpdate',
+            'Update',
+            'AfterUpdate',
+        )
+        self._shouldRemoveTaskFns = []
 
-    scheduleSequence = (
-        'BeforeUpdate',
-        'Update',
-        'AfterUpdate',
-    )
-
-    _scheduleQueues = {}  # type: dict[str, list[Task]]
-    _executingThreads = []  # type: list[Task]
 
     def _getTaskQueue(self, scheduleName):
         # type: (str) -> list[Task]
@@ -39,26 +41,27 @@ class Scheduler:
     def execute(self, scheduleName):
         queue = self._getTaskQueue(scheduleName)
         for t in queue:
+            if t.fn in self._shouldRemoveTaskFns:
+                queue.remove(t)
+                self._shouldRemoveTaskFns.remove(t.fn)
+                continue
+
             self._executingThreads.append(t)
-            t.thread.start()
 
         for t in self._executingThreads:
-            t.thread.join()
+            thread = Thread(target=t.fn)
+            thread.start()
+            thread.join()
             self._executingThreads.remove(t)
-            if t.once:
-                queue.remove(t)
 
     def executeAsync(self, scheduleName):
         # type: (str) -> Future
         return Future.runAsync(lambda: self.execute(scheduleName))
 
-    def addTask(self, scheduleName, fn, once=False):
-        # type: (str, FunctionType, bool) -> int
-        """
-        :return: 移除任务的函数
-        """
+    def addTask(self, scheduleName, fn):
+        # type: (str, FunctionType) -> int
         queue = self._getTaskQueue(scheduleName)
-        task = Task(fn, once)
+        task = Task(fn)
         queue.append(task)
         return task.id
 
@@ -72,11 +75,6 @@ class Scheduler:
                     return
         else:
             queue.clear()
-
-    _sequenceExecuting = False
-    _lastExecutedTime = time()
-    _skippedUpdates = 0
-    _innerTicks = 0
 
     def executeSequence(self):
         """
@@ -92,6 +90,7 @@ class Scheduler:
         self.execute('SchedulerTask')
         for scheduleName in self.scheduleSequence:
             self.execute(scheduleName)
+
         dt = time() - self._lastExecutedTime
         self._lastExecutedTime = time()
         self._sequenceExecuting = False
@@ -102,20 +101,21 @@ class Scheduler:
         # type: () -> Future[tuple[float, int], Exception]
         return Future.runAsync(lambda: self.executeSequence())
 
-    def _timeoutWrapper(self, fn, ticks):
+    def _timeoutWrapper(self, fn, ticks, once=False):
         startTick = self._innerTicks
 
         def wrapper():
             if (self._innerTicks - startTick) % ticks <= 0:
                 fn()
+                if once:
+                    self._shouldRemoveTaskFns.append(wrapper)
 
         return wrapper
 
     def runTimer(self, fn, ticks=1, interval=False):
         return self.addTask(
             'SchedulerTask',
-            self._timeoutWrapper(fn, max(1, ticks)),
-            not interval
+            self._timeoutWrapper(fn, max(1, ticks), not interval),
         )
 
     def run(self, fn):
