@@ -248,3 +248,9 @@ class System(ServerSystem):
         Cancels the execution of a function run that was previously scheduled via @minecraft/server.System.run.
         """
         self._scriptScheduler.removeTask('SchedulerTask', runId)
+
+    def runJob(self, generator):
+        return self._scriptScheduler.addSuspendableTask('SchedulerTask', generator)
+    
+    def clearJob(self, jobId):
+        self.clearRun(jobId)

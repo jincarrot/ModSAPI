@@ -1,5 +1,5 @@
 # coding=utf-8
-from threading import Thread
+from threading import Thread, Timer
 from time import time
 from types import *
 
@@ -12,6 +12,25 @@ class Task:
         self.id = Task.taskId
         self.finished = False  # type: bool
         Task.taskId += 1
+
+
+class SuspendableTask:
+    def __init__(self, generator):
+        self.fn = generator  # type: GeneratorType
+        self.gen = generator()
+        self.id = Task.taskId
+        self.finished = False  # type: bool
+        Task.taskId += 1
+
+    def callOnce(self):
+        if self.finished:
+            return None
+
+        try:
+            return next(self.gen)
+        except StopIteration:
+            self.finished = True
+            return None
 
 class Scheduler:
     def __init__(self):
@@ -38,6 +57,7 @@ class Scheduler:
 
         return queue
 
+
     def execute(self, scheduleName):
         queue = self._getTaskQueue(scheduleName)
         for t in queue:
@@ -49,14 +69,22 @@ class Scheduler:
             self._executingThreads.append(t)
 
         for t in self._executingThreads:
-            thread = Thread(target=t.fn)
-            thread.start()
-            thread.join()
-            self._executingThreads.remove(t)
+            if isinstance(t, Task):
+                thread = Thread(target=t.fn)
+                thread.start()
+                thread.join()
+                self._executingThreads.remove(t)
+
+            elif isinstance(t, SuspendableTask):
+                t.callOnce()
+                if t.finished:
+                    self._executingThreads.remove(t)
+
 
     def executeAsync(self, scheduleName):
         # type: (str) -> Future
         return Future.runAsync(lambda: self.execute(scheduleName))
+
 
     def addTask(self, scheduleName, fn):
         # type: (str, FunctionType) -> int
@@ -65,6 +93,16 @@ class Scheduler:
         queue.append(task)
         return task.id
 
+
+    def addSuspendableTask(self, scheduleName, generator):
+        # type: (str, GeneratorType) -> int
+        queue = self._getTaskQueue(scheduleName)
+        task = SuspendableTask(generator)
+        queue.append(task)
+        return task.id
+
+
+    # 注意, 如果 taskId=-1, 则移除该 scheduleName 下的所有任务
     def removeTask(self, scheduleName, taskId=-1):
         # type: (str, int) -> None
         queue = self._getTaskQueue(scheduleName)
@@ -75,6 +113,7 @@ class Scheduler:
                     return
         else:
             queue.clear()
+
 
     def executeSequence(self):
         """
@@ -97,9 +136,11 @@ class Scheduler:
 
         return dt, self._skippedUpdates
 
+
     def executeSequenceAsync(self):
         # type: () -> Future[tuple[float, int], Exception]
         return Future.runAsync(lambda: self.executeSequence())
+
 
     def _timeoutWrapper(self, fn, ticks, once=False):
         startTick = self._innerTicks
@@ -112,14 +153,17 @@ class Scheduler:
 
         return wrapper
 
+
     def runTimer(self, fn, ticks=1, interval=False):
         return self.addTask(
             'SchedulerTask',
             self._timeoutWrapper(fn, max(1, ticks), not interval),
         )
 
+
     def run(self, fn):
         return self.runTimer(fn)
+
 
 
 class Future:
@@ -156,3 +200,21 @@ class Future:
         ftr = Future(fn)
         ftr.start()
         return ftr
+    
+
+# def gen():
+#     for i in range(500):
+#         print(i)
+#         yield i
+
+# def test():
+#     print("Timer executed")
+
+# scheduler = Scheduler()
+# def schedule():
+#     scheduler.executeSequenceAsync()
+#     Timer(0.05, schedule).start()
+
+# schedule()
+
+# scheduler.addSuspendableTask('SchedulerTask', gen)
