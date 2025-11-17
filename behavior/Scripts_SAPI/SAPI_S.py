@@ -5,7 +5,7 @@ from Classes.WorldEvents import *
 from Classes.Scoreboard import *
 from Interfaces.Game import *
 from Classes.Container import *
-from scheduler import Scheduler
+from .architect.scheduler import Scheduler
 from decorators import *
 import types
 

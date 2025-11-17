@@ -8,7 +8,7 @@ from Classes.Entity import *
 from Classes.Screen import *
 from Classes.Audio import *
 from Classes.Particle import *
-from scheduler import Scheduler
+from .architect.scheduler import Scheduler
 # from minecraft import *
 
 ClientSystem = clientApi.GetClientSystemCls()
