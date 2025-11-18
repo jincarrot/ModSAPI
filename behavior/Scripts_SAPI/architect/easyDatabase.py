@@ -2,7 +2,7 @@ from .subsystem import ServerSubsystem, SubsystemServer
 from .level import LevelServer
 
 @SubsystemServer
-class ServerDatabase(ServerSubsystem):
+class ServerKVDatabase(ServerSubsystem):
     data = LevelServer.extraData
 
     def getData(self, key):
