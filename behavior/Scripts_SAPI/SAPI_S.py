@@ -5,7 +5,7 @@ from Classes.WorldEvents import *
 from Classes.Scoreboard import *
 from Interfaces.Game import *
 from Classes.Container import *
-from scheduler import Scheduler
+from .architect.scheduler import Scheduler
 from decorators import *
 import types
 
@@ -252,3 +252,9 @@ class System(ServerSystem):
     def send(self, player, eventName, data):
         # type: (Player, str, dict) -> None
         """Send data to client"""
+        
+    def runJob(self, generator):
+        return self._scriptScheduler.addSuspendableTask('SchedulerTask', generator)
+    
+    def clearJob(self, jobId):
+        self.clearRun(jobId)
