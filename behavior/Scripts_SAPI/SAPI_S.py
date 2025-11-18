@@ -248,3 +248,7 @@ class System(ServerSystem):
         Cancels the execution of a function run that was previously scheduled via @minecraft/server.System.run.
         """
         self._scriptScheduler.removeTask('SchedulerTask', runId)
+
+    def send(self, player, eventName, data):
+        # type: (Player, str, dict) -> None
+        """Send data to client"""

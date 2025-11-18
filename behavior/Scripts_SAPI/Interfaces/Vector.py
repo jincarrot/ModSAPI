@@ -21,6 +21,10 @@ class Vector3(object):
             self.x = data[0]
             self.y = data[1]
             self.z = data[2]
+        elif isinstance(data, Vector3):
+            self.x = data.x
+            self.y = data.y
+            self.z = data.z
 
     def __str__(self):
         data = {
