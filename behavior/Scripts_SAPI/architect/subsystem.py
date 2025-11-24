@@ -1,30 +1,41 @@
 import mod.client.extraClientApi as clientApi
 import mod.server.extraServerApi as serverApi
 
-isServer = clientApi.GetLocalPlayerId() == '-1'
+def isServer():
+    return clientApi.GetLocalPlayerId() == '-1'
 
 class SubsystemManager:
     registeredSubsystems = []
-    inst = None
-    initialized = False
+    client = None
+    server = None
+    rawEngine = None
+    rawSysName = None
 
     @staticmethod
     def getInst():
-        return SubsystemManager.inst
+        return SubsystemManager.server if isServer() else SubsystemManager.client
     
     @staticmethod
     def createClientSystem(engine, sysName, clsPath):
-        return SubsystemManager(
+        manager = SubsystemManager(
             clientApi.RegisterSystem(engine, sysName, clsPath),
             engine, sysName
         )
+        manager.rawEngine = clientApi.GetEngineNamespace()
+        manager.rawSysName = clientApi.GetEngineSystemName()
+        SubsystemManager.client = manager
+        return manager
 
     @staticmethod
     def createServerSystem(engine, sysName, clsPath):
-        return SubsystemManager(
+        manager = SubsystemManager(
             serverApi.RegisterSystem(engine, sysName, clsPath),
             engine, sysName
         )
+        manager.rawEngine = serverApi.GetEngineNamespace()
+        manager.rawSysName = serverApi.GetEngineSystemName()
+        SubsystemManager.server = manager
+        return manager
 
 
     def __init__(self, system, engine, sysName):
@@ -32,39 +43,45 @@ class SubsystemManager:
         self.sysName = sysName
         self.system = system
         self.subsystems = {}
+        if isServer():
+            from .levelServer import LevelServer
+            LevelServer.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
+        else:
+            from .levelClient import LevelClient
+            LevelClient.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
 
-        # Initialize all registered subsystems
+    def appendAllSubsystems(self):
         for subsystemCls in SubsystemManager.registeredSubsystems:
             self.addSubsystem(subsystemCls)
-        SubsystemManager.inst = self
-        SubsystemManager.initialized = True
 
 
     def addSubsystem(self, subsystemCls):
         subSys = subsystemCls(self.system, self.engine, self.sysName)
-        self.subsystems[subsystemCls] = subSys
+        self.subsystems[subsystemCls.__name__] = subSys
         if hasattr(subSys, 'onInit'):
             subSys.onInit()
+        print('[INFO] {} Subsystem "{}" has been initialized'.format('Server' if isServer() else 'Client', subSys.__class__.__name__))
 
 
     def getSubsystem(self, subsystemCls):
-        # type: (str) -> 'Subsystem'
-        return self.subsystems[subsystemCls]
+        # type: (object) -> 'Subsystem'
+        return self.subsystems[subsystemCls.__name__]
 
 
     def removeSubsystem(self, subsystemCls):
-        subSys = self.subsystems[subsystemCls]
+        subSys = self.subsystems[subsystemCls.__name__]
         if hasattr(subSys, 'onDestroy'):
             subSys.onDestroy()
-        del self.subsystems[subsystemCls]
+        del self.subsystems[subsystemCls.__name__]
 
 
     @staticmethod
     def registerSubsystem(subsystem):
-        if not SubsystemManager.initialized:
+        inst = SubsystemManager.getInst()
+        if not inst:
             SubsystemManager.registeredSubsystems.append(subsystem)
         else:
-            SubsystemManager.getInst().addSubsystem(subsystem)
+            inst.addSubsystem(subsystem)
 
 
     @staticmethod
@@ -76,7 +93,7 @@ def SubsystemClient(subsystemCls):
     """
     Decorator to auto register subsystem class
     """
-    if not isServer:
+    if not isServer():
         SubsystemManager.registerSubsystem(subsystemCls)
     return subsystemCls
 
@@ -85,7 +102,7 @@ def SubsystemServer(subsystemCls):
     """
     Decorator to auto register subsystem class
     """
-    if isServer:
+    if isServer():
         SubsystemManager.registerSubsystem(subsystemCls)
     return subsystemCls
 
@@ -96,10 +113,7 @@ if 1 > 2:
     from mod.server.system.serverSystem import ServerSystem
 
 def getSubsystemCls():
-    if isServer:
-        return ServerSubsystem
-    else:
-        return ClientSubsystem
+    return ServerSubsystem if isServer() else ClientSubsystem
 
 class Subsystem:
     def __init__(self, system, engine, sysName):
@@ -107,6 +121,12 @@ class Subsystem:
         self.system = system
         self.engine = engine
         self.sysName = sysName
+
+    def onInit(self):
+        pass
+
+    def onDestroy(self):
+        pass
 
     def getSystem(self):
         return self.system
@@ -117,7 +137,7 @@ class Subsystem:
     def getSysName(self):
         return self.sysName
     
-    def listen(self, eventName, handler):
+    def on(self, eventName, handler):
         self.system.ListenForEvent(
             self.engine,
             self.sysName,
@@ -126,17 +146,30 @@ class Subsystem:
             handler
         )
 
-    @classmethod
-    def Listen(cls, eventName, handler):
-        inst = SubsystemManager.getInst()
-        subsystem = inst.getSubsystem(cls)
-        if subsystem:
-            subsystem.listen(eventName, handler)
-
-    def unlisten(self, eventName, handler):
+    def off(self, eventName, handler):
         self.system.UnListenForEvent(
             self.engine,
             self.sysName,
+            eventName,
+            self,
+            handler
+        )
+
+    def listen(self, eventName, handler):
+        manager = SubsystemManager.getInst()
+        self.system.ListenForEvent(
+            manager.rawEngine,
+            manager.rawSysName,
+            eventName,
+            self,
+            handler
+        )
+
+    def unlisten(self, eventName, handler):
+        manager = SubsystemManager.getInst()
+        self.system.UnListenForEvent(
+            manager.rawEngine,
+            manager.rawSysName,
             eventName,
             self,
             handler
@@ -212,3 +245,33 @@ class ClientSubsystem(Subsystem):
     
     def destroySfx(self, entityId):
         return self.system.DestroyEntity(entityId)
+
+
+ScreenNode = clientApi.GetScreenNodeCls()
+class UiSubsystem(ScreenNode, ClientSubsystem):
+    def __init__(self, engine, system, params):
+        manager = SubsystemManager.getInst()
+        ScreenNode.__init__(self, engine, system, params)
+        ClientSubsystem.__init__(self, manager.system, engine, system)
+
+    ns = 'xxx_roninUi_xxx'
+    inst = None
+
+    @classmethod
+    def defineUi(cls, uiDef):
+        return clientApi.RegisterUI(
+            cls.ns,
+            cls.__name__,
+            cls.__module__ + '.' + cls.__name__,
+            uiDef
+        )
+    
+    @classmethod
+    def getOrCreate(cls, **params):
+        if cls.inst:
+            return cls.inst
+
+        print(cls.ns, cls.__name__, params)
+        ui = clientApi.CreateUI(cls.ns, cls.__name__, params)
+        cls.inst = ui
+        return ui
