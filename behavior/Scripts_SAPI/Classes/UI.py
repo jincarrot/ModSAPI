@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
+import time
 import mod.client.extraClientApi as clientApi
 # from mod.client.ui.controls.baseUIControl import *
 import types
@@ -7,12 +8,14 @@ import types
 from ControlData import *
 from ..Interfaces.Vector import Vector2
 from ..Utils.Expression import *
+from ..Utils.Counter import *
 
 ScreenNode = clientApi.GetScreenNodeCls()
 ViewBinder = clientApi.GetViewBinderCls()
 CComp = clientApi.GetEngineCompFactory()
 
 RefreshSigns = {}
+RemoveSigns = {}
 
 class Variables(object):
 
@@ -76,6 +79,10 @@ class ButtonCallbackManager:
         self.callbacks.hoverOut(self.arg)
 
 
+class BlankUI(ScreenNode):
+    pass
+
+
 class _CustomUI(ScreenNode):
     """Custom UI"""
 
@@ -92,6 +99,9 @@ class _CustomUI(ScreenNode):
         self.buttonCallbackManagers = {}
         self.drawingData = {}
         self.traceData = {}
+        self.loaded = False
+        self.loadingTime = 0.05
+        self.loadingControlAmount = 0
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, '#custom_ui_close')
     def Close(self, __args):
@@ -231,8 +241,22 @@ class _CustomUI(ScreenNode):
             controlData[controlName] = None
             return
         if data['controls']:
-            for control in data['controls']:
-                self.createControl(control, path + "/" + controlName)
+            def finish():
+                pass
+            def generateChildControls():
+                for control in data['controls']:
+                    self.createControl(control, path + "/" + controlName)
+                    self.loadingControlAmount += 1
+                    
+                    if self.loadingControlAmount > 30:
+                        clientApi.StopCoroutine(progress)
+                        self.loadingControlAmount = 0
+                        comp.AddTimer(0.05, clientApi.StartCoroutine, progress, finish)
+                        self.loadingTime += 0.05
+
+                    yield
+            comp = CComp.CreateGame(clientApi.GetLevelId())
+            progress = clientApi.StartCoroutine(generateChildControls, finish)
 
     def Create(self):
         # type: () -> None
@@ -250,10 +274,30 @@ class _CustomUI(ScreenNode):
             self.ui.size[0]._change(baseSize[0])
             self.ui.size[1]._change(baseSize[1])
             # create child control
-            for control in controls:
-                self.createControl(control)
+            def finish():
+                self.loaded = True
 
+            def generateChildControls():
+                for control in controls:
+                    self.createControl(control)
+                    self.loadingControlAmount += 1
+                    
+                    if self.loadingControlAmount > 30:
+                        clientApi.StopCoroutine(progress)
+                        self.loadingControlAmount = 0
+                        comp.AddTimer(0.05, clientApi.StartCoroutine, progress, finish)
+                        self.loadingTime += 0.05
+                    
+                    yield
+            comp = CComp.CreateGame(clientApi.GetLevelId())
+            progress = clientApi.StartCoroutine(generateChildControls, finish)
+            
     def Update(self):
+        if RemoveSigns.get(id(self.ui), None):
+            del RemoveSigns[id(self.ui)]
+            self.SetRemove()
+        if not self.loaded:
+            return
         self.ui.age._change(int(self.ui.age + 1))
         if self.ui._controlData.updateCallback:
             self.ui._controlData.updateCallback(self)
@@ -265,7 +309,7 @@ class _CustomUI(ScreenNode):
                     color = data['params']['color']
                     c = self.GetBaseUIControl(p).asImage()
                     c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
-                    c.SetSpriteColor((float(color[0] if 0 <= float(color[0]) <= 255 else (255 if float(color[0]) > 255 else 0)) / 255.0, float(color[1] if 0 <= float(color[1]) <= 255 else (1 if float(color[1]) > 255 else 0)) / 255.0, float(color[2] if 0 <= float(color[2]) <= 255 else (1 if float(color[2]) > 255 else 0)) / 255.0))
+                    c.SetSpriteColor((float(color[0] if 0 <= float(color[0]) <= 1 else (1 if float(color[0]) > 1 else 0)) / 1.0, float(color[1] if 0 <= float(color[1]) <= 1 else (1 if float(color[1]) > 1 else 0)) / 1.0, float(color[2] if 0 <= float(color[2]) <= 1 else (1 if float(color[2]) > 1 else 0)) / 1.0))
         if self.screenData:
             basePath = "/screen"
             controls = self.screenData['screen']['controls']
@@ -400,6 +444,8 @@ class _CustomUI(ScreenNode):
                     self.updateControl(path + "/" + controlName, data)
                 if controlType == 'label':
                     c.asLabel().SetText(controlData['text'])
+                if controlType == 'image':
+                    c.asImage().Rotate(float(controlData['rotation']))
                 self.updateControl(path + "/" + controlName, controlData['controls'])
 
     def draw(self, control, controlData):
@@ -431,7 +477,7 @@ class _CustomUI(ScreenNode):
             line.SetFullPosition("y", {"fit": False, "followType": "none", "absoluteValue": (oldPos[1] + newPos[1]) / 2.0})
             if dist(oldPos, newPos):
                 line.Rotate(math.asin((newPos[1] - oldPos[1]) / dist(oldPos, newPos)) * 180.0 / math.pi * (-1 if newPos[0] > oldPos[0] else 1))
-            line.SetAlpha(params['alpha'])
+            line.SetAlpha(float(params['alpha']) * float(self.drawingData[control.GetPath()]['parent']['alpha']))
             line.SetSpriteColor(params['color'])
             line.SetLayer(0)
             self.drawingData[control.GetPath()]['lst'].append("/screen/%s" % name)
@@ -731,6 +777,19 @@ class Image(Control):
         # type: (str) -> None
         self._controlData.texture = value
 
+    @property
+    def rotation(self):
+        # type: () -> Expression | float
+        """控件旋转角度"""
+        return self._controlData.rotation
+    
+    @rotation.setter
+    def rotation(self, value):
+        # type: (float | Expression) -> None
+        if type(value) in [float, int]:
+            value = Expression(value)
+        self._controlData.rotation._change(value)
+    
 class Label(Control):
     """label class."""
     
@@ -879,6 +938,10 @@ class UI(object):
         # type: (types.FunctionType) -> None
         """设置界面刷新时要执行的函数"""
         self._controlData.updateCallback = callback
+
+    def remove(self):
+        if self.age.staticValue > 0:
+            RemoveSigns[id(self)] = 1
 
     def __refresh(self):
         RefreshSigns[id(self)] = 1

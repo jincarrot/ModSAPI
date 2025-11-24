@@ -5,6 +5,7 @@ import Classes.ItemStack as i
 import Classes.FormData as fd
 import Classes.UI as ui
 import Utils.Expression
+import math
 
 def getWorld():
     # type: () -> SAPI.World
@@ -50,6 +51,15 @@ class SAPIS(ServerSystem):
         ServerSystem.__init__(self, namespace, systemName)
         self.__ListenEvents()
         self.formTasks = {}
+
+    def Destroy(self):
+        from Utils.Expression import old
+        math.sin = old.sin
+        math.cos = old.cos
+        math.pow = old.pow
+        abs = old.abs
+        max = old.max
+        min = old.min
 
     def __ListenEvents(self):
         self.ListenForEvent(serverApi.GetEngineNamespace(), serverApi.GetEngineSystemName(), "ServerChatEvent", self, self.debug)

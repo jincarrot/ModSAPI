@@ -14,7 +14,7 @@ from Camara import *
 from Request import *
 from ClientSystemInfo import *
 import mod.server.extraServerApi as serverApi
-from ..packs.server import *
+from ..minecraft import *
 from Command import *
 import types
 from UI import *

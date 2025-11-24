@@ -6,6 +6,7 @@ from ..Interfaces.Vector import *
 from ..Interfaces.EntityOptions import *
 from ..minecraft import *
 from ..Interfaces.WorldOptions import *
+import time
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -216,8 +217,22 @@ class Dimension(object):
         return SComp.CreateExplosion(serverApi.GetLevelId()).CreateExplosion((location.x, location.y, location.z), radius, options.causesFire, options.breaksBlocks, options.source.id, options.source.id)
     
     def fillBlocks(self, volume, block, options):
-        # type: (BlockVolumeBase, BlockPermutation | str, 0) -> 0 
-        pass
+        # type: (BlockVolume, BlockPermutation | str, 0) -> 0 
+        """Fills an area of blocks with a specific block type."""
+        if not isinstance(volume, self.__b.BlockVolumeBase):
+            print("[Error][ModSAPI][TypeError] volume should be BlockVolumeBase type")
+            return
+        comp = SComp.CreateBlock(serverApi.GetLevelId())
+        data = comp.GetBlockPaletteBetweenPos(self.dimId, volume.fromLocation.getTuple(), volume.toLocation.getTuple(), False).SerializeBlockPalette()
+        temp = self.__b.BlockPaletteData(data)
+        temp.fillAllBlocks((block.type.id, block.type.aux))
+        data = temp.getData()
+        p = comp.GetBlankBlockPalette()
+        p.DeserializeBlockPalette(data)
+        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation, 0)
 
-    def setBlock(self, type):
-        pass
+    def setBlockType(self, location, blockType):
+        # type: (Vector3, str) -> None
+        """Sets a block at a given location within the dimension."""
+        location = Vector3(location)
+        SComp.CreateBlockInfo(serverApi.GetLevelId()).SetBlockNew(location.getTuple(), {"name": blockType}, 0, self.dimId)

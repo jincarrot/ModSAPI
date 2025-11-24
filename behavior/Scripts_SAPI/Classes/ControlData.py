@@ -184,10 +184,12 @@ class ImageData(ControlData):
     def __init__(self, parentData=None):
         ControlData.__init__(self, parentData)
         self.texture = ""
+        self.rotation = Expression(0.0)
 
     def _generate(self):
         baseData = ControlData._generate(self)
         baseData[self.controlName]['texture'] = self.texture
+        baseData[self.controlName]['rotation'] = self.rotation
         return baseData
     
 class ButtonTouchCallbacks:

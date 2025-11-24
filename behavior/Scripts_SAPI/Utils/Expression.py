@@ -135,9 +135,15 @@ class Expression(object):
         elif self.__operation == 14:
             ori = old.pow(ori, v)
         elif self.__operation == 15:
-            ori = old.max(self.__next)
+            temp = []
+            for i in self.__next:
+                temp.append(float(i))
+            ori = old.max(tuple(temp))
         elif self.__operation == 16:
-            ori = old.min(self.__next)
+            temp = []
+            for i in self.__next:
+                temp.append(float(i))
+            ori = old.min(tuple(temp))
         elif self.__operation == 17:
             ori = old.abs(ori)
         return ori

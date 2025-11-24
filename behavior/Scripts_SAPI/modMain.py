@@ -6,6 +6,16 @@ import mod.client.extraClientApi as clientApi
 
 from .architect.subsystem import getSubsystemCls, SubsystemManager
 
+def Destroy():
+    from Utils.Expression import old
+    import math
+    math.sin = old.sin
+    math.cos = old.cos
+    math.pow = old.pow
+    abs = old.abs
+    max = old.max
+    min = old.min
+
 
 @Mod.Binding(name="Script_SAPI", version="0.0.1")
 class Script_SAPI(object):
@@ -22,3 +32,7 @@ class Script_SAPI(object):
         clientApi.RegisterSystem("SAPI", "manager",
                                  "Scripts_SAPI.SAPI_C.Manager")
         SubsystemManager.createClientSystem('SAPI', 'SAPI_C', 'Scripts_SAPI.SAPI_C.SAPI_C')
+
+    @Mod.DestroyServer()
+    def SAPI_UtilsDestory(self):
+        Destroy()

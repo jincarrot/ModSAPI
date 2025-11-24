@@ -3,9 +3,159 @@
 from ..Interfaces.Vector import *
 from ..Classes.ItemStack import *
 
-class BlockVolumeBase(object):
-    pass
+class BlockPaletteData(object):
 
+    def __init__(self, data):
+        self.__data = data
+        """{
+            'extra': {}, 
+            'void': False, 
+            'actor': {}, 
+            'volume': (3, 3, 2), 
+            'common': {
+                ('minecraft:light_gray_terracotta', 0): [3], 
+                ('minecraft:hardened_clay', 0): [4], 
+                ('minecraft:white_terracotta', 0): [1], 
+                ('minecraft:orange_terracotta', 0): [8], 
+                ('minecraft:brown_terracotta', 0): [7], 
+                ('minecraft:gray_terracotta', 0): [13], 
+                ('minecraft:black_terracotta', 0): [5], 
+                ('minecraft:red_terracotta', 0): [2], 
+                ('minecraft:yellow_terracotta', 0): [0]
+            }, 
+            'eliminateAir': False
+        }"""
+        self.__volume = self.__data['volume'] # type: tuple[int, int, int]
+        self.__blocks = self.__data['common'] # type: dict[tuple[str, int], list[int]]
+        self.__exludeAirData = ("minecraft:air", 0) in self.__blocks
+
+    def getLocationId(self, location):
+        # type: (tuple[int, int, int]) -> int
+        """returns the id of this location, or -1 if this location doesn't exist."""
+        if location[0] >= self.__volume[0] or location[1] >= self.__volume[1] or location[2] >= self.__volume[2]:
+            return -1
+        else:
+            return location[0] * self.__volume[0] + location[1] * self.__volume[0] * self.__volume[1] + location[2]
+        
+    def getLocation(self, locId):
+        # type: (int) -> tuple[int, int, int]
+        """returns the location of this id"""
+        sq = self.__volume[0] * self.__volume[1]
+        y = locId // sq
+        locId %= sq
+        x = locId // self.__volume[0]
+        z = locId % self.__volume[0]
+        return (x, y, z)
+    
+    def getBlock(self, location):
+        # type: (tuple[int, int, int]) -> tuple[str, int]
+        """returns block data in this location"""
+        locId = self.getLocationId(location)
+        if locId < 0:
+            raise ValueError("location is not exist in this palette!")
+        for (blockType, blockAux) in self.__blocks:
+            if locId in self.__blocks[(blockType, blockAux)]:
+                return (blockType, blockAux)
+        return ("minecraft:air", 0)
+            
+    def getLocationIds(self, blockData):
+        # type: (tuple[str, int] | str) -> list[int]
+        """returns the location ids where this block exist."""
+        if type(blockData) == str:
+            for (blockType, __aux) in self.__blocks:
+                if blockType == blockData:
+                    return self.__blocks[(blockType, __aux)]
+            return []
+        else:
+            return self.__blocks.get(blockData, [])
+            
+    def setBlock(self, location, blockData):
+        # type: (tuple[int, int, int], tuple[str, int]) -> bool
+        """set a block in a location"""
+        locId = self.getLocationId(location)
+        if locId < 0:
+            return False
+        ori = self.getBlock(location)
+        if self.__exludeAirData or ori[0] != "minecraft:air":
+            self.__blocks[ori].remove(locId)
+            if not self.__blocks[ori]:
+                del self.__blocks[ori]
+        if blockData not in self.__blocks:
+            self.__blocks[blockData] = []
+        self.__blocks[blockData].append(locId)
+        return True
+
+    def getData(self):
+        # type: () -> dict
+        """get data."""
+        return self.__data
+
+    def fillBlocks(self, start, end, blockData):
+        # type: (tuple[int, int, int], tuple[int, int, int], tuple[str, int]) -> None
+        """fills blocks"""
+        startId = self.getLocationId(start)
+        endId = self.getLocationId(end)
+        for id in range(min(startId, endId), max(startId, endId) + 1):
+            self.setBlock(id, blockData)
+
+    def fillAllBlocks(self, blockData):
+        # type: (tuple[str, int]) -> None
+        """fills all blocks"""
+        maxNum = self.__volume[0] * self.__volume[1] * self.__volume[2]
+        data = list(range(maxNum))
+        self.__data['common'] = {}
+        self.__blocks = self.__data['common']
+        self.__blocks[blockData] = data
+    
+class BlockVolumeBase(object):
+
+    def __init__(self, data):
+        # type: (dict[str, Vector3]) -> None
+        self.__fromLocation = data['fromLocation']
+        self.__toLocation = data['toLocation']
+
+    def getBlockLocationIterator(self):
+        """Fetch a @minecraft/server.BlockLocationIterator that represents all of the block world locations within the specified volume"""
+        locs = [] # type: list[Vector3]
+        for x in range(min(self.__toLocation.x, self.__fromLocation.x), max(self.__toLocation.x, self.__fromLocation.x) + 1):
+            for y in range(min(self.__toLocation.y, self.__fromLocation.y), max(self.__toLocation.y, self.__fromLocation.y) + 1):
+                for z in range(min(self.__toLocation.z, self.__fromLocation.z), max(self.__toLocation.z, self.__fromLocation.z) + 1):
+                    locs.append(Vector3((x, y, z)))
+        return iter(locs)
+
+class BlockVolume(BlockVolumeBase):
+    """
+    A BlockVolume is a simple interface to an object which represents a 3D rectangle of a given size (in blocks) at a world block location.
+
+    Note that these are not analogous to "min" and "max" values, in that the vector components are not guaranteed to be in any order.
+
+    In addition, these vector positions are not interchangeable with BlockLocation.
+
+    If you want to get this volume represented as range of of BlockLocations, you can use the getBoundingBox utility function.
+
+    This volume class will maintain the ordering of the corner indexes as initially set. imagine that each corner is assigned in Editor - as you move the corner around (potentially inverting the min/max relationship of the bounds) - what
+
+    you had originally selected as the top/left corner would traditionally become the bottom/right.
+
+    When manually editing these kinds of volumes, you need to maintain the identity of the corner as you edit - the BlockVolume utility functions do this.
+
+    Important to note that this measures block sizes (to/from) - a normal AABB (0,0,0) to (0,0,0) would traditionally be of size (0,0,0)
+
+    However, because we're measuring blocks - the size or span of a BlockVolume would actually be (1,1,1)"""
+
+    def __init__(self, fromLocation, toLocation):
+        # type: (Vector3, Vector3) -> None
+        self.__fromLocation = Vector3(fromLocation)
+        self.__toLocation = Vector3(toLocation)
+        BlockVolumeBase.__init__(self, {"fromLocation": fromLocation, "toLocation": toLocation})
+
+    @property
+    def fromLocation(self):
+        return self.__fromLocation
+    
+    @property
+    def toLocation(self):
+        return self.__toLocation
 
 class BlockType(object):
     """
@@ -13,9 +163,10 @@ class BlockType(object):
     Does not contain permutation data (state) other than the type of block it represents.
     """
 
-    def __init__(self, id):
-        # type: (str) -> None
+    def __init__(self, id, aux=0):
+        # type: (str, int) -> None
         self.__id = id
+        self.__aux = aux
 
     @property
     def id(self):
@@ -24,6 +175,11 @@ class BlockType(object):
         Block type name
         """
         return self.__id
+    
+    @property
+    def aux(self):
+        # type: () -> int
+        return self.__aux
 
 
 class BlockPermutation(object):
@@ -201,7 +357,7 @@ class Block(object):
         """
         Gets the type of block.
         """
-        return BlockType(self.typeId)
+        return BlockType(self.typeId, SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockNew((int(self.location.x), int(self.location.y), int(self.location.z)), self.dimension.dimId)['aux'])
     
     @property
     def typeId(self):
