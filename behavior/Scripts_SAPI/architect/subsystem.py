@@ -1,5 +1,6 @@
 import mod.client.extraClientApi as clientApi
 import mod.server.extraServerApi as serverApi
+import time
 
 def isServer():
     return clientApi.GetLocalPlayerId() == '-1'
@@ -10,6 +11,8 @@ class SubsystemManager:
     server = None
     rawEngine = None
     rawSysName = None
+    clientSubs = {}
+    serverSubs = {}
 
     @staticmethod
     def getInst():
@@ -42,7 +45,7 @@ class SubsystemManager:
         self.engine = engine
         self.sysName = sysName
         self.system = system
-        self.subsystems = {}
+
         if isServer():
             from .levelServer import LevelServer
             LevelServer.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
@@ -50,29 +53,53 @@ class SubsystemManager:
             from .levelClient import LevelClient
             LevelClient.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
 
+
+    def getSubsystems(self):
+        return self.clientSubs if isServer() else self.serverSubs
+
+
     def appendAllSubsystems(self):
         for subsystemCls in SubsystemManager.registeredSubsystems:
             self.addSubsystem(subsystemCls)
 
+        SubsystemManager.unregisterSubsystems()
+        self.startTicking()
+
+        for v in self.getSubsystems().values():
+            if hasattr(v, 'onReady'):
+                v.onReady()
+
+
+    def startTicking(self):
+        self.system.ListenForEvent(
+            self.rawEngine,
+            self.rawSysName,
+            'OnScriptTickServer' if isServer() else 'OnScriptTickClient',
+            self,
+            self.tick
+        )
+
 
     def addSubsystem(self, subsystemCls):
         subSys = subsystemCls(self.system, self.engine, self.sysName)
-        self.subsystems[subsystemCls.__name__] = subSys
+        self.getSubsystems()[subsystemCls.__name__] = subSys
         if hasattr(subSys, 'onInit'):
             subSys.onInit()
+
         print('[INFO] {} Subsystem "{}" has been initialized'.format('Server' if isServer() else 'Client', subSys.__class__.__name__))
 
 
     def getSubsystem(self, subsystemCls):
         # type: (object) -> 'Subsystem'
-        return self.subsystems[subsystemCls.__name__]
+        return self.getSubsystems()[subsystemCls.__name__]
 
 
     def removeSubsystem(self, subsystemCls):
-        subSys = self.subsystems[subsystemCls.__name__]
+        subSystems = self.getSubsystems()
+        subSys = subSystems[subsystemCls.__name__]
         if hasattr(subSys, 'onDestroy'):
             subSys.onDestroy()
-        del self.subsystems[subsystemCls.__name__]
+        del subSystems[subsystemCls.__name__]
 
 
     @staticmethod
@@ -85,8 +112,22 @@ class SubsystemManager:
 
 
     @staticmethod
-    def unregisterSubsystem(subsystem):
-        SubsystemManager.registeredSubsystems.remove(subsystem)
+    def unregisterSubsystems():
+        SubsystemManager.registeredSubsystems = []
+
+
+    lastTickTime = time.time()
+
+    def tick(self):
+        currentTime = time.time()
+        dt = currentTime - self.lastTickTime
+
+        for obj in self.getSubsystems().values():
+            if obj.canTick:
+                obj.onUpdate(dt)
+                obj.ticks += 1
+
+        self.lastTickTime = currentTime
 
 
 def SubsystemClient(subsystemCls):
@@ -121,12 +162,39 @@ class Subsystem:
         self.system = system
         self.engine = engine
         self.sysName = sysName
+        self.ticks = 0
+        self.canTick = False
+
+    def onUpdate(self, dt):
+        """
+        每tick调用
+
+        需要设置 `canTick` 为 `True`
+        """
+        pass
+
+    def onReady(self):
+        """
+        所有子系统初始化完毕后调用
+
+        此时所有子系统已经创建完毕，可以通过 `getSubsystem` 获取其他子系统
+        """
+        pass
 
     def onInit(self):
+        """
+        当前子系统创建完毕后调用
+
+        此时 `SubystemManager` 已经创建完毕
+        """
         pass
 
     def onDestroy(self):
         pass
+
+    @classmethod
+    def getInstance(cls):
+        return SubsystemManager.getInst().getSubsystem(cls)
 
     def getSystem(self):
         return self.system
@@ -138,6 +206,7 @@ class Subsystem:
         return self.sysName
     
     def on(self, eventName, handler):
+        print('on', self.engine, self.sysName)
         self.system.ListenForEvent(
             self.engine,
             self.sysName,
@@ -219,9 +288,6 @@ class ServerSubsystem(Subsystem):
 
 
 class ClientSubsystem(Subsystem):
-    def __init__(self, system, engine, sysName):
-        # type: (ClientSystem, str, str) -> 'None'
-        Subsystem.__init__(self, system, engine, sysName)
 
     def sendServer(self, eventName, eventData):
         self.system.NotifyToServer(eventName, eventData)
@@ -252,7 +318,7 @@ class UiSubsystem(ScreenNode, ClientSubsystem):
     def __init__(self, engine, system, params):
         manager = SubsystemManager.getInst()
         ScreenNode.__init__(self, engine, system, params)
-        ClientSubsystem.__init__(self, manager.system, engine, system)
+        ClientSubsystem.__init__(self, manager.system, manager.engine, manager.sysName)
 
     ns = 'xxx_roninUi_xxx'
     inst = None
@@ -271,7 +337,6 @@ class UiSubsystem(ScreenNode, ClientSubsystem):
         if cls.inst:
             return cls.inst
 
-        print(cls.ns, cls.__name__, params)
         ui = clientApi.CreateUI(cls.ns, cls.__name__, params)
         cls.inst = ui
         return ui
