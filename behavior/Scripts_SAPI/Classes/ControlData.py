@@ -185,11 +185,17 @@ class ImageData(ControlData):
         ControlData.__init__(self, parentData)
         self.texture = ""
         self.rotation = Expression(0.0)
+        self.color = (Expression(255), Expression(255), Expression(255))
+        self.uv_origin = (Expression(0.0), Expression(0.0))
+        self.uv_size = (Expression(self.size[0]), Expression(self.size[1]))
 
     def _generate(self):
         baseData = ControlData._generate(self)
         baseData[self.controlName]['texture'] = self.texture
         baseData[self.controlName]['rotation'] = self.rotation
+        baseData[self.controlName]['color'] = self.color
+        baseData[self.controlName]['uv'] = self.uv_origin
+        baseData[self.controlName]['uv_size'] = self.uv_size
         return baseData
     
 class ButtonTouchCallbacks:
@@ -371,10 +377,18 @@ class LabelData(ControlData):
     def __init__(self, parentData=None):
         ControlData.__init__(self, parentData)
         self.text = ""
+        self.align = "center"
+        self.fontSize = Expression(1.0)
+        self.linePadding = Expression(0.0)
+        self.color = (Expression(255), Expression(255), Expression(255))
 
     def _generate(self):
         baseData = ControlData._generate(self)
         baseData[self.controlName]['text'] = self.text
+        baseData[self.controlName]['align'] = self.align
+        baseData[self.controlName]['fontSize'] = self.fontSize
+        baseData[self.controlName]['linePadding'] = self.linePadding
+        baseData[self.controlName]['color'] = self.color
         return baseData
 
 class ScreenData(object):

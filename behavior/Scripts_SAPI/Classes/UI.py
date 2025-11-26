@@ -32,6 +32,23 @@ class Variables(object):
         """
         return ui.age
 
+class Textures(object):
+
+    def __init__(self):
+        pass
+
+    @property
+    def playerProfilePicture(self):
+        return "playerProfilePicture"
+    
+    @property
+    def playerProfileFrame(self):
+        return "playerProfileFrame"
+    
+    @property
+    def white(self):
+        return "textures/ui/white_bg"
+    
 v = Variables()
 
 
@@ -347,6 +364,7 @@ class _CustomUI(ScreenNode):
                 controlType = controlData['type']
                 if controlData['shouldTrace']:
                     self.draw(c, controlData)
+                # size and offset
                 if type(controlData['size'][0]) != str:
                     size = (float(controlData['size'][0]), float(controlData['size'][1]))
                     c.SetFullSize("x", {"absoluteValue": size[0]})
@@ -443,9 +461,19 @@ class _CustomUI(ScreenNode):
                     data.append(controlData['label']._generate())
                     self.updateControl(path + "/" + controlName, data)
                 if controlType == 'label':
-                    c.asLabel().SetText(controlData['text'])
+                    c = c.asLabel()
+                    c.SetText(controlData['text'])
+                    color = (float(controlData['color'][0]), float(controlData['color'][1]), float(controlData['color'][2]))
+                    c.SetTextColor(color)
+                    c.SetTextAlignment(controlData['align'])
+                    c.SetTextFontSize(float(controlData['fontSize']))
+                    c.SetTextLinePadding(float(controlData['linePadding']))
                 if controlType == 'image':
-                    c.asImage().Rotate(float(controlData['rotation']))
+                    c = c.asImage()
+                    c.Rotate(float(controlData['rotation']))
+                    c.SetSpriteColor((float(controlData['color'][0]) / 255.0, float(controlData['color'][1]) / 255.0, float(controlData['color'][2] / 255.0)))
+                    c.SetSpriteUV((float(controlData['uv'][0]), float(controlData['uv'][1])))
+                    c.SetSpriteUVSize((float(controlData['uv_size'][0]), float(controlData['uv_size'][1])))
                 self.updateControl(path + "/" + controlName, controlData['controls'])
 
     def draw(self, control, controlData):
@@ -493,10 +521,14 @@ class _CustomUI(ScreenNode):
 class Control(object):
     """控件基类"""
 
-    def __init__(self, parent=None):
-        # type: (Control | UI) -> None
-        self._controlData = ControlData(parent._controlData)
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0):
+        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression) -> None
+        self._controlData = ControlData(parent._controlData if parent else None)
         self._parent = parent
+        self.name = name if name else "control%s" % random.randint(0, 2147483648)
+        self.offset = offset
+        self.size = size
+        self.alpha = alpha
 
     @property
     def parent(self):
@@ -674,7 +706,7 @@ class Control(object):
     @alpha.setter
     def alpha(self, value):
         # type: (float) -> None
-        if type(value) == float or isinstance(value, Expression):
+        if type(value) in [int, float] or isinstance(value, Expression):
             self._controlData.alpha._change(value)
         else:
             print("[Error][ModSAPI][TypeError] 属性 alpha 可接受的值为 float | Expression")
@@ -694,13 +726,18 @@ class Control(object):
         self._controlData.addControl(panel._controlData)
         return panel
     
-    def addImage(self, imageData={}):
-        # type: (dict) -> Image
+    def addImage(self, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0):
+        # type: (str, tuple[float, float], tuple[float, float], str, float, float) -> Image
         """
         Add a new image.
         """
         image = Image(self)
-        image.name = "image%s" % random.randint(0, 2147483648)
+        image.name = "image%s" % random.randint(0, 2147483648) if not name else name
+        image.offset = offset
+        image.size = size
+        image.texture = texture
+        image.alpha = alpha
+        image.rotation = rotation
         self._controlData.addControl(image._controlData)
         return image
     
@@ -720,16 +757,24 @@ class Control(object):
         self._controlData.addControl(button._controlData)
         return button
     
-    def addControl(self, control):
-        # type: (Control) -> bool
+    def addControl(self, control, createCopy=True):
+        # type: (Control, bool) -> Control
         temp = self
         while temp:
-            if id(temp) == control.GetPath():
+            if id(temp) == id(control):
                 print("add control error! cannot add a parent control.")
-                return False
+                return None
             temp = temp.parent if isinstance(temp, Control) else None
-        self._controlData.addControl(control._controlData)
-        return True
+        if createCopy:
+            new = control.copy()
+            new.alpha = control.alpha
+            new.offset = control.offset
+            new.size = control.size
+            if isinstance(new, Image):
+                new.rotation = control.rotation
+            new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
+        self._controlData.addControl(new._controlData)
+        return new
 
     def copy(self):
         # type: () -> Control
@@ -762,10 +807,122 @@ class Panel(Control):
 class Image(Control):
     """Image class"""
 
-    def __init__(self, parent=None):
-        # type: (Control | UI) -> None
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0, uvOrigin=(0, 0), uvSize=None, color=(255, 255, 255)):
+        # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], str, Expression, Expression, tuple[Expression, Expression], tuple[Expression, Expression], tuple[Expression, Expression, Expression]) -> None
+        Control.__init__(self, parent=parent, name=name if name else "image%s" % random.randint(0, 2147483648), offset=offset, size=size, alpha=alpha)
         self._controlData = ImageData(parent._controlData if parent else None)
         self._parent = parent
+        self.texture = texture
+        self.rotation = rotation
+        self.color = color
+        self.uvOrigin = uvOrigin
+        self.uvSize = uvSize
+
+    @property
+    def color(self):
+        # type: () -> tuple[Expression, Expression, Expression]
+        """
+        颜色，使用rgb格式，默认为(255, 255, 255)
+
+        支持表达式
+        """
+        return self._controlData.color
+    
+    @color.setter
+    def color(self, value):
+        # type: (tuple[int | Expression] | list[int | Expression]) -> None
+        if type(value) in [list, tuple]:
+            if len(value) != 3:
+                print("[Error][ModSAPI][TypeError] 属性 color 长度为3")
+                return
+            # process value
+            temp = [0, 0, 0]
+            for i in range(3):
+                if type(value[i]) in [int, float]:
+                    temp[i] = value[i]
+                elif isinstance(value[i], Expression):
+                    temp[i] = value[i]
+                else:
+                    print("[Error][ModSAPI][TypeError] 属性 color 只接受元素类型为 int | float | Expression 的元组或列表")
+                    return
+                self._controlData.color[0]._change(temp[0])
+                self._controlData.color[1]._change(temp[1])
+                self._controlData.color[2]._change(temp[2])
+        elif type(value) == str:
+            if value == 'black':
+                self._controlData.color[0]._change(0)
+                self._controlData.color[1]._change(0)
+                self._controlData.color[2]._change(0)
+            elif value == 'white':
+                self._controlData.color[0]._change(255)
+                self._controlData.color[1]._change(255)
+                self._controlData.color[2]._change(255)
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 color 只接受元组或列表类型值")
+
+    @property
+    def uvOrigin(self):
+        # type: () -> tuple[Expression, Expression]
+        """
+        uv起始坐标，默认为(0, 0)
+
+        支持表达式
+        """
+        return self._controlData.uv_origin
+    
+    @uvOrigin.setter
+    def uvOrigin(self, value):
+        # type: (tuple[int | Expression] | list[int | Expression]) -> None
+        if type(value) in [list, tuple]:
+            if len(value) != 2:
+                print("[Error][ModSAPI][TypeError] 属性 uvOrigin 长度为2")
+                return
+            # process value
+            temp = [0, 0]
+            for i in range(2):
+                if type(value[i]) in [int, float]:
+                    temp[i] = value[i]
+                elif isinstance(value[i], Expression):
+                    temp[i] = value[i]
+                else:
+                    print("[Error][ModSAPI][TypeError] 属性 uvOrigin 只接受元素类型为 int | float | Expression 的元组或列表")
+                    return
+                self._controlData.uv_origin[0]._change(temp[0])
+                self._controlData.uv_origin[1]._change(temp[1])
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 uvOrigin 只接受元组或列表类型值")
+
+    @property
+    def uvSize(self):
+        # type: () -> tuple[Expression, Expression]
+        """
+        uv起始坐标，默认为(0, 0)
+
+        支持表达式
+        """
+        return self._controlData.uv_size
+    
+    @uvSize.setter
+    def uvSize(self, value):
+        # type: (tuple[int | Expression] | list[int | Expression]) -> None
+        if type(value) in [list, tuple]:
+            if len(value) != 2:
+                print("[Error][ModSAPI][TypeError] 属性 uvSize 长度为2")
+                return
+            # process value
+            temp = [0, 0]
+            for i in range(2):
+                if type(value[i]) in [int, float]:
+                    temp[i] = value[i]
+                elif isinstance(value[i], Expression):
+                    temp[i] = value[i]
+                else:
+                    print("[Error][ModSAPI][TypeError] 属性 uvSize 只接受元素类型为 int | float | Expression 的元组或列表")
+                    return
+                self._controlData.uv_size[0]._change(temp[0])
+                self._controlData.uv_size[1]._change(temp[1])
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 uvOrigin 只接受元组或列表类型值")
 
     @property
     def texture(self):
@@ -793,10 +950,15 @@ class Image(Control):
 class Label(Control):
     """label class."""
     
-    def __init__(self, parent=None):
-        # type: (Control | UI) -> None
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, fontSize=1.0, align="center", linePadding=0.0, color=(255, 255, 255)):
+        # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], Expression, Expression, str, Expression, tuple[Expression, Expression, Expression]) -> None
+        Control.__init__(self, parent=parent, name=name if name else "label%s" % random.randint(0, 2147483648), offset=offset, size=size, alpha=alpha)
         self._controlData = LabelData(parent._controlData if parent else None)
         self._parent = parent
+        self.fontSize = fontSize
+        self.linePadding = linePadding
+        self.align = align
+        self.color = color
 
     @property
     def text(self):
@@ -807,6 +969,92 @@ class Label(Control):
     def text(self, value):
         # type: (str) -> None
         self._controlData.text = value
+
+    @property
+    def fontSize(self):
+        # type: () -> Expression
+        """
+        文本大小，默认为1.0，支持表达式
+        """
+        return self._controlData.fontSize
+    
+    @fontSize.setter
+    def fontSize(self, value):
+        # type: (float | Expression) -> None
+        if type(value) in [int, float] or isinstance(value, Expression):
+            self._controlData.fontSize._change(value)
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 fontSize 可接受的值为 float | Expression")
+
+    @property
+    def align(self):
+        # type: () -> str
+        """文本对齐方向，可设置为left | right | center"""
+        return self._controlData.align
+    
+    @align.setter
+    def align(self, value):
+        # type: (str) -> None
+        if value in ['left', 'right', 'center']:
+            self._controlData.align = value
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 align 可接受的值为 left | right | center")
+
+    @property
+    def linePadding(self):
+        # type: () -> Expression
+        """文本行间距，默认为0，支持表达式"""
+        return self._controlData.linePadding
+    
+    @linePadding.setter
+    def linePadding(self, value):
+        # type: (float | Expression) -> None
+        if type(value) in [int, float] or isinstance(value, Expression):
+            self._controlData.linePadding._change(value)
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 linePadding 可接受的值为 float | Expression")
+    
+    @property
+    def color(self):
+        # type: () -> tuple[Expression, Expression, Expression]
+        """
+        颜色，使用rgb格式，默认为(255, 255, 255)
+
+        支持表达式
+        """
+        return self._controlData.color
+    
+    @color.setter
+    def color(self, value):
+        # type: (tuple[int | Expression] | list[int | Expression]) -> None
+        if type(value) in [list, tuple]:
+            if len(value) != 3:
+                print("[Error][ModSAPI][TypeError] 属性 color 长度为3")
+                return
+            # process value
+            temp = [0, 0, 0]
+            for i in range(3):
+                if type(value[i]) in [int, float]:
+                    temp[i] = value[i]
+                elif isinstance(value[i], Expression):
+                    temp[i] = value[i]
+                else:
+                    print("[Error][ModSAPI][TypeError] 属性 color 只接受元素类型为 int | float | Expression 的元组或列表")
+                    return
+                self.color[0]._change(temp[0])
+                self.color[1]._change(temp[1])
+                self.color[2]._change(temp[2])
+        elif type(value) == str:
+            if value == 'black':
+                self._controlData.color[0]._change(0)
+                self._controlData.color[1]._change(0)
+                self._controlData.color[2]._change(0)
+            elif value == 'white':
+                self._controlData.color[0]._change(255)
+                self._controlData.color[1]._change(255)
+                self._controlData.color[2]._change(255)
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 color 只接受元组或列表类型值")
 
 class Button(Control):
     """button class."""
@@ -898,13 +1146,18 @@ class UI(object):
         self._controlData.addControl(panel._controlData)
         return panel
     
-    def addImage(self, imageData={}):
-        # type: (dict) -> Image
+    def addImage(self, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0):
+        # type: (str, tuple[float, float], tuple[float, float], str, float, float) -> Image
         """
         Add a new image.
         """
         image = Image(self)
-        image.name = "image%s" % random.randint(0, 2147483648)
+        image.name = name if name else "image%s" % random.randint(0, 2147483648)
+        image.offset = offset
+        image.size = size
+        image.texture = texture
+        image.alpha = alpha
+        image.rotation = rotation
         self._controlData.addControl(image._controlData)
         return image
     
@@ -929,11 +1182,26 @@ class UI(object):
         from ..SAPI_C import Screens
         Screens[id(self)] = self
         clientApi.PushScreen("modsapi", "CustomUI", {"screenId": id(self)})
-
-    def addControl(self, control):
-        # type: (Control) -> None
-        self._controlData.addControl(control._controlData)
-
+    
+    def addControl(self, control, createCopy=True):
+        # type: (Control, bool) -> Control
+        temp = self
+        while temp:
+            if id(temp) == id(control):
+                print("add control error! cannot add a parent control.")
+                return None
+            temp = temp.parent if isinstance(temp, Control) else None
+        if createCopy:
+            new = control.copy()
+            new.alpha = control.alpha
+            new.offset = control.offset
+            new.size = control.size
+            if isinstance(new, Image):
+                new.rotation = control.rotation
+            new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
+        self._controlData.addControl(new._controlData)
+        return new
+    
     def onUpdate(self, callback):
         # type: (types.FunctionType) -> None
         """设置界面刷新时要执行的函数"""
@@ -965,4 +1233,3 @@ class ScreenUI(UI):
         支持表达式
         """
         return self.__age
-
