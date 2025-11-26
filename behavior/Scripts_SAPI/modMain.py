@@ -4,7 +4,7 @@ from mod.common.mod import Mod
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
 
-from .architect.subsystem import getSubsystemCls, SubsystemManager
+from .architect.subsystem import SubsystemManager
 
 def Destroy():
     from Utils.Expression import old
