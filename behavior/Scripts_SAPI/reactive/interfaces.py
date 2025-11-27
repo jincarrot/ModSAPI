@@ -38,6 +38,7 @@ class Node:
     def __init__(self, control):
         # type: (Control) -> None
         self._control = control
+        self.__attributes = []
         
     def on(self, event, callback):
         # type: (str, function) -> None
@@ -66,6 +67,8 @@ class Node:
         """
         获取所有属性
         """
+        if self.__attributes:
+            return self.__attributes
         attrOrMethods = dir(self._control)
         attrs = []
         for propertyName in attrOrMethods:
@@ -77,6 +80,7 @@ class Node:
         result = []
         for attr in attrs:
             result.append(Attr(attr, self._control))
+        self.__attributes = result
         return result
 
     def getAttr(self, name):
@@ -84,7 +88,9 @@ class Node:
         """
         获取指定属性
         """
-        return Attr(name, self._control)
+        for attr in self.__attributes:
+            if attr.name == name:
+                return attr
 
 class ParentNode(Node):
 
