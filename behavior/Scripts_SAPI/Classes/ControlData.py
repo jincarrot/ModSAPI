@@ -83,8 +83,8 @@ class BackgroundData(object):
 class ControlData(object):
     """Base class of all controls"""
 
-    def __init__(self, parentData=None):
-        # type: (ControlData) -> None
+    def __init__(self, parentData=None, inst=None):
+        # type: (ControlData, Control) -> None
         self.parent = parentData
         """parent control"""
         self.controls = [] # type: list[ControlData]
@@ -102,9 +102,11 @@ class ControlData(object):
         self.background = BackgroundData()
         """background of this control"""
         self.visible = True
-        """visblibity of this control"""
+        """visibility of this control"""
         self.isStatic = False
         self.shouldTrace = False
+        self.inst=inst
+        """instance of this control"""
 
     def __str__(self):
         controlStr = []
@@ -176,14 +178,14 @@ class ControlData(object):
 class PanelData(ControlData):
     """Panel class"""
 
-    def __init__(self, parentData=None):
-        ControlData.__init__(self, parentData)
+    def __init__(self, parentData=None, inst=None):
+        ControlData.__init__(self, parentData, inst)
 
 class ImageData(ControlData):
     """Image class"""
 
-    def __init__(self, parentData=None):
-        ControlData.__init__(self, parentData)
+    def __init__(self, parentData=None, inst=None):
+        ControlData.__init__(self, parentData, inst)
         self.texture = ""
         self.rotation = Expression(0.0)
         self.color = (Expression(255), Expression(255), Expression(255))
@@ -348,7 +350,7 @@ class ButtonData(ControlData):
     """Button class"""
 
     def __init__(self, parentData=None, buttonInstance=None):
-        ControlData.__init__(self, parentData)
+        ControlData.__init__(self, parentData, buttonInstance)
         self.buttonInstance = buttonInstance
         self.callbacks = ButtonTouchCallbacks()
         """按钮回调函数"""
@@ -369,14 +371,14 @@ class ButtonData(ControlData):
 class DragableButtonData(ButtonData):
     """Dragable button data"""
 
-    def __init__(self, parentData=None):
-        ButtonData.__init__(self, parentData)
+    def __init__(self, parentData=None, inst=None):
+        ButtonData.__init__(self, parentData, inst)
     
 class LabelData(ControlData):
     """Lable class"""
 
-    def __init__(self, parentData=None):
-        ControlData.__init__(self, parentData)
+    def __init__(self, parentData=None, inst=None):
+        ControlData.__init__(self, parentData, inst)
         self.text = ""
         self.align = "center"
         self.fontSize = Expression(1.0)

@@ -135,7 +135,7 @@ class _CustomUI(ScreenNode):
         clientApi.PopScreen()
 
     def createControl(self, controlData, path="/screen"):
-        # type: (dict, str) -> Generator
+        # type: (dict, str) -> None
         parentControl = self.GetBaseUIControl(path)
         if not parentControl:
             print("Error! Parent control '%s' dosen't exist!" % path)
@@ -529,7 +529,8 @@ class Control(object):
 
     def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg"):
         # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression, tuple[Expression, Expression, Expression], Expression, str) -> None
-        self._controlData = ControlData(parent._controlData if parent else None)
+        self._controlData = ControlData(parent._controlData if parent else None, self)
+
         self._parent = parent
         self.name = name if name else "control%s" % random.randint(0, 2147483648)
         self.offset = offset
@@ -785,6 +786,7 @@ class Control(object):
             if createCopy:
                 new = control.copy()
                 new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
+                new.parent = self
             self._controlData.addControl(new._controlData)
             news.append(new)
         return news if len(news) > 1 else news[0]
@@ -817,7 +819,7 @@ class Panel(Control):
 
     def __init__(self, parent=None):
         # type: (Control | UI) -> None
-        self._controlData = PanelData(parent._controlData if parent else None)
+        self._controlData = PanelData(parent._controlData if parent else None, self)
         self._parent = parent
 
 class Image(Control):
@@ -826,7 +828,7 @@ class Image(Control):
     def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], texture="", background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg", rotation=0, alpha=1.0, uvOrigin=(0, 0), uvSize=None, color=(255, 255, 255)):
         # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], str, tuple[Expression, Expression, Expression], Expression, str, Expression, Expression, tuple[Expression, Expression], tuple[Expression, Expression], tuple[Expression, Expression, Expression]) -> None
         # Control.__init__(self, parent=parent, name=(name if name else "image%s" % random.randint(0, 2147483648)), offset=offset, size=size, alpha=alpha)
-        self._controlData = ImageData(parent._controlData if parent else None)
+        self._controlData = ImageData(parent._controlData if parent else None, self)
         self._parent = parent
         self.name = name if name else "image%s" % random.randint(0, 2147483648)
         self.offset = offset
@@ -981,7 +983,7 @@ class Label(Control):
     def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, text="", fontSize=1.0, align="center", linePadding=0.0, color=(255, 255, 255)):
         # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], Expression, str, Expression, str, Expression, tuple[Expression, Expression, Expression]) -> None
         # Control.__init__(self, parent=parent, name=name if name else "label%s" % random.randint(0, 2147483648), offset=offset, size=size, alpha=alpha)
-        self._controlData = LabelData(parent._controlData if parent else None)
+        self._controlData = LabelData(parent._controlData if parent else None, self)
         self._parent = parent
         self.text = text
         self.fontSize = fontSize
@@ -1242,6 +1244,7 @@ class UI(object):
                 temp = temp.parent if isinstance(temp, Control) else None
             if createCopy:
                 new = control.copy()
+                new.parent = self
                 new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
             self._controlData.addControl(new._controlData)
             news.append(new)
