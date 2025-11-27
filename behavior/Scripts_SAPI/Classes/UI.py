@@ -100,6 +100,14 @@ class BlankUI(ScreenNode):
     pass
 
 
+def fixColor(value):
+    if value < 0:
+        return 0
+    elif value > 255:
+        return 255
+    else:
+        return value
+
 class _CustomUI(ScreenNode):
     """Custom UI"""
 
@@ -119,13 +127,15 @@ class _CustomUI(ScreenNode):
         self.loaded = False
         self.loadingTime = 0.05
         self.loadingControlAmount = 0
+        self.currentTime = 0
+        self.progress = None
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, '#custom_ui_close')
     def Close(self, __args):
         clientApi.PopScreen()
 
     def createControl(self, controlData, path="/screen"):
-        # type: (dict, str) -> None
+        # type: (dict, str) -> Generator
         parentControl = self.GetBaseUIControl(path)
         if not parentControl:
             print("Error! Parent control '%s' dosen't exist!" % path)
@@ -139,7 +149,7 @@ class _CustomUI(ScreenNode):
         bg = self.CreateChildControl("base_controls.background", "custom_ui_background_auto_generate", c).asImage()
         bg.SetSprite(data['bg'].texture)
         bg.SetAlpha(float(data['bg'].alpha))
-        # bg.SetSpriteColor(data['bg'].color)
+        bg.SetSpriteColor((float(data['bg'].color[0]) / 255.0, float(data['bg'].color[1]) / 255.0, float(data['bg'].color[2] / 255.0)))
         bg.SetLayer(0)
         if not c:
             return
@@ -230,9 +240,18 @@ class _CustomUI(ScreenNode):
         c.SetAlpha(float(alpha))
         c.SetVisible(data['visible'])
         if controlType == "image":
+            c = c.asImage()
+            c.Rotate(float(data['rotation']))
+            c.SetSpriteColor((fixColor(float(data['color'][0])) / 255.0, fixColor(float(data['color'][1])) / 255.0, fixColor(float(data['color'][2])) / 255.0))
             c.asImage().SetSprite(data['texture'])
         elif controlType == 'label':
-            c.asLabel().SetText(data['text'])
+            c = c.asLabel()
+            c.SetText(data['text'])
+            color = (fixColor(float(data['color'][0])) / 255.0, fixColor(float(data['color'][1])) / 255.0, fixColor(float(data['color'][2])) / 255.0)
+            c.SetTextColor(color)
+            c.SetTextAlignment(data['align'])
+            c.SetTextFontSize(float(data['fontSize']))
+            c.SetTextLinePadding(float(data['linePadding']))
         elif controlType == 'button':
             button = c.asButton()
             callbackManager = ButtonCallbackManager(data['base'], self.ui, data['callbacks'])
@@ -258,25 +277,17 @@ class _CustomUI(ScreenNode):
             controlData[controlName] = None
             return
         if data['controls']:
-            def finish():
-                pass
-            def generateChildControls():
-                for control in data['controls']:
-                    self.createControl(control, path + "/" + controlName)
-                    self.loadingControlAmount += 1
-                    
-                    if self.loadingControlAmount > 30:
-                        clientApi.StopCoroutine(progress)
-                        self.loadingControlAmount = 0
-                        comp.AddTimer(0.05, clientApi.StartCoroutine, progress, finish)
-                        self.loadingTime += 0.05
+            for control in data['controls']:
+                self.createControl(control, path + "/" + controlName)
+                
+                """if time.time() - self.currentTime > 0.025:
+                    clientApi.StopCoroutine(self.progress)
 
-                    yield
-            comp = CComp.CreateGame(clientApi.GetLevelId())
-            progress = clientApi.StartCoroutine(generateChildControls, finish)
+                yield"""
 
     def Create(self):
         # type: () -> None
+        self.currentTime = time.time()
         if self.screenData:
             controls = self.screenData['screen']['controls']
             self.GetBaseUIControl("/screen").SetAnchorFrom("center")
@@ -291,29 +302,24 @@ class _CustomUI(ScreenNode):
             self.ui.size[0]._change(baseSize[0])
             self.ui.size[1]._change(baseSize[1])
             # create child control
-            def finish():
-                self.loaded = True
-
             def generateChildControls():
                 for control in controls:
                     self.createControl(control)
-                    self.loadingControlAmount += 1
                     
-                    if self.loadingControlAmount > 30:
-                        clientApi.StopCoroutine(progress)
-                        self.loadingControlAmount = 0
-                        comp.AddTimer(0.05, clientApi.StartCoroutine, progress, finish)
-                        self.loadingTime += 0.05
+                    if time.time() - self.currentTime > 0.032:
+                        clientApi.StopCoroutine(self.progress)
                     
                     yield
-            comp = CComp.CreateGame(clientApi.GetLevelId())
-            progress = clientApi.StartCoroutine(generateChildControls, finish)
+                self.loaded = True
+            self.progress = clientApi.StartCoroutine(generateChildControls)
             
     def Update(self):
         if RemoveSigns.get(id(self.ui), None):
             del RemoveSigns[id(self.ui)]
             self.SetRemove()
         if not self.loaded:
+            self.currentTime = time.time()
+            clientApi.StartCoroutine(self.progress)
             return
         self.ui.age._change(int(self.ui.age + 1))
         if self.ui._controlData.updateCallback:
@@ -463,7 +469,7 @@ class _CustomUI(ScreenNode):
                 if controlType == 'label':
                     c = c.asLabel()
                     c.SetText(controlData['text'])
-                    color = (float(controlData['color'][0]), float(controlData['color'][1]), float(controlData['color'][2]))
+                    color = (fixColor(float(controlData['color'][0])) / 255.0, fixColor(float(controlData['color'][1])) / 255.0, fixColor(float(controlData['color'][2])) / 255.0)
                     c.SetTextColor(color)
                     c.SetTextAlignment(controlData['align'])
                     c.SetTextFontSize(float(controlData['fontSize']))
@@ -471,9 +477,9 @@ class _CustomUI(ScreenNode):
                 if controlType == 'image':
                     c = c.asImage()
                     c.Rotate(float(controlData['rotation']))
-                    c.SetSpriteColor((float(controlData['color'][0]) / 255.0, float(controlData['color'][1]) / 255.0, float(controlData['color'][2] / 255.0)))
-                    c.SetSpriteUV((float(controlData['uv'][0]), float(controlData['uv'][1])))
-                    c.SetSpriteUVSize((float(controlData['uv_size'][0]), float(controlData['uv_size'][1])))
+                    c.SetSpriteColor((fixColor(float(controlData['color'][0])) / 255.0, fixColor(float(controlData['color'][1])) / 255.0, fixColor(float(controlData['color'][2])) / 255.0))
+                    # c.SetSpriteUV((float(controlData['uv'][0]), float(controlData['uv'][1])))
+                    # c.SetSpriteUVSize((float(controlData['uv_size'][0]), float(controlData['uv_size'][1])))
                 self.updateControl(path + "/" + controlName, controlData['controls'])
 
     def draw(self, control, controlData):
@@ -521,14 +527,17 @@ class _CustomUI(ScreenNode):
 class Control(object):
     """控件基类"""
 
-    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0):
-        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression) -> None
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg"):
+        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression, tuple[Expression, Expression, Expression], Expression, str) -> None
         self._controlData = ControlData(parent._controlData if parent else None)
         self._parent = parent
         self.name = name if name else "control%s" % random.randint(0, 2147483648)
         self.offset = offset
         self.size = size
         self.alpha = alpha
+        self.background.color = background_color
+        self.background.alpha = background_alpha
+        self.background.texture = background_texture
 
     @property
     def parent(self):
@@ -726,18 +735,22 @@ class Control(object):
         self._controlData.addControl(panel._controlData)
         return panel
     
-    def addImage(self, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0):
-        # type: (str, tuple[float, float], tuple[float, float], str, float, float) -> Image
+    def addImage(self, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0, uvOrigin=(0, 0), uvSize=None):
+        # type: (str, tuple[float, float], tuple[float, float], str, float, float, tuple[Expression], tuple[Expression]) -> Image
         """
         Add a new image.
         """
-        image = Image(self)
-        image.name = "image%s" % random.randint(0, 2147483648) if not name else name
-        image.offset = offset
-        image.size = size
-        image.texture = texture
-        image.alpha = alpha
-        image.rotation = rotation
+        image = Image(
+            self,
+            name=name,
+            offset=offset,
+            size=size,
+            texture=texture,
+            alpha=alpha,
+            rotation=rotation,
+            uvOrigin=uvOrigin,
+            uvSize=uvSize if uvSize else size
+        )
         self._controlData.addControl(image._controlData)
         return image
     
@@ -757,30 +770,33 @@ class Control(object):
         self._controlData.addControl(button._controlData)
         return button
     
-    def addControl(self, control, createCopy=True):
-        # type: (Control, bool) -> Control
+    def addControl(self, *controls):
+        # type: (Control) -> Control | list[Control]
+        """add one or more controls."""
+        createCopy = True
         temp = self
-        while temp:
-            if id(temp) == id(control):
-                print("add control error! cannot add a parent control.")
-                return None
-            temp = temp.parent if isinstance(temp, Control) else None
-        if createCopy:
-            new = control.copy()
-            new.alpha = control.alpha
-            new.offset = control.offset
-            new.size = control.size
-            if isinstance(new, Image):
-                new.rotation = control.rotation
-            new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
-        self._controlData.addControl(new._controlData)
-        return new
+        news = []
+        for control in controls:
+            while temp:
+                if id(temp) == id(control):
+                    print("add control error! cannot add a parent control.")
+                    return None
+                temp = temp.parent if isinstance(temp, Control) else None
+            if createCopy:
+                new = control.copy()
+                new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
+            self._controlData.addControl(new._controlData)
+            news.append(new)
+        return news if len(news) > 1 else news[0]
 
     def copy(self):
         # type: () -> Control
         """Create a copy of this control"""
         newControl = self.__class__(self.parent)
         newControl._controlData = self._controlData.copy()
+        newControl.alpha = self.alpha
+        newControl.offset = self.offset
+        newControl.size = self.size
         return newControl
     
     def __refresh(self):
@@ -807,16 +823,20 @@ class Panel(Control):
 class Image(Control):
     """Image class"""
 
-    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0, uvOrigin=(0, 0), uvSize=None, color=(255, 255, 255)):
-        # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], str, Expression, Expression, tuple[Expression, Expression], tuple[Expression, Expression], tuple[Expression, Expression, Expression]) -> None
-        Control.__init__(self, parent=parent, name=name if name else "image%s" % random.randint(0, 2147483648), offset=offset, size=size, alpha=alpha)
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], texture="", background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg", rotation=0, alpha=1.0, uvOrigin=(0, 0), uvSize=None, color=(255, 255, 255)):
+        # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], str, tuple[Expression, Expression, Expression], Expression, str, Expression, Expression, tuple[Expression, Expression], tuple[Expression, Expression], tuple[Expression, Expression, Expression]) -> None
+        # Control.__init__(self, parent=parent, name=(name if name else "image%s" % random.randint(0, 2147483648)), offset=offset, size=size, alpha=alpha)
         self._controlData = ImageData(parent._controlData if parent else None)
         self._parent = parent
+        self.name = name if name else "image%s" % random.randint(0, 2147483648)
+        self.offset = offset
+        self.size = size
+        self.alpha = alpha
         self.texture = texture
         self.rotation = rotation
         self.color = color
         self.uvOrigin = uvOrigin
-        self.uvSize = uvSize
+        self.uvSize = uvSize if uvSize else self.size
 
     @property
     def color(self):
@@ -887,8 +907,8 @@ class Image(Control):
                 else:
                     print("[Error][ModSAPI][TypeError] 属性 uvOrigin 只接受元素类型为 int | float | Expression 的元组或列表")
                     return
-                self._controlData.uv_origin[0]._change(temp[0])
-                self._controlData.uv_origin[1]._change(temp[1])
+            self._controlData.uv_origin[0]._change(temp[0])
+            self._controlData.uv_origin[1]._change(temp[1])
         else:
             print("[Error][ModSAPI][TypeError] 属性 uvOrigin 只接受元组或列表类型值")
 
@@ -919,8 +939,8 @@ class Image(Control):
                 else:
                     print("[Error][ModSAPI][TypeError] 属性 uvSize 只接受元素类型为 int | float | Expression 的元组或列表")
                     return
-                self._controlData.uv_size[0]._change(temp[0])
-                self._controlData.uv_size[1]._change(temp[1])
+            self._controlData.uv_size[0]._change(temp[0])
+            self._controlData.uv_size[1]._change(temp[1])
         else:
             print("[Error][ModSAPI][TypeError] 属性 uvOrigin 只接受元组或列表类型值")
 
@@ -947,18 +967,32 @@ class Image(Control):
             value = Expression(value)
         self._controlData.rotation._change(value)
     
+    def copy(self):
+        newControl = Control.copy(self) # type: Image
+        newControl.rotation = self.rotation
+        newControl.color = self.color
+        newControl.uvOrigin = self.uvOrigin
+        newControl.uvSize = self.uvSize
+        return newControl
+
 class Label(Control):
     """label class."""
     
-    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, fontSize=1.0, align="center", linePadding=0.0, color=(255, 255, 255)):
-        # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], Expression, Expression, str, Expression, tuple[Expression, Expression, Expression]) -> None
-        Control.__init__(self, parent=parent, name=name if name else "label%s" % random.randint(0, 2147483648), offset=offset, size=size, alpha=alpha)
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, text="", fontSize=1.0, align="center", linePadding=0.0, color=(255, 255, 255)):
+        # type: (Control | UI, str, tuple[Expression, Expression], tuple[Expression, Expression], Expression, str, Expression, str, Expression, tuple[Expression, Expression, Expression]) -> None
+        # Control.__init__(self, parent=parent, name=name if name else "label%s" % random.randint(0, 2147483648), offset=offset, size=size, alpha=alpha)
         self._controlData = LabelData(parent._controlData if parent else None)
         self._parent = parent
+        self.text = text
         self.fontSize = fontSize
         self.linePadding = linePadding
         self.align = align
         self.color = color
+        
+        self.name = name if name else "label%s" % random.randint(0, 2147483648)
+        self.offset = offset
+        self.size = size
+        self.alpha = alpha
 
     @property
     def text(self):
@@ -1056,6 +1090,13 @@ class Label(Control):
         else:
             print("[Error][ModSAPI][TypeError] 属性 color 只接受元组或列表类型值")
 
+    def copy(self):
+        newControl = Control.copy(self) # type: Label
+        newControl.color = self.color
+        newControl.linePadding = self.linePadding
+        newControl.fontSize = self.fontSize
+        return newControl
+    
 class Button(Control):
     """button class."""
     
@@ -1146,18 +1187,22 @@ class UI(object):
         self._controlData.addControl(panel._controlData)
         return panel
     
-    def addImage(self, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0):
-        # type: (str, tuple[float, float], tuple[float, float], str, float, float) -> Image
+    def addImage(self, name=None, offset=[0, 0], size=[100, 100], texture="", rotation=0, alpha=1.0, uvOrigin=(0, 0), uvSize=None):
+        # type: (str, tuple[float, float], tuple[float, float], str, float, float, tuple[Expression], tuple[Expression]) -> Image
         """
         Add a new image.
         """
-        image = Image(self)
-        image.name = name if name else "image%s" % random.randint(0, 2147483648)
-        image.offset = offset
-        image.size = size
-        image.texture = texture
-        image.alpha = alpha
-        image.rotation = rotation
+        image = Image(
+            self,
+            name=name,
+            offset=offset,
+            size=size,
+            texture=texture,
+            alpha=alpha,
+            rotation=rotation,
+            uvOrigin=uvOrigin,
+            uvSize=uvSize
+        )
         self._controlData.addControl(image._controlData)
         return image
     
@@ -1183,25 +1228,25 @@ class UI(object):
         Screens[id(self)] = self
         clientApi.PushScreen("modsapi", "CustomUI", {"screenId": id(self)})
     
-    def addControl(self, control, createCopy=True):
-        # type: (Control, bool) -> Control
+    def addControl(self, *controls):
+        # type: (Control) -> Control | list[Control]
+        """add one or more controls."""
+        createCopy = True
         temp = self
-        while temp:
-            if id(temp) == id(control):
-                print("add control error! cannot add a parent control.")
-                return None
-            temp = temp.parent if isinstance(temp, Control) else None
-        if createCopy:
-            new = control.copy()
-            new.alpha = control.alpha
-            new.offset = control.offset
-            new.size = control.size
-            if isinstance(new, Image):
-                new.rotation = control.rotation
-            new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
-        self._controlData.addControl(new._controlData)
-        return new
-    
+        news = []
+        for control in controls:
+            while temp:
+                if id(temp) == id(control):
+                    print("add control error! cannot add a parent control.")
+                    return None
+                temp = temp.parent if isinstance(temp, Control) else None
+            if createCopy:
+                new = control.copy()
+                new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
+            self._controlData.addControl(new._controlData)
+            news.append(new)
+        return news if len(news) > 1 else news[0]
+ 
     def onUpdate(self, callback):
         # type: (types.FunctionType) -> None
         """设置界面刷新时要执行的函数"""

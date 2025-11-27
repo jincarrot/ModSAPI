@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from ..Utils.Expression import *
 import copy
+import mod.client.extraClientApi as clientApi
 
 class BackgroundData(object):
 
@@ -48,9 +49,9 @@ class BackgroundData(object):
                 else:
                     print("[Error][ModSAPI][TypeError] 属性 color 只接受元素类型为 int | float | Expression 的元组或列表")
                     return
-                self.color[0]._change(temp[0])
-                self.color[1]._change(temp[1])
-                self.color[2]._change(temp[2])
+            self.color[0]._change(temp[0])
+            self.color[1]._change(temp[1])
+            self.color[2]._change(temp[2])
         elif type(value) == str:
             if value == 'black':
                 self.color[0]._change(0)
@@ -397,7 +398,8 @@ class ScreenData(object):
     def __init__(self):
         self.controls = [] # type: list[ControlData]
         """child controls"""
-        self.size = [Expression(0), Expression(0)]
+        size = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId()).GetScreenSize()
+        self.size = [Expression(size[0]), Expression(size[1])]
         self.alpha = Expression(1.0)
         self.background = BackgroundData()
         self.updateCallback = None

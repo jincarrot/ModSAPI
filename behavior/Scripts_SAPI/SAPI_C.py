@@ -95,6 +95,11 @@ class SAPI_C(ClientSystem):
     def getUI():
         from Classes.UI import UI
         return UI
+    
+    @staticmethod
+    def getControls():
+        from Classes.UI import UI
+        return Image, Label
 
 
 class ClientP(ClientSystem):
@@ -232,3 +237,14 @@ class Manager(ClientSystem):
     def afterEvents(self):
         """events"""
         return self.__afterEvents
+
+    @property
+    def CONTROLS(self):
+        import Classes.UI as customui
+        class CustomControls:
+            Image = customui.Image
+            Label = customui.Label
+            __Button = customui.Button
+            __Panel = customui.Panel
+        return CustomControls()
+    
