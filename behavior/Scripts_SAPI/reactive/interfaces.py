@@ -111,7 +111,7 @@ class ParentNode(Node):
         """
         获取第一个子节点
         """
-        return self.children[0]
+        return ChildNode(self._control._controlData.controls[0].inst)
 
     @property
     def last(self):
@@ -119,7 +119,7 @@ class ParentNode(Node):
         """
         获取最后一个子节点
         """
-        return self.children[-1]
+        return ChildNode(self._control._controlData.controls[-1].inst)
 
     def insertAfter(self, node, target):
         # type: (ChildNode, ChildNode) -> ChildNode
@@ -219,7 +219,7 @@ class ChildNode(Node):
         在当前节点之前插入节点
         返回新插入的节点
         """
-        self.parent.insertBefore(self, node)
+        return self.parent.insertBefore(self, node)
 
     def after(self, node):
         # type: (ChildNode) -> ChildNode
@@ -227,7 +227,7 @@ class ChildNode(Node):
         在当前节点之后插入节点
         返回新插入的节点
         """
-        self.parent.insertAfter(self, node)
+        return self.parent.insertAfter(self, node)
 
     def replaceWith(self, node):
         # type: (ChildNode) -> ChildNode
@@ -235,14 +235,14 @@ class ChildNode(Node):
         替换当前节点
         返回被替换的节点
         """
-        self.parent.replaceChild(node, self)
+        return self.parent.replaceChild(node, self)
 
     def remove(self):
         # type: () -> None
         """
         移除当前节点
         """
-        self.parent.removeChild(self)
+        return self.parent.removeChild(self)
 
 class Widget(ParentNode, ChildNode):
 
