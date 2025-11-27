@@ -15,7 +15,7 @@ class Attr:
 
     @property
     def value(self):
-        # type: () -> any
+        # type: () -> Any
         """
         获取属性值 (如label, size, color等的值)
         """
