@@ -9,10 +9,12 @@ class ServerKVDatabase(ServerSubsystem):
         return self.data.GetExtraData(key)
     
     def setData(self, key, value):
-        self.data.SetExtraData(key, value)
+        self.data.SetExtraData(key, value, autoSave=False)
+        self.data.SaveExtraData()
 
     def removeData(self, key):
         self.data.SetExtraData(key, None)
+        self.data.SaveExtraData()
 
     def clearData(self):
         self.data.CleanExtraData()
@@ -31,7 +33,7 @@ class DatabaseView:
         self.key = key
 
     def get(self, item, default=None):
-        v = self.cache[item]
+        v = self.cache.get(item)
         if v is None:
             self.set(item, default)
             return default

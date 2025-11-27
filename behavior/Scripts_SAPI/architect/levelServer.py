@@ -1,9 +1,8 @@
 import mod.server.extraServerApi as serverApi
+compServer = serverApi.GetEngineCompFactory()
+levelId = serverApi.GetLevelId()
 
 class LevelServer:
-    compServer = serverApi.GetEngineCompFactory()
-    levelId = serverApi.GetLevelId()
-
     game = compServer.CreateGame(levelId)
     chunkSource = compServer.CreateChunkSource(levelId)
     achievement = compServer.CreateAchievement(levelId)
