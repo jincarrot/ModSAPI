@@ -1,10 +1,10 @@
 import mod.client.extraClientApi as clientApi
+compClient = clientApi.GetEngineCompFactory()
+levelId = clientApi.GetLevelId()
+localPlayerId = clientApi.GetLocalPlayerId()
 
 class LevelClient:
-    compClient = clientApi.GetEngineCompFactory()
-    levelId = clientApi.GetLevelId()
-    localPlayerId = clientApi.GetLocalPlayerId()
-
+    localPlayer = compClient.CreatePlayer(levelId)
     achievement = compClient.CreateAchievement(levelId)
     actorRender = compClient.CreateActorRender(levelId)
     biome = compClient.CreateBiome(levelId)

@@ -148,11 +148,6 @@ def SubsystemServer(subsystemCls):
     return subsystemCls
 
 
-if 1 > 2:
-    from mod.common.system.baseSystem import BaseSystem
-    from mod.client.system.clientSystem import ClientSystem
-    from mod.server.system.serverSystem import ServerSystem
-
 def getSubsystemCls():
     return ServerSubsystem if isServer() else ClientSubsystem
 
@@ -267,7 +262,7 @@ class ServerSubsystem(Subsystem):
         self.system.BroadcastToAllClient(eventName, eventData)
 
     def sendClient(self, targetIds, eventName, eventData):
-        if type(targetIds) == str:
+        if type(targetIds) == str or type(targetIds) == int:
             self.system.NotifyToClient(targetIds, eventName, eventData)
             return
 
