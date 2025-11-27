@@ -38,6 +38,7 @@ class Node:
     def __init__(self, control):
         # type: (Control) -> None
         self._control = control
+        self.__attributes = []
         
     def on(self, event, callback):
         # type: (str, function) -> None
@@ -66,6 +67,8 @@ class Node:
         """
         获取所有属性
         """
+        if self.__attributes:
+            return self.__attributes
         attrOrMethods = dir(self._control)
         attrs = []
         for propertyName in attrOrMethods:
@@ -77,6 +80,7 @@ class Node:
         result = []
         for attr in attrs:
             result.append(Attr(attr, self._control))
+        self.__attributes = result
         return result
 
     def getAttr(self, name):
@@ -84,7 +88,9 @@ class Node:
         """
         获取指定属性
         """
-        return Attr(name, self._control)
+        for attr in self.__attributes:
+            if attr.name == name:
+                return attr
 
 class ParentNode(Node):
 
@@ -111,7 +117,7 @@ class ParentNode(Node):
         """
         获取第一个子节点
         """
-        return self.children[0]
+        return ChildNode(self._control._controlData.controls[0].inst)
 
     @property
     def last(self):
@@ -119,7 +125,7 @@ class ParentNode(Node):
         """
         获取最后一个子节点
         """
-        return self.children[-1]
+        return ChildNode(self._control._controlData.controls[-1].inst)
 
     def insertAfter(self, node, target):
         # type: (ChildNode, ChildNode) -> ChildNode
@@ -219,7 +225,7 @@ class ChildNode(Node):
         在当前节点之前插入节点
         返回新插入的节点
         """
-        self.parent.insertBefore(self, node)
+        return self.parent.insertBefore(self, node)
 
     def after(self, node):
         # type: (ChildNode) -> ChildNode
@@ -227,7 +233,7 @@ class ChildNode(Node):
         在当前节点之后插入节点
         返回新插入的节点
         """
-        self.parent.insertAfter(self, node)
+        return self.parent.insertAfter(self, node)
 
     def replaceWith(self, node):
         # type: (ChildNode) -> ChildNode
@@ -235,20 +241,73 @@ class ChildNode(Node):
         替换当前节点
         返回被替换的节点
         """
-        self.parent.replaceChild(node, self)
+        return self.parent.replaceChild(node, self)
 
     def remove(self):
         # type: () -> None
         """
         移除当前节点
         """
-        self.parent.removeChild(self)
+        return self.parent.removeChild(self)
 
 class Widget(ParentNode, ChildNode):
 
     def __init__(self, control):
         # type: (Control) -> None
         self._control = control
+        self.__attributes = []
+        
+    def on(self, event, callback):
+        # type: (str, function) -> None
+        """
+        监听事件
+        """
+        pass
+
+    def off(self, event, callback):
+        # type: (str, function) -> None
+        """
+        移除事件监听器
+        """
+        pass
+
+    def trigger(self, event, args):
+        # type: (str, dict) -> None
+        """
+        手动触发事件
+        """
+        pass
+
+    @property
+    def attributes(self):
+        # type: () -> list[Attr]
+        """
+        获取所有属性
+        """
+        if self.__attributes:
+            return self.__attributes
+        attrOrMethods = dir(self._control)
+        attrs = []
+        for propertyName in attrOrMethods:
+            if propertyName[0] == '_':
+                continue
+            if callable(getattr(self._control, propertyName)):
+                continue
+            attrs.append(propertyName)
+        result = []
+        for attr in attrs:
+            result.append(Attr(attr, self._control))
+        self.__attributes = result
+        return result
+
+    def getAttr(self, name):
+        # type: (str) -> Attr
+        """
+        获取指定属性
+        """
+        for attr in self.__attributes:
+            if attr.name == name:
+                return attr
 
     def getNodeByName(self, name):
         # type: (str) -> Node
