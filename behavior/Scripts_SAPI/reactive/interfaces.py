@@ -255,6 +255,59 @@ class Widget(ParentNode, ChildNode):
     def __init__(self, control):
         # type: (Control) -> None
         self._control = control
+        self.__attributes = []
+        
+    def on(self, event, callback):
+        # type: (str, function) -> None
+        """
+        监听事件
+        """
+        pass
+
+    def off(self, event, callback):
+        # type: (str, function) -> None
+        """
+        移除事件监听器
+        """
+        pass
+
+    def trigger(self, event, args):
+        # type: (str, dict) -> None
+        """
+        手动触发事件
+        """
+        pass
+
+    @property
+    def attributes(self):
+        # type: () -> list[Attr]
+        """
+        获取所有属性
+        """
+        if self.__attributes:
+            return self.__attributes
+        attrOrMethods = dir(self._control)
+        attrs = []
+        for propertyName in attrOrMethods:
+            if propertyName[0] == '_':
+                continue
+            if callable(getattr(self._control, propertyName)):
+                continue
+            attrs.append(propertyName)
+        result = []
+        for attr in attrs:
+            result.append(Attr(attr, self._control))
+        self.__attributes = result
+        return result
+
+    def getAttr(self, name):
+        # type: (str) -> Attr
+        """
+        获取指定属性
+        """
+        for attr in self.__attributes:
+            if attr.name == name:
+                return attr
 
     def getNodeByName(self, name):
         # type: (str) -> Node
