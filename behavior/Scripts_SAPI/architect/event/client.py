@@ -1,0 +1,34 @@
+from .core import EventChain
+from ..annotation import AnnotationHelper
+
+import mod.client.extraClientApi as api
+
+engine = api.GetEngineNamespace()
+sysName = api.GetEngineSystemName()
+
+class MinecraftClientEvents:
+    globalEvents = {}
+
+    @staticmethod
+    def getOrCreateChain(eventType, isCustomEvent=False):
+        # type: (str, bool) -> EventChain
+        if eventType in MinecraftClientEvents.globalEvents:
+            return MinecraftClientEvents.globalEvents[eventType]
+        else:
+            chain = EventChain()
+            MinecraftClientEvents.globalEvents[eventType] = chain
+            from ..subsystem import SubsystemManager
+            SubsystemManager.getInst().addListener(eventType, lambda ev: chain.dispatch(eventType, ev), isCustomEvent)
+            return chain
+
+def event(eventType, isCustomEvent=False):
+    return MinecraftClientEvents.getOrCreateChain(eventType, isCustomEvent)
+
+def EventListener(eventType, isCutomEvent=False):
+    def decorator(fn):
+        # 标记方法为事件监听器
+        AnnotationHelper.addAnnotation(fn, '_event_listener', eventType)
+        if isCutomEvent:
+            AnnotationHelper.addAnnotation(fn, '_custom_event', True)
+        return fn
+    return decorator

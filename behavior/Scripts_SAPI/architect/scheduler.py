@@ -200,21 +200,3 @@ class Future:
         ftr = Future(fn)
         ftr.start()
         return ftr
-    
-
-# def gen():
-#     for i in range(500):
-#         print(i)
-#         yield i
-
-# def test():
-#     print("Timer executed")
-
-# scheduler = Scheduler()
-# def schedule():
-#     scheduler.executeSequenceAsync()
-#     Timer(0.05, schedule).start()
-
-# schedule()
-
-# scheduler.addSuspendableTask('SchedulerTask', gen)
