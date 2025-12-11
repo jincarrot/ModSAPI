@@ -32,6 +32,10 @@ def modulo(a):
     # type: (Vector3) -> float
     return Vector3.Length(a)
 
+def moduloSqrt(a):
+    # type: (Vector3) -> float
+    return Vector3.LengthSquared(a)
+
 def normalize(a):
     # type: (Vector3) -> Vector3
     return Vector3.Normalized(a)

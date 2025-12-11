@@ -67,7 +67,7 @@ class _Query:
     def __enter__(self):
         result = getComponent(self.entityId, self.comps)
         if result is None:
-            raise
+            raise Exception()
         return result
     
     def __exit__(self, exc_type, exc_val, exc_tb):

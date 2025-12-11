@@ -18,15 +18,16 @@ def Component(isSingleton=False, persist=False):
             'persist': persist
         })
         clsList.append(cls)
+        return cls
 
     return decorator
 
-def registerComponents():
-    _isServer = isServer()
-    clsList = serverCompCls if _isServer else clientCompCls
-    api = serverApi if _isServer else clientApi
+def registerComponents(isServer):
+    clsList = serverCompCls if isServer else clientCompCls
+    api = serverApi if isServer else clientApi
     for cls in clsList:
-        api.RegisterComponent(COMPONENT_NAMESPACE, cls.__name__, cls.__module__ + '.' + cls.__name__)
+        result = api.RegisterComponent(COMPONENT_NAMESPACE, cls.__name__, cls.__module__ + '.' + cls.__name__)
+        print('[INFO] Register component', cls.__name__, 'result:', result)
 
 def getComponentAnnotation(cls):
     return AnnotationHelper.getAnnotation(cls, '_component')
@@ -43,9 +44,13 @@ entitiesServer = {}
 entitiesClient = {}
 
 def createComponent(entityId, cls):
+    # print('create component', entityId, cls)
     api = serverApi if isServer() else clientApi
     comp = api.CreateComponent(entityId, COMPONENT_NAMESPACE, cls.__name__)
     components[(entityId, cls)] = comp
+    if hasattr(comp, 'onCreate'):
+        comp.onCreate(entityId)
+
     entities = entitiesServer if isServer() else entitiesClient
     if entityId not in entities:
         entities[entityId] = 0
@@ -67,6 +72,7 @@ def destroyComponent(entityId, cls):
 
 
 def getComponent(entityId, clsList, filter=None):
+    # print(components)
     result = []
     for c in clsList:
         key = (entityId, c)

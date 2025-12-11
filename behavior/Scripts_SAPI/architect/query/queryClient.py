@@ -1,6 +1,6 @@
 from ..level.client import compClient, clientApi
 from .cache import QueryCache
-
+from ..annotation import AnnotationHelper
 
 class QueryClient:
     _caches = {}
@@ -67,7 +67,7 @@ class _Query:
     def __enter__(self):
         result = getComponent(self.entityId, self.comps)
         if result is None:
-            raise
+            raise Exception()
         return result
     
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -79,9 +79,12 @@ def query(entityId, comps):
 
 queries = []
 
-def callQueries(entityId):
+def callQueries(entityId, frameUpdate=False):
     for q in queries:
-        q(entityId)
+        anyFrame = AnnotationHelper.getAnnotation(q, 'AnyFrame') or False
+        if frameUpdate == anyFrame:
+            q(entityId)
+
 
 def Query(*compCls):
     def decorator(fn):
@@ -89,5 +92,16 @@ def Query(*compCls):
             with query(entityId, compCls) as comps:
                 return fn(entityId, *comps)
         queries.append(wrapper)
+        return wrapper
+    return decorator
+
+
+def QueryAnyFrame(*compCls):
+    def decorator(fn):
+        def wrapper(entityId):
+            with query(entityId, compCls) as comps:
+                return fn(entityId, *comps)
+        queries.append(wrapper)
+        AnnotationHelper.addAnnotation(wrapper, 'AnyFrame', True)
         return wrapper
     return decorator

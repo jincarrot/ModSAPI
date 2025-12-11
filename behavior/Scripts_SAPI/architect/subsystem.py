@@ -45,7 +45,6 @@ class SubsystemManager:
         manager.rawEngine = clientApi.GetEngineNamespace()
         manager.rawSysName = clientApi.GetEngineSystemName()
         SubsystemManager.client = manager
-        registerComponents()
         return manager
 
     @staticmethod
@@ -57,7 +56,6 @@ class SubsystemManager:
         manager.rawEngine = serverApi.GetEngineNamespace()
         manager.rawSysName = serverApi.GetEngineSystemName()
         SubsystemManager.server = manager
-        registerComponents()
         return manager
 
     @classmethod
@@ -89,35 +87,53 @@ class SubsystemManager:
         self.system = system
 
         if isServer():
-            LevelServer.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
+            LevelServer.game.AddTimer(0.1, lambda: self.appendAllSubsystems(True))
         else:
-            threading.Timer(0.1, lambda: self.appendAllSubsystems()).start()
+            threading.Timer(0.1, lambda: self.appendAllSubsystems(False)).start()
 
 
     def getSubsystems(self):
         return self.clientSubs if isServer() else self.serverSubs
 
 
-    def appendAllSubsystems(self):
+    def appendAllSubsystems(self, isServer):
         for subsystemCls in SubsystemManager.registeredSubsystems:
             self.addSubsystem(subsystemCls)
 
         SubsystemManager.unregisterSubsystems()
-        self.startTicking()
+        self.startTicking(isServer)
+        registerComponents(isServer)
 
         for v in self.getSubsystems().values():
             if hasattr(v, 'onReady'):
                 v.onReady()
 
 
-    def startTicking(self):
-        self.system.ListenForEvent(
-            self.rawEngine,
-            self.rawSysName,
-            'OnScriptTickServer' if isServer() else 'OnScriptTickClient',
-            self,
-            self.tick
-        )
+    def startTicking(self, isServer):
+        if isServer:
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                'OnScriptTickServer',
+                self,
+                self.tickServer
+            )
+        else:
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                'OnScriptTickClient',
+                self,
+                self.tickClient
+            )
+
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                'GameRenderTickEvent',
+                self,
+                self.tickRender
+            )
 
 
     def addSubsystem(self, subsystemCls):
@@ -154,9 +170,24 @@ class SubsystemManager:
         SubsystemManager.registeredSubsystems = []
 
 
+    lastTickTimeServer = time.time()
     lastTickTime = time.time()
 
-    def tick(self):
+    def tickServer(self):
+        currentTime = time.time()
+        dt = currentTime - self.lastTickTimeServer
+
+        for obj in self.getSubsystems().values():
+            if obj.canTick:
+                obj.onUpdate(dt)
+                obj.ticks += 1
+
+        for entity in getEntities():
+            callServerQueries(entity)
+
+        self.lastTickTimeServer = currentTime
+
+    def tickClient(self):
         currentTime = time.time()
         dt = currentTime - self.lastTickTime
 
@@ -166,15 +197,13 @@ class SubsystemManager:
                 obj.ticks += 1
 
         for entity in getEntities():
-            self._callQueries(entity)
+            callClientQueries(entity)
 
         self.lastTickTime = currentTime
-    
-    def _callQueries(self, entityId):
-        if isServer():
-            callServerQueries(entityId)
-        else:
-            callClientQueries(entityId)
+
+    def tickRender(self, _):
+        for entity in getEntities():
+            callClientQueries(entity, True)
 
     def addListener(self, event, fn, isCustomEvent=False):
         listeners = self.serverListeners if isServer() else self.clientListeners
@@ -423,6 +452,7 @@ class UiSubsystem(ScreenNode, ClientSubsystem):
         ui = clientApi.CreateUI(cls.ns, cls.__name__, params)
         cls.inst = ui
         return ui
+
     
 
 ServerSystem = serverApi.GetServerSystemCls()

@@ -1,8 +1,10 @@
+from __future__ import division, print_function
 from mod.common.utils.mcmath import Matrix, Vector3
 from .vec3 import normalize, dot, cross
 import math
 
 def identity():
+    # type: () -> Matrix
     return Matrix.Create([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -13,24 +15,33 @@ def identity():
 def lookAt(eye, target, up):
     # type: (Vector3, Vector3, Vector3) -> Matrix
     # 右手系：相机看向 -Z 方向
-    zaxis = normalize(eye - target).ToTuple()
-    xaxis = normalize(Vector3.Cross(up, zaxis)).ToTuple()
-    yaxis = cross(zaxis, xaxis).ToTuple()
+    zaxis = normalize(eye - target)
+    xaxis = normalize(cross(up, zaxis))
+    yaxis = cross(zaxis, xaxis)
     return Matrix.Create([
-        [xaxis[0], yaxis[0], zaxis[0], 0],
-        [xaxis[1], yaxis[1], zaxis[1], 0],
-        [xaxis[2], yaxis[2], zaxis[2], 0],
-        [-dot(xaxis, eye), -dot(yaxis, eye), -dot(zaxis, eye), 1]
+        [xaxis.x, xaxis.y, xaxis.z, -dot(xaxis, eye)],
+        [yaxis.x, yaxis.y, yaxis.z, -dot(yaxis, eye)],
+        [zaxis.x, zaxis.y, zaxis.z, -dot(zaxis, eye)],
+        [0, 0, 0, 1]
     ])
 
-def perspective(fov, aspect, near, far):
+def perspective(fov_degrees, aspect, near, far):
     # type: (float, float, float, float) -> Matrix
-    tanHalfFov = math.tan(fov / 2)
+    # 右手系透视投影矩阵，NDC的z范围映射到[-1, 1]
+    # 行向量左乘版本：v' = v * M, 其中 v = [x, y, z, 1]
+    # 投影后：x' = a*x, y' = b*y, z' = c*z + d, w' = -z
+    # 注意：fov_degrees 为角度制（垂直视场角）
+    fov_rad = math.radians(fov_degrees)
+    tanHalfFov = math.tan(fov_rad / 2)
+    a = 1 / (aspect * tanHalfFov)
+    b = 1 / tanHalfFov
+    c = -(far + near) / (far - near)
+    d = -2 * far * near / (far - near)
     return Matrix.Create([
-        [1 / (aspect * tanHalfFov), 0, 0, 0],
-        [0, 1 / tanHalfFov, 0, 0],
-        [0, 0, -(far + near) / (far - near), -1],
-        [0, 0, -2 * far * near / (far - near), 0]
+        [a, 0, 0, 0],
+        [0, b, 0, 0],
+        [0, 0, c, d],
+        [0, 0, -1, 0]
     ])
 
 def multiply(a, b):
@@ -49,10 +60,10 @@ def translate(v):
     # type: (Vector3) -> Matrix
     x, y, z = v.ToTuple()
     return Matrix.Create([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [x, y, z, 1]
+        [1, 0, 0, x],
+        [0, 1, 0, y],
+        [0, 0, 1, z],
+        [0, 0, 0, 1]
     ])
 
 def rotateAxis(axis, angle):
@@ -151,7 +162,7 @@ def transformPoint(m, point):
         rx /= rw
         ry /= rw
         rz /= rw
-    return Vector3(rx, ry, rz)
+    return (rx, ry, rz, rw)
 
 def transformVector(m, vector):
     # type: (Matrix, Vector3) -> Vector3
@@ -189,7 +200,7 @@ def worldToLocal(modelMatrix, worldPoint):
     return transformPoint(invMatrix, worldPoint)
 
 def worldToScreen(modelMatrix, viewMatrix, projectionMatrix, viewport, worldPoint):
-    # type: (Matrix, Matrix, Matrix, Vector3, Vector3) -> Vector3
+    # type: (Matrix, Matrix, Matrix, tuple[int, int], Vector3) -> Vector3
     """
     将世界坐标系中的点转换到屏幕坐标系
     modelMatrix: 模型到世界的变换矩阵（即模型的世界矩阵）
@@ -201,17 +212,17 @@ def worldToScreen(modelMatrix, viewMatrix, projectionMatrix, viewport, worldPoin
     """
     # 先将世界坐标转换到裁剪空间
     mvpMatrix = multiply(projectionMatrix, multiply(viewMatrix, modelMatrix))
-    clipPoint = transformPoint(mvpMatrix, worldPoint)
-    # 再将裁剪空间坐标转换到屏幕坐标
+    clipPoint = transformPoint(mvpMatrix, worldPoint)  # clipPoint 已经是 (x_ndc, y_ndc, z_ndc, w_clip)
+    # 直接将 NDC 坐标映射到屏幕坐标
     screenPoint = Vector3(
-        (clipPoint[0] / clipPoint[3] + 1) * 0.5 * viewport[0],
-        (1 - (clipPoint[1] / clipPoint[3] + 1) * 0.5) * viewport[1],
-        clipPoint[2] / clipPoint[3]
+        (clipPoint[0] + 1) * 0.5 * viewport[0],
+        (1 - (clipPoint[1] + 1) * 0.5) * viewport[1],
+        clipPoint[2]  # 直接使用 z_ndc 作为深度
     )
     return screenPoint
 
 def screenToWorld(modelMatrix, viewMatrix, projectionMatrix, viewport, screenPoint, depth):
-    # type: (Matrix, Matrix, Matrix, Vector3, Vector3, float) -> Vector3
+    # type: (Matrix, Matrix, Matrix, tuple[int, int], Vector3, float) -> Vector3
     """
     将屏幕坐标系中的点转换到世界坐标系
     modelMatrix: 模型到世界的变换矩阵（即模型的世界矩阵）
@@ -224,8 +235,8 @@ def screenToWorld(modelMatrix, viewMatrix, projectionMatrix, viewport, screenPoi
     """
     # 先将屏幕坐标转换到裁剪空间
     clipPoint = Vector3(
-        (screenPoint[0] / viewport[0] * 2 - 1) * depth,
-        (1 - screenPoint[1] / viewport[1] * 2) * depth,
+        (screenPoint.x / viewport[0] * 2 - 1) * depth,
+        (1 - screenPoint.y / viewport[1] * 2) * depth,
         depth
     )
     # 再将裁剪空间坐标转换到世界坐标

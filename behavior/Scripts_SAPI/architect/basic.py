@@ -16,3 +16,5 @@ def getGoalCls():
 def serverTick():
     return serverApi.GetServerTickTime()
 
+compServer = serverApi.GetEngineCompFactory()
+compClient = clientApi.GetEngineCompFactory()
