@@ -80,6 +80,67 @@ class BackgroundData(object):
         else:
             print("[Error][ModSAPI][TypeError] 属性 alpha 可接受的类型为 float | Expression")
     
+class TraceData(object):
+
+    def __init__(self):
+        self.width = 1
+        """追踪线条的宽度"""
+        self.interval = 1
+        """追踪记录的间隔，间隔越大性能越好"""
+        self.amount = 50
+        """追踪线条数量，数量越小线条越短，性能越好"""
+        self.__color = (Expression(255.0), Expression(255.0), Expression(255.0))
+        self.__alpha = Expression(1.0)
+
+    @property
+    def color(self):
+        """线条颜色"""
+        return self.__color
+    
+    @color.setter
+    def color(self, value):
+        if type(value) in [list, tuple]:
+            if len(value) != 3:
+                print("[Error][ModSAPI][TypeError] 属性 color 长度为3")
+                return
+            # process value
+            temp = [0, 0, 0]
+            for i in range(3):
+                if type(value[i]) in [int, float]:
+                    temp[i] = value[i]
+                elif isinstance(value[i], Expression):
+                    temp[i] = value[i]
+                else:
+                    print("[Error][ModSAPI][TypeError] 属性 color 只接受元素类型为 int | float | Expression 的元组或列表")
+                    return
+                self.__color[0]._change(temp[0])
+                self.__color[1]._change(temp[1])
+                self.__color[2]._change(temp[2])
+        elif type(value) == str:
+            if value == 'black':
+                self.__color[0]._change(0)
+                self.__color[1]._change(0)
+                self.__color[2]._change(0)
+            elif value == 'white':
+                self.__color[0]._change(255)
+                self.__color[1]._change(255)
+                self.__color[2]._change(255)
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 color 只接受元组或列表类型值")
+
+    @property
+    def alpha(self):
+        """线条透明度"""
+        return self.__alpha
+    
+    @alpha.setter
+    def alpha(self, value):
+        # type: (float) -> None
+        if type(value) in [int, float] or isinstance(value, Expression):
+            self.__alpha._change(value)
+        else:
+            print("[Error][ModSAPI][TypeError] 属性 alpha 可接受的值为 float | Expression")
+
 class ControlData(object):
     """Base class of all controls"""
 
@@ -132,6 +193,8 @@ class ControlData(object):
         """add a new control to current control"""
         if isinstance(controlData, ControlData):
             self.controls.append(controlData)
+            import UI as custom_ui
+            custom_ui.RefreshSigns[id(self.inst)] = True
         else:
             print("param error! Not a control.")
 
@@ -164,7 +227,8 @@ class ControlData(object):
                 "visible": self.visible,
                 "isStatic": self.isStatic,
                 "shouldTrace": self.shouldTrace,
-                "path": self.path
+                "path": self.path,
+                "instance": self.inst
             }
         }
         return data
@@ -200,11 +264,24 @@ class ImageData(ControlData):
         baseData[self.controlName]['uv'] = self.uv_origin
         baseData[self.controlName]['uv_size'] = self.uv_size
         return baseData
-    
+
+class ScrollPanelData(ControlData):
+
+    def __init__(self, parentData=None, inst=None):
+        ControlData.__init__(self, parentData, inst)
+        self.content = None # type: PanelData
+
+    def _generate(self):
+        baseData = ControlData._generate(self)
+        baseData[self.controlName]['content'] = self.content
+        return baseData
+
 class ButtonTouchCallbacks:
 
     def __init__(self):
+        from UI import ButtonCallbackArgument
         def default(arg):
+            # type: (ButtonCallbackArgument) -> None
             pass
         self.__hoverIn = default
         """鼠标挪入按钮区域时触发函数"""
@@ -397,7 +474,7 @@ class LabelData(ControlData):
 class ScreenData(object):
     """Screen data"""
 
-    def __init__(self):
+    def __init__(self, inst=None):
         self.controls = [] # type: list[ControlData]
         """child controls"""
         size = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId()).GetScreenSize()
@@ -406,6 +483,7 @@ class ScreenData(object):
         self.background = BackgroundData()
         self.updateCallback = None
         self.controlName = "screen"
+        self.inst = inst
 
     def __str__(self):
         controlStr = []
@@ -421,6 +499,8 @@ class ScreenData(object):
         """add a new control to current control"""
         if isinstance(controlData, ControlData):
             self.controls.append(controlData)
+            import UI as custom_ui
+            custom_ui.RefreshSigns[id(self.inst)] = True
         else:
             print("[Error][ModSAPI] 添加控件失败！")
 

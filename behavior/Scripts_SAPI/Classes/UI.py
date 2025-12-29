@@ -4,6 +4,7 @@ import time
 import mod.client.extraClientApi as clientApi
 # from mod.client.ui.controls.baseUIControl import *
 import types
+import inspect
 
 from ControlData import *
 from ..Interfaces.Vector import Vector2
@@ -59,41 +60,48 @@ class ButtonCallbackManager:
         self.arg = ButtonCallbackArgument(button, ui)
         self.callbacks = callbacks
 
+    def hasArg(self, callback):
+        # type: (types.FunctionType) -> bool
+        args = callback.func_code.co_argcount
+        if hasattr(callback, "im_self"):
+            args -= 1
+        return args > 0
+
     def onTouchUp(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.touchUp(self.arg)
+        self.callbacks.touchUp(self.arg) if self.hasArg(self.callbacks.touchUp) else self.callbacks.touchUp()
 
     def onTouchDown(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.touchDown(self.arg)
+        self.callbacks.touchDown(self.arg) if self.hasArg(self.callbacks.touchDown) else self.callbacks.touchDown()
 
     def onMoveIn(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.touchMoveIn(self.arg)
+        self.callbacks.touchMoveIn(self.arg) if self.hasArg(self.callbacks.touchMoveIn) else self.callbacks.touchMoveIn()
 
     def onMove(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.touchMove(self.arg)
+        self.callbacks.touchMove(self.arg) if self.hasArg(self.callbacks.touchMove) else self.callbacks.touchMove()
 
     def onMoveOut(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.touchMoveOut(self.arg)
+        self.callbacks.touchMoveOut(self.arg) if self.hasArg(self.callbacks.touchMoveOut) else self.callbacks.touchMoveOut()
 
     def onScreenExit(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.screenExit(self.arg)
+        self.callbacks.screenExit(self.arg) if self.hasArg(self.callbacks.screenExit) else self.callbacks.screenExit()
 
     def onTouchCancel(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.touchCancel(self.arg)
+        self.callbacks.touchCancel(self.arg) if self.hasArg(self.callbacks.touchCancel) else self.callbacks.touchCancel()
 
     def onHoverIn(self, data):
         self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.hoverIn(self.arg)
+        self.callbacks.hoverIn(self.arg) if self.hasArg(self.callbacks.hoverIn) else self.callbacks.hoverIn()
 
     def onHoverOut(self, data):
-        self.arg.pos = Vector2((data['TouchPosX'], data['TouchPosY']))
-        self.callbacks.hoverOut(self.arg)
+        self.arg.pos = Vector2((0, 0))
+        self.callbacks.hoverOut(self.arg) if self.hasArg(self.callbacks.hoverOut) else self.callbacks.hoverOut()
 
 
 class BlankUI(ScreenNode):
@@ -146,7 +154,14 @@ class _CustomUI(ScreenNode):
             return
         controlType = data['type']
         c = self.CreateChildControl("base_controls.custom_%s" % controlType, controlName, parentControl)
-        bg = self.CreateChildControl("base_controls.background", "custom_ui_background_auto_generate", c).asImage()
+
+        bg = None
+        if controlType == 'scrollpanel':
+            contentPath = c.asScrollView().GetScrollViewContentPath()
+            contentPath = contentPath.split("background_and_viewport")[0] + "background_and_viewport/background"
+            bg = self.GetBaseUIControl(contentPath).asImage()
+        else:
+            bg = self.CreateChildControl("base_controls.background", "custom_ui_background_auto_generate", c).asImage()
         bg.SetSprite(data['bg'].texture)
         bg.SetAlpha(float(data['bg'].alpha))
         bg.SetSpriteColor((float(data['bg'].color[0]) / 255.0, float(data['bg'].color[1]) / 255.0, float(data['bg'].color[2] / 255.0)))
@@ -273,17 +288,17 @@ class _CustomUI(ScreenNode):
             Data.append(data['textures'].pressed._generate())
             Data.append(data['label']._generate())
             self.updateControl(path + "/" + controlName, Data)
+        elif controlType == 'scrollpanel':
+            contentData = data['content']._generate()
+            contentPath = c.asScrollView().GetScrollViewContentPath()
+            self.GetBaseUIControl(contentPath).SetSize((float(data['content'].size[0]), float(data['content'].size[1])))
+            self.createControl(contentData, contentPath)
         if data['isStatic']:
             controlData[controlName] = None
             return
         if data['controls']:
             for control in data['controls']:
                 self.createControl(control, path + "/" + controlName)
-                
-                """if time.time() - self.currentTime > 0.025:
-                    clientApi.StopCoroutine(self.progress)
-
-                yield"""
 
     def Create(self):
         # type: () -> None
@@ -317,6 +332,9 @@ class _CustomUI(ScreenNode):
         if RemoveSigns.get(id(self.ui), None):
             del RemoveSigns[id(self.ui)]
             self.SetRemove()
+        if RefreshSigns.get(id(self.ui), None):
+            del RefreshSigns[id(self.ui)]
+            self.screenData = self.ui._controlData._generate()
         if not self.loaded:
             self.currentTime = time.time()
             clientApi.StartCoroutine(self.progress)
@@ -328,8 +346,8 @@ class _CustomUI(ScreenNode):
             for key in self.drawingData:
                 data = self.drawingData[key]
                 for p in data['lst']:
-                    alpha = float(data['params']['alpha']) * float(data['parent']['alpha'])
-                    color = data['params']['color']
+                    alpha = float(data['params'].alpha) * float(data['parent']['alpha'])
+                    color = data['params'].color
                     c = self.GetBaseUIControl(p).asImage()
                     c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
                     c.SetSpriteColor((float(color[0] if 0 <= float(color[0]) <= 1 else (1 if float(color[0]) > 1 else 0)) / 1.0, float(color[1] if 0 <= float(color[1]) <= 1 else (1 if float(color[1]) > 1 else 0)) / 1.0, float(color[2] if 0 <= float(color[2]) <= 1 else (1 if float(color[2]) > 1 else 0)) / 1.0))
@@ -344,17 +362,6 @@ class _CustomUI(ScreenNode):
                 color = self.ui.background.color
                 bg.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
                 bg.SetSpriteColor((float(color[0] if 0 <= int(color[0]) <= 255 else 1 if int(color[0]) > 255 else 0) / 255.0, float(color[1] if 0 <= int(color[1]) <= 255 else 1 if int(color[1]) > 255 else 0) / 255.0, float(color[2] if 0 <= int(color[2]) <= 255 else 1 if int(color[2]) > 255 else 0)/ 255.0))
-        if RefreshSigns.get(id(self.ui), 0):
-            RefreshSigns[id(self.ui)] = 0
-            newData = self.ui._controlData._generate()
-            controls = newData['screen']['controls']
-            for control in controls:
-                if control not in self.screenData['screen']['controls']:
-                    self.createControl(control)
-            for control in self.screenData['screen']['controls']:
-                if control not in controls:
-                    self.RemoveChildControl(self.GetBaseUIControl("/screen/%s" % control.keys()[0]))
-            self.screenData = newData
 
     def updateControl(self, path, controls):
         # type: (str, list[dict]) -> None
@@ -364,9 +371,13 @@ class _CustomUI(ScreenNode):
                 controlData = control[controlName]
                 if not controlData:
                     return
+                if RefreshSigns.get(id(controlData['instance']), None):
+                    del RefreshSigns[id(controlData['instance'])]
+                    self.screenData = self.ui._controlData._generate()
                 c = self.GetBaseUIControl(path + "/" + controlName)
                 if not c:
-                    return
+                    self.createControl({controlName: controlData}, path)
+                    c = self.GetBaseUIControl(path + "/" + controlName)
                 controlType = controlData['type']
                 if controlData['shouldTrace']:
                     self.draw(c, controlData)
@@ -454,7 +465,7 @@ class _CustomUI(ScreenNode):
 
                 alpha = float(controlData['alpha'])
                 c.SetAlpha(alpha if 0 <= alpha <= 1 else (1 if alpha > 1 else 0))
-                c.SetVisible(controlData['visible'])
+                # c.SetVisible(controlData['visible'])
                 if c.GetChildByName("custom_ui_background_auto_generate"):
                     bg = c.GetChildByName("custom_ui_background_auto_generate").asImage()
                     bg.SetSpriteColor((float(controlData['bg'].color[0]) / 255.0, float(controlData['bg'].color[1]) / 255.0, float(controlData['bg'].color[2] / 255.0)))
@@ -477,15 +488,21 @@ class _CustomUI(ScreenNode):
                 if controlType == 'image':
                     c = c.asImage()
                     c.Rotate(float(controlData['rotation']))
+                    c.SetSprite(controlData['texture'])
                     c.SetSpriteColor((fixColor(float(controlData['color'][0])) / 255.0, fixColor(float(controlData['color'][1])) / 255.0, fixColor(float(controlData['color'][2])) / 255.0))
                     # c.SetSpriteUV((float(controlData['uv'][0]), float(controlData['uv'][1])))
                     # c.SetSpriteUVSize((float(controlData['uv_size'][0]), float(controlData['uv_size'][1])))
+                if controlType == 'scrollpanel':
+                    contentData = controlData['content']._generate()
+                    contentPath = c.asScrollView().GetScrollViewContentPath()
+                    self.GetBaseUIControl(contentPath).SetSize((float(controlData['content'].size[0]), float(controlData['content'].size[1])))
+                    self.updateControl(contentPath, [contentData])
                 self.updateControl(path + "/" + controlName, controlData['controls'])
 
     def draw(self, control, controlData):
-        # type: (BaseUIControl, dict) -> None
-        params = controlData['shouldTrace']
-        if float(self.ui.age % params['interval']):
+        # type: (BaseUIControl, dict[str, TraceData]) -> None
+        params = controlData['shouldTrace'] # TraceData
+        if float(self.ui.age % params.interval):
             return
         if not self.drawingData.get(control.GetPath(), None):
             self.drawingData[control.GetPath()] = {
@@ -501,21 +518,21 @@ class _CustomUI(ScreenNode):
             def dist(old, new):
                 return math.sqrt((old[0] - new[0]) * (old[0] - new[0]) + (old[1] - new[1]) * (old[1] - new[1]))
             line = self.CreateChildControl("base_controls.background", name, self.GetBaseUIControl("/screen")).asImage()
-            self.ui.age._change(float(self.ui.age) - params['interval'])
+            self.ui.age._change(float(self.ui.age) - params.interval)
             oldPos = (self.drawingData[control.GetPath()]['expression'][0].staticValue, self.drawingData[control.GetPath()]['expression'][1].staticValue)
-            self.ui.age._change(float(self.ui.age) + params['interval'])
+            self.ui.age._change(float(self.ui.age) + params.interval)
             newPos = (self.drawingData[control.GetPath()]['expression'][0].staticValue, self.drawingData[control.GetPath()]['expression'][1].staticValue)
-            line.SetFullSize("y", {"fit": False, "followType": "parent", "absoluteValue": params['width']})
+            line.SetFullSize("y", {"fit": False, "followType": "parent", "absoluteValue": params.width})
             line.SetFullSize("x", {"fit": False, "followType": "parent", "absoluteValue": dist(oldPos, newPos)})
             line.SetFullPosition("x", {"fit": False, "followType": "none", "absoluteValue": (oldPos[0] + newPos[0]) / 2.0})
             line.SetFullPosition("y", {"fit": False, "followType": "none", "absoluteValue": (oldPos[1] + newPos[1]) / 2.0})
             if dist(oldPos, newPos):
                 line.Rotate(math.asin((newPos[1] - oldPos[1]) / dist(oldPos, newPos)) * 180.0 / math.pi * (-1 if newPos[0] > oldPos[0] else 1))
-            line.SetAlpha(float(params['alpha']) * float(self.drawingData[control.GetPath()]['parent']['alpha']))
-            line.SetSpriteColor(params['color'])
+            line.SetAlpha(float(params.alpha) * float(self.drawingData[control.GetPath()]['parent']['alpha']))
+            line.SetSpriteColor((fixColor(params.color[0]) / 255.0, fixColor(params.color[1] / 255.0), fixColor(params.color[2]) / 255.0))
             line.SetLayer(0)
             self.drawingData[control.GetPath()]['lst'].append("/screen/%s" % name)
-            if len(self.drawingData[control.GetPath()]['lst']) > params['maxAmount']:
+            if len(self.drawingData[control.GetPath()]['lst']) > params.amount:
                 path = self.drawingData[control.GetPath()]['lst'][0]
                 self.RemoveChildControl(self.GetBaseUIControl(path))
                 self.drawingData[control.GetPath()]['lst'].remove(path)
@@ -771,6 +788,14 @@ class Control(object):
         self._controlData.addControl(button._controlData)
         return button
     
+    def addScrollPanel(self, panelData={}):
+        # type: (dict) -> None
+        """添加滚动面板"""
+        scrollPanel = ScrollPanel(self)
+        scrollPanel.name = "scrollpanel%s" % random.randint(0, 2147483648)
+        self._controlData.addControl(scrollPanel._controlData)
+        return scrollPanel
+    
     def addControl(self, *controls):
         # type: (Control) -> Control | list[Control]
         """add one or more controls."""
@@ -786,7 +811,7 @@ class Control(object):
             if createCopy:
                 new = control.copy()
                 new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
-                new.parent = self
+                new._parent = self
             self._controlData.addControl(new._controlData)
             news.append(new)
         return news if len(news) > 1 else news[0]
@@ -805,10 +830,16 @@ class Control(object):
         """刷新控件，重新生成子控件，计算值等"""
         pass
 
-    def trace(self, interval=1, maxAmount=50, width=2, alpha=1, color=(1, 1, 1)):
-        # type: (int, int, int, int, tuple) -> None
+    def trace(self, interval=1, maxAmount=50, width=2, alpha=1, color=(255, 255, 255)):
+        # type: (int, int, int, int, tuple) -> TraceData
         """记录轨迹"""
-        self._controlData.shouldTrace = {"interval": interval, "maxAmount": maxAmount, "width": width, "alpha": alpha, "color": color}
+        td = self._controlData.shouldTrace = TraceData()
+        td.interval = interval
+        td.amount = maxAmount
+        td.width = width
+        td.alpha = alpha
+        td.color = color
+        return td
     
     def asStaticControl(self):
         """将此控件作为静态控件，即不会更新size等表达式。主要用于降低性能消耗。"""
@@ -817,10 +848,18 @@ class Control(object):
 class Panel(Control):
     """Panel class"""
 
-    def __init__(self, parent=None):
-        # type: (Control | UI) -> None
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg"):
+        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression, tuple[Expression, Expression, Expression], Expression, str) -> None
         self._controlData = PanelData(parent._controlData if parent else None, self)
+
         self._parent = parent
+        self.name = name if name else "panel%s" % random.randint(0, 2147483648)
+        self.offset = offset
+        self.size = size
+        self.alpha = alpha
+        self.background.color = background_color
+        self.background.alpha = background_alpha
+        self.background.texture = background_texture
 
 class Image(Control):
     """Image class"""
@@ -1099,14 +1138,75 @@ class Label(Control):
         newControl.fontSize = self.fontSize
         return newControl
     
+class ScrollPanel(Control):
+    """滚动面板（竖向）"""
+    
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha=1, background_color=(255, 255, 255), background_alpha=1, background_texture="textures/ui/ScrollRail"):
+        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression, tuple[Expression, Expression, Expression], Expression, str) -> None
+        self._controlData = ScrollPanelData(parent._controlData if parent else None, self)
+
+        self._parent = parent
+        self.name = name if name else "scrollpanel%s" % random.randint(0, 2147483648)
+        self.offset = offset
+        self.size = size
+        self.alpha = alpha
+        self.background.color = background_color
+        self.background.alpha = background_alpha
+        self.background.texture = background_texture
+        self.__content = Panel()
+        self._controlData.content = self.__content._controlData
+
+    @property
+    def content(self):
+        """滚动面板的内容"""
+        return self.__content
+
 class Button(Control):
     """button class."""
     
-    def __init__(self, parent=None):
-        # type: (Control | UI) -> None
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, 
+                 background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg",
+                 callback_touch_up=None, callback_touch_down=None, callback_touch_cancel=None,
+                 callback_touch_move=None, callback_touch_move_in=None, callback_touch_move_out=None,
+                 callback_hover_in=None, callback_hover_out=None, callback_screen_exit=None,
+                 texture_default="textures/netease/common/button/default", 
+                 texture_hover="textures/netease/common/button/hover", 
+                 texture_pressed="textures/netease/common/button/pressed"
+                 ):
+        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression, tuple[Expression, Expression, Expression], Expression, str, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, str, str, str) -> None
         self._controlData = ButtonData(parent._controlData if parent else None, self)
         self._parent = parent
+        self.name = name if name else "control%s" % random.randint(0, 2147483648)
+        self.offset = offset
+        self.size = size
+        self.alpha = alpha
+        self.background.color = background_color
+        self.background.alpha = background_alpha
+        self.background.texture = background_texture
 
+        self.textures.default.texture = texture_default
+        self.textures.hover.texture = texture_hover
+        self.textures.pressed.texture = texture_pressed
+        if callback_touch_up:
+            self.callbacks.touchUp = callback_touch_up
+        if callback_touch_down:
+            self.callbacks.touchDown = callback_touch_down
+        if callback_touch_move:
+            self.callbacks.touchMove = callback_touch_move
+        if callback_touch_move_in:
+            self.callbacks.touchMoveIn = callback_touch_move_in
+        if callback_touch_cancel:
+            self.callbacks.touchCancel = callback_touch_cancel
+        if callback_touch_move_out:
+            self.callbacks.touchMoveOut = callback_touch_move_out
+        if callback_screen_exit:
+            self.callbacks.screenExit = callback_screen_exit
+        if callback_hover_in:
+            self.callbacks.hoverIn = callback_hover_in
+        if callback_hover_out:
+            self.callbacks.hoverOut = callback_hover_out
+            
+        
     @property
     def callbacks(self):
         """按钮回调函数"""
@@ -1125,8 +1225,13 @@ class Button(Control):
 class DragableButton(Button):
     """dragable button class."""
     
-    def __init__(self, parent=None):
-        # type: (Control | UI) -> None
+    def __init__(self, parent=None, name=None, offset=[0, 0], size=[100, 100], alpha = 1.0, 
+                 background_color=(255, 255, 255), background_alpha=0.0, background_texture="textures/ui/white_bg",
+                 callback_touch_up=None, callback_touch_down=None, callback_touch_cancel=None,
+                 callback_touch_move=None, callback_touch_move_in=None, callback_touch_move_out=None,
+                 callback_hover_in=None, callback_hover_out=None, callback_screen_exit=None
+                 ):
+        # type: (Control | UI, str, tuple[Expression. Expression], tuple[Expression, Expression], Expression, tuple[Expression, Expression, Expression], Expression, str, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType, types.FunctionType) -> None
         self._controlData = DragableButtonData(parent._controlData if parent else None, self)
         self._parent = parent
 
@@ -1145,7 +1250,7 @@ class UI(object):
     """Custom UI (ModSAPI only)"""
 
     def __init__(self):
-        self._controlData = ScreenData()
+        self._controlData = ScreenData(self)
         self.__age = Expression(-1)
 
     @property
@@ -1224,6 +1329,14 @@ class UI(object):
         self._controlData.addControl(button._controlData)
         return button
     
+    def addScrollPanel(self, panelData={}):
+        # type: (dict) -> None
+        """添加滚动面板"""
+        scrollPanel = ScrollPanel(self)
+        scrollPanel.name = "scrollpanel%s" % random.randint(0, 2147483648)
+        self._controlData.addControl(scrollPanel._controlData)
+        return scrollPanel
+    
     def show(self):
         # type: () -> None
         from ..SAPI_C import Screens
@@ -1244,7 +1357,7 @@ class UI(object):
                 temp = temp.parent if isinstance(temp, Control) else None
             if createCopy:
                 new = control.copy()
-                new.parent = self
+                new._parent = self
                 new.name = "%s%s" % (control.__class__.__name__.lower(), random.randint(0, 2147483648))
             self._controlData.addControl(new._controlData)
             news.append(new)

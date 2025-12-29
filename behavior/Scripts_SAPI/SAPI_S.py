@@ -6,6 +6,7 @@ from Classes.Scoreboard import *
 from Interfaces.Game import *
 from Classes.Container import *
 from .architect.scheduler import Scheduler
+from Classes.TickingAreaManager import *
 from decorators import *
 import types
 
@@ -20,6 +21,7 @@ class World(ServerSystem):
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
+        self.__tickingAreaManager = TickingAreaManager()
         print("ModSAPI: world loaded")
         global world
         world = self
@@ -52,6 +54,10 @@ class World(ServerSystem):
     @property
     def scoreboard(self):
         return self.__scoreboard
+
+    @property
+    def tickingAreaManager(self):
+        return self.__tickingAreaManager
 
     @staticmethod
     def getAllPlayers():

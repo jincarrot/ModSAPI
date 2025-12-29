@@ -16,11 +16,16 @@
     },
     "UI": {
         "customPrefabGroupExpand": [
-
+            "base_controls"
         ],
         "expandData": {
             "prefab": {
-
+                "base_controls.custom_switch_toggle": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/custom_switch_toggle",
+                    "/netease_prefab_screen/custom_switch_toggle/this_toggle",
+                    "/netease_prefab_screen/custom_switch_toggle/this_toggle/unchecked_hover/button_panel"
+                ]
             },
             "screen": {
                 "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\base_controls.json": [

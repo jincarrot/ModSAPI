@@ -6,6 +6,7 @@ import Classes.FormData as fd
 import Classes.UI as ui
 import Utils.Expression
 import math
+from Interfaces.Vector import *
 
 def getWorld():
     # type: () -> SAPI.World
