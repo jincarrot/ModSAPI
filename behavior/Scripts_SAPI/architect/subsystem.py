@@ -1,9 +1,25 @@
+import time
+import threading
+
 import mod.client.extraClientApi as clientApi
 import mod.server.extraServerApi as serverApi
-import time
+
+from .level.server import LevelServer
+from .component.index import registerComponents, getEntities
+from .query.queryClient import callQueries as callClientQueries
+from .query.queryServer import callQueries as callServerQueries
+from .event.client import event as eventClient
+from .event.server import event as eventServer
+from .annotation import AnnotationHelper
 
 def isServer():
     return clientApi.GetLocalPlayerId() == '-1'
+
+class EventListener:
+    def __init__(self, evType, fn):
+        self.evType = evType
+        self.fn = fn
+        setattr(self, '<lambda>', self.fn)
 
 class SubsystemManager:
     registeredSubsystems = []
@@ -13,6 +29,8 @@ class SubsystemManager:
     rawSysName = None
     clientSubs = {}
     serverSubs = {}
+    clientListeners = []
+    serverListeners = []
 
     @staticmethod
     def getInst():
@@ -40,6 +58,28 @@ class SubsystemManager:
         SubsystemManager.server = manager
         return manager
 
+    @classmethod
+    def createClient(cls, engine, sysName):
+        manager = SubsystemManager(
+            clientApi.RegisterSystem(engine, sysName, cls.__module__ + '.' + '_ShadowSystemClient'),
+            engine, sysName
+        )
+        manager.rawEngine = clientApi.GetEngineNamespace()
+        manager.rawSysName = clientApi.GetEngineSystemName()
+        SubsystemManager.client = manager
+        return manager
+
+    @classmethod
+    def createServer(cls, engine, sysName):
+        manager = SubsystemManager(
+            serverApi.RegisterSystem(engine, sysName, cls.__module__ + '.' + '_ShadowSystemServer'),
+            engine, sysName
+        )
+        manager.rawEngine = serverApi.GetEngineNamespace()
+        manager.rawSysName = serverApi.GetEngineSystemName()
+        SubsystemManager.server = manager
+        return manager
+
 
     def __init__(self, system, engine, sysName):
         self.engine = engine
@@ -47,45 +87,59 @@ class SubsystemManager:
         self.system = system
 
         if isServer():
-            from .levelServer import LevelServer
-            LevelServer.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
+            LevelServer.game.AddTimer(0.1, lambda: self.appendAllSubsystems(True))
         else:
-            from .levelClient import LevelClient
-            LevelClient.game.AddTimer(0.1, lambda: self.appendAllSubsystems())
+            threading.Timer(0.1, lambda: self.appendAllSubsystems(False)).start()
 
 
     def getSubsystems(self):
         return self.clientSubs if isServer() else self.serverSubs
 
 
-    def appendAllSubsystems(self):
+    def appendAllSubsystems(self, isServer):
         for subsystemCls in SubsystemManager.registeredSubsystems:
             self.addSubsystem(subsystemCls)
 
         SubsystemManager.unregisterSubsystems()
-        self.startTicking()
+        self.startTicking(isServer)
+        registerComponents(isServer)
 
         for v in self.getSubsystems().values():
             if hasattr(v, 'onReady'):
                 v.onReady()
 
 
-    def startTicking(self):
-        self.system.ListenForEvent(
-            self.rawEngine,
-            self.rawSysName,
-            'OnScriptTickServer' if isServer() else 'OnScriptTickClient',
-            self,
-            self.tick
-        )
+    def startTicking(self, isServer):
+        if isServer:
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                'OnScriptTickServer',
+                self,
+                self.tickServer
+            )
+        else:
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                'OnScriptTickClient',
+                self,
+                self.tickClient
+            )
+
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                'GameRenderTickEvent',
+                self,
+                self.tickRender
+            )
 
 
     def addSubsystem(self, subsystemCls):
         subSys = subsystemCls(self.system, self.engine, self.sysName)
         self.getSubsystems()[subsystemCls.__name__] = subSys
-        if hasattr(subSys, 'onInit'):
-            subSys.onInit()
-
+        subSys._init()
         print('[INFO] {} Subsystem "{}" has been initialized'.format('Server' if isServer() else 'Client', subSys.__class__.__name__))
 
 
@@ -116,9 +170,24 @@ class SubsystemManager:
         SubsystemManager.registeredSubsystems = []
 
 
+    lastTickTimeServer = time.time()
     lastTickTime = time.time()
 
-    def tick(self):
+    def tickServer(self):
+        currentTime = time.time()
+        dt = currentTime - self.lastTickTimeServer
+
+        for obj in self.getSubsystems().values():
+            if obj.canTick:
+                obj.onUpdate(dt)
+                obj.ticks += 1
+
+        for entity in getEntities():
+            callServerQueries(entity)
+
+        self.lastTickTimeServer = currentTime
+
+    def tickClient(self):
         currentTime = time.time()
         dt = currentTime - self.lastTickTime
 
@@ -127,7 +196,48 @@ class SubsystemManager:
                 obj.onUpdate(dt)
                 obj.ticks += 1
 
+        for entity in getEntities():
+            callClientQueries(entity)
+
         self.lastTickTime = currentTime
+
+    def tickRender(self, _):
+        for entity in getEntities():
+            callClientQueries(entity, True)
+
+    def addListener(self, event, fn, isCustomEvent=False):
+        listeners = self.serverListeners if isServer() else self.clientListeners
+        listener = EventListener(event, fn)
+        if isCustomEvent:
+            self.system.ListenForEvent(
+                self.engine,
+                self.sysName,
+                event,
+                listener,
+                listener.fn
+            )
+        else:
+            self.system.ListenForEvent(
+                self.rawEngine,
+                self.rawSysName,
+                event,
+                listener,
+                listener.fn
+            )
+        listeners.append(listener)
+
+    def removeListener(self, event, fn):
+        listeners = self.serverListeners if isServer() else self.clientListeners
+        for listener in listeners:
+            if listener.fn == fn:
+                self.system.UnListenForEvent(
+                    self.rawEngine,
+                    self.rawSysName,
+                    event,
+                    listener,
+                    listener.fn
+                )
+                listeners.remove(listener)
 
 
 def SubsystemClient(subsystemCls):
@@ -153,7 +263,7 @@ def getSubsystemCls():
 
 class Subsystem:
     def __init__(self, system, engine, sysName):
-        # type: (BaseSystem, str, str) -> 'None'
+        # type: (object, str, str) -> 'None'
         self.system = system
         self.engine = engine
         self.sysName = sysName
@@ -201,7 +311,6 @@ class Subsystem:
         return self.sysName
     
     def on(self, eventName, handler):
-        print('on', self.engine, self.sysName)
         self.system.ListenForEvent(
             self.engine,
             self.sysName,
@@ -242,11 +351,19 @@ class Subsystem:
     def broadcast(self, eventName, eventData):
         self.system.BroadcastEvent(eventName, eventData)
 
-    def onInit(self):
-        pass
+    def _addListeners(self):
+        event = eventServer if isServer() else eventClient
 
-    def onDestroy(self):
-        pass
+        methods = AnnotationHelper.findAnnotatedMethods(self, '_event_listener')
+        for method in methods:
+            eventType = AnnotationHelper.getAnnotation(method, '_event_listener')
+            isCustomEvent = AnnotationHelper.getAnnotation(method, '_custom_event') or False
+            event(eventType, isCustomEvent).addListener(method.__get__(self))
+
+    def _init(self):
+        self._addListeners()
+        self.onInit()
+
 
 class Location:
     def __init__(self, pos, dim):
@@ -255,7 +372,7 @@ class Location:
 
 class ServerSubsystem(Subsystem):
     def __init__(self, system, engine, sysName):
-        # type: (ServerSystem, str, str) -> 'None'
+        # type: (object, str, str) -> 'None'
         Subsystem.__init__(self, system, engine, sysName)
 
     def sendAllClients(self, eventName, eventData):
@@ -335,3 +452,14 @@ class UiSubsystem(ScreenNode, ClientSubsystem):
         ui = clientApi.CreateUI(cls.ns, cls.__name__, params)
         cls.inst = ui
         return ui
+
+    
+
+ServerSystem = serverApi.GetServerSystemCls()
+ClientSystem = clientApi.GetClientSystemCls()
+
+class _ShadowSystemServer(ServerSystem):
+    pass
+
+class _ShadowSystemClient(ClientSystem):
+    pass

@@ -1,5 +1,5 @@
 from .subsystem import ServerSubsystem, SubsystemServer
-from .levelServer import LevelServer
+from .level.server import LevelServer
 
 @SubsystemServer
 class ServerKVDatabase(ServerSubsystem):

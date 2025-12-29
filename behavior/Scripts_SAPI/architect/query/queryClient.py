@@ -1,6 +1,6 @@
-from ..levelClient import compClient
+from ..level.client import compClient, clientApi
 from .cache import QueryCache
-
+from ..annotation import AnnotationHelper
 
 class QueryClient:
     _caches = {}
@@ -51,3 +51,57 @@ class QueryClient:
     @staticmethod
     def motion(id):
         return compClient.CreateActorMotion(id)
+
+
+from ..component.index import getComponent
+
+class _Query:
+    def __init__(self, entityId, comps):
+        # type: (str, list) -> None
+        self.entityId = entityId
+        self.comps = comps
+
+    def iter(self):
+        return getComponent(self.entityId, self.comps) or []
+    
+    def __enter__(self):
+        result = getComponent(self.entityId, self.comps)
+        if result is None:
+            raise Exception()
+        return result
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+def query(entityId, comps):
+    # type: (int, list) -> _Query
+    return _Query(entityId, comps)
+
+queries = []
+
+def callQueries(entityId, frameUpdate=False):
+    for q in queries:
+        anyFrame = AnnotationHelper.getAnnotation(q, 'AnyFrame') or False
+        if frameUpdate == anyFrame:
+            q(entityId)
+
+
+def Query(*compCls):
+    def decorator(fn):
+        def wrapper(entityId):
+            with query(entityId, compCls) as comps:
+                return fn(entityId, *comps)
+        queries.append(wrapper)
+        return wrapper
+    return decorator
+
+
+def QueryAnyFrame(*compCls):
+    def decorator(fn):
+        def wrapper(entityId):
+            with query(entityId, compCls) as comps:
+                return fn(entityId, *comps)
+        queries.append(wrapper)
+        AnnotationHelper.addAnnotation(wrapper, 'AnyFrame', True)
+        return wrapper
+    return decorator
