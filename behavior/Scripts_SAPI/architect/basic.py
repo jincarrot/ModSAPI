@@ -18,3 +18,18 @@ def serverTick():
 
 compServer = serverApi.GetEngineCompFactory()
 compClient = clientApi.GetEngineCompFactory()
+
+defaultFilters = {
+    "any_of": [
+        {
+            "subject" : "other",
+            "test" :  "is_family",
+            "value" :  "player"
+        },
+        {
+            "subject" : "other",
+            "test" :  "is_family",
+            "value" :  "mob"
+        }
+    ]
+}

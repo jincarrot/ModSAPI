@@ -24,11 +24,11 @@ class MinecraftClientEvents:
 def event(eventType, isCustomEvent=False):
     return MinecraftClientEvents.getOrCreateChain(eventType, isCustomEvent)
 
-def EventListener(eventType, isCutomEvent=False):
+def EventListener(eventType, isCustomEvent=False):
     def decorator(fn):
         # 标记方法为事件监听器
         AnnotationHelper.addAnnotation(fn, '_event_listener', eventType)
-        if isCutomEvent:
+        if isCustomEvent:
             AnnotationHelper.addAnnotation(fn, '_custom_event', True)
         return fn
     return decorator

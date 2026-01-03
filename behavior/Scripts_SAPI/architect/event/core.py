@@ -70,6 +70,9 @@ class ChainedEvent:
 
     def dict(self):
         return self._data
+    
+    def setEvent(self, p, v):
+        self._data[p] = v
 
     def __getattr__(self, name):
         if name in self._data:
