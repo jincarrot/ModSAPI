@@ -16,29 +16,144 @@
     },
     "UI": {
         "customPrefabGroupExpand": [
-            "base_controls"
+            "base_controls",
+            "oreui_controls"
         ],
         "expandData": {
             "prefab": {
+                "base_controls.custom_scrollpanel": [
+                    "/netease_prefab_screen"
+                ],
                 "base_controls.custom_switch_toggle": [
                     "/netease_prefab_screen",
                     "/netease_prefab_screen/custom_switch_toggle",
                     "/netease_prefab_screen/custom_switch_toggle/this_toggle",
+                    "/netease_prefab_screen/custom_switch_toggle/this_toggle/unchecked",
+                    "/netease_prefab_screen/custom_switch_toggle/this_toggle/unchecked_hover",
                     "/netease_prefab_screen/custom_switch_toggle/this_toggle/unchecked_hover/button_panel"
+                ],
+                "oreui_controls.background": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.body": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/body",
+                    "/netease_prefab_screen/body/scroll_mouse",
+                    "/netease_prefab_screen/body/scroll_mouse/scroll_view",
+                    "/netease_prefab_screen/body/scroll_mouse/scroll_view/stack_panel",
+                    "/netease_prefab_screen/body/scroll_mouse/scroll_view/stack_panel/background_and_viewport",
+                    "/netease_prefab_screen/body/scroll_mouse/scroll_view/stack_panel/background_and_viewport/scrolling_view_port",
+                    "/netease_prefab_screen/body/scroll_mouse/scroll_view/stack_panel/bar_and_track",
+                    "/netease_prefab_screen/body/scroll_mouse/scroll_view/stack_panel/bar_and_track/stack_panel"
+                ],
+                "oreui_controls.body_background_dark": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/body_background_dark"
+                ],
+                "oreui_controls.body_background_light": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/body_background_light"
+                ],
+                "oreui_controls.bodytemp": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.divider": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.green_btn": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.green_button": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/green_button"
+                ],
+                "oreui_controls.header": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.label": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.move_btn": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.normal_btn": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.normal_button": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/normal_button"
+                ],
+                "oreui_controls.red_btn": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.resize_btn": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/resize_btn",
+                    "/netease_prefab_screen/resize_btn/default",
+                    "/netease_prefab_screen/resize_btn/hover"
+                ],
+                "oreui_controls.scroll_box": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.scroll_track": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.scrolling_content": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.slider": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/slider"
+                ],
+                "oreui_controls.slider_background": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/slider_background"
+                ],
+                "oreui_controls.slider_box": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.slider_common": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.textfield": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.textfield_bg": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/textfield_bg"
+                ],
+                "oreui_controls.toggle": [
+                    "/netease_prefab_screen"
+                ],
+                "oreui_controls.toggle_checked": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/toggle_checked"
+                ],
+                "oreui_controls.toggle_uncheck": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/toggle_uncheck"
+                ],
+                "oreui_controls.toggle_unchecked": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/toggle_unchecked"
                 ]
             },
             "screen": {
                 "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\base_controls.json": [
-
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/slider"
                 ],
                 "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\debug.json": [
                     "/main",
                     "/main/panel"
                 ],
+                "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\oreui_controls.json": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/resize_btn",
+                    "/netease_prefab_screen/resize_btn/default"
+                ],
                 "D:\\MCStudioDownload\\work\\jincarrot@outlook.com\\Cpp\\AddOn\\SAPI-styleSupport\\resource\\ui\\server_forms.json": [
-                    "/action_form",
-                    "/custom_ui",
-                    "/custom_ui/screen"
+
                 ]
             }
         }

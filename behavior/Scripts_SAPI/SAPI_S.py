@@ -57,6 +57,7 @@ class World(ServerSystem):
 
     @property
     def tickingAreaManager(self):
+        """Manager for adding, removing and querying pack specific ticking areas."""
         return self.__tickingAreaManager
 
     @staticmethod

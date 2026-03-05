@@ -4,6 +4,7 @@ from ..Interfaces.Vector import *
 from ..Classes.ItemStack import *
 
 class BlockPaletteData(object):
+    """Process block palette data"""
 
     def __init__(self, data):
         self.__data = data
@@ -31,7 +32,7 @@ class BlockPaletteData(object):
 
     def getLocationId(self, location):
         # type: (tuple[int, int, int]) -> int
-        """returns the id of this location, or -1 if this location doesn't exist."""
+        """Returns the id of this location, or -1 if this location doesn't exist."""
         if location[0] >= self.__volume[0] or location[1] >= self.__volume[1] or location[2] >= self.__volume[2]:
             return -1
         else:
@@ -39,7 +40,7 @@ class BlockPaletteData(object):
         
     def getLocation(self, locId):
         # type: (int) -> tuple[int, int, int]
-        """returns the location of this id"""
+        """Returns the location of this id"""
         sq = self.__volume[0] * self.__volume[1]
         y = locId // sq
         locId %= sq
@@ -49,7 +50,7 @@ class BlockPaletteData(object):
     
     def getBlock(self, location):
         # type: (tuple[int, int, int]) -> tuple[str, int]
-        """returns block data in this location"""
+        """Returns block data in this location"""
         locId = self.getLocationId(location)
         if locId < 0:
             raise ValueError("location is not exist in this palette!")
@@ -71,7 +72,7 @@ class BlockPaletteData(object):
             
     def setBlock(self, location, blockData):
         # type: (tuple[int, int, int], tuple[str, int]) -> bool
-        """set a block in a location"""
+        """Set a block in a location."""
         locId = self.getLocationId(location)
         if locId < 0:
             return False
@@ -87,12 +88,28 @@ class BlockPaletteData(object):
 
     def getData(self):
         # type: () -> dict
-        """get data."""
+        """Get data."""
         return self.__data
+
+    def hasBlock(self, blockType, blockAux=-1):
+        # type: (str, int) -> bool
+        """Returns true if block in this palette, else false."""
+        if blockAux >= 0:
+            return (blockType, blockAux) in self.__blocks
+        else:
+            for blockData in self.__blocks.keys():
+                if blockType in blockData:
+                    return True
+        return False
+
+    def replaceBlocks(self, oldBlockData, newBlockData):
+        """Replace block."""
+        self.__blocks[newBlockData] = self.__blocks[oldBlockData]
+        del self.__blocks[oldBlockData]
 
     def fillBlocks(self, start, end, blockData):
         # type: (tuple[int, int, int], tuple[int, int, int], tuple[str, int]) -> None
-        """fills blocks"""
+        """Fill blocks in a square area."""
         startId = self.getLocationId(start)
         endId = self.getLocationId(end)
         for id in range(min(startId, endId), max(startId, endId) + 1):
@@ -100,7 +117,7 @@ class BlockPaletteData(object):
 
     def fillAllBlocks(self, blockData):
         # type: (tuple[str, int]) -> None
-        """fills all blocks"""
+        """Fill all blocks in this palatte."""
         maxNum = self.__volume[0] * self.__volume[1] * self.__volume[2]
         data = list(range(maxNum))
         self.__data['common'] = {}

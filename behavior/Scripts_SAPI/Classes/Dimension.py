@@ -229,7 +229,7 @@ class Dimension(object):
         data = temp.getData()
         p = comp.GetBlankBlockPalette()
         p.DeserializeBlockPalette(data)
-        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation, 0)
+        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation.getTuple(), 0)
 
     def setBlockType(self, location, blockType):
         # type: (Vector3, str) -> None

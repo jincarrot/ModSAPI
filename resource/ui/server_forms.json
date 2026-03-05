@@ -9,6 +9,56 @@
             }
         ]
     },
+    "custom_form": {
+        "type": "screen",
+        "button_mappings": [
+            {
+                "to_button_id": "#custom_form_close",
+                "from_button_id": "button.menu_cancel",
+                "mapping_type": "global"
+            },
+            {
+                "to_button_id": "#custom_form_close",
+                "from_button_id": "button.menu_inventory_cancel",
+                "mapping_type": "global"
+            }
+        ],
+        "controls": [
+            {
+                "panel@oreui_controls.body": {
+                    "layer": 1,
+                    "size": [
+                        "40%",
+                        "80%"
+                    ]
+                }
+            },
+            {
+                "move@oreui_controls.move_btn": {
+                    "offset": [
+                        -2,
+                        "-40%+8px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            },
+            {
+                "resize@oreui_controls.resize_btn": {
+                    "offset": [
+                        "20%+-8px",
+                        "40%+-17px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            }
+        ]
+    },
     "custom_ui": {
         "type": "screen",
         "button_mappings": [
@@ -32,7 +82,7 @@
                         "100%",
                         "100%"
                     ],
-                    "layer": 0,
+                    "layer": 1,
                     "controls": [
                         {
                             "custom_ui_background_auto_generate": {
@@ -47,12 +97,42 @@
                                     "100%",
                                     "100%"
                                 ],
-                                "layer": 0,
+                                "layer": 1,
                                 "visible": true,
                                 "fill": true,
                                 "texture": "textures/ui/white_bg"
                             }
                         }
+                    ]
+                }
+            }
+        ]
+    },
+    "moreui": {
+        "type": "screen",
+        "button_mappings": [
+            {
+                "to_button_id": "#custom_ui_close",
+                "from_button_id": "button.menu_cancel",
+                "mapping_type": "global"
+            },
+            {
+                "to_button_id": "#custom_ui_close",
+                "from_button_id": "button.menu_inventory_cancel",
+                "mapping_type": "global"
+            }
+        ],
+        "controls": [
+            {
+                "screen": {
+                    "type": "panel",
+                    "anchor_to": "center",
+                    "size": [
+                        "100%",
+                        "100%"
+                    ],
+                    "layer": 1,
+                    "controls": [
                     ]
                 }
             }

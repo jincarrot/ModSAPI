@@ -76,7 +76,31 @@ class SAPIS(ServerSystem):
             msg = msg[6:]
             if not world:
                 world = getWorld()
-            print(msg)
+            import Classes.FormData as fd
+            title = fd.Observable.create("Test", {"clientWritable": True})
+            sliderValue = fd.Observable.create(1, {"clientWritable": True})
+            maxV = fd.Observable.create(4)
+            titleLength = fd.Observable.create("title length: 4")
+            char = fd.Observable.create("T")
+            @title.subscribe
+            def onChange(value):
+                maxV.setData(len(value))
+                titleLength.setData("title length: %s" % maxV.getData())
+            @sliderValue.subscribe
+            def onMove(value):
+                char.setData(title.getData()[value - 1] if title.getData() else "")
+            toggled = fd.Observable.create(False, {"clientWritable": True})
+            fm = fd.CustomForm.create(world.getAllPlayers()[0], title)
+            def onClick():
+                title.setData("")
+            fm.button("点击清空标题", onClick)
+            fm.divider()
+            fm.textField(title, title, {"visible": toggled})
+            fm.divider({"visible": toggled})
+            fm.toggle(title, toggled)
+            fm.slider(titleLength, sliderValue, 1, maxV)
+            fm.label(char)
+            fm.show()
             # exec(compile(msg, "<string>", "exec"))
 
     @staticmethod

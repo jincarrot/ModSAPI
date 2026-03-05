@@ -43,13 +43,34 @@ class SAPI_C(ClientSystem):
         self.ListenForEvent("SAPI", "world", "showUI", self, self.showUI)
         self.ListenForEvent("SAPI", "world", "setMusicState", self, self.setMusicState)
         self.ListenForEvent("SAPI", "world", "popScreen", self, self.popScreen)
+        self.ListenForEvent("SAPI", "world", "sendCustomForm", self, self.sendCustomForm)
+        self.ListenForEvent("SAPI", "world", "updateCustomForm", self, self.updateCustomForm)
+        self.ListenForEvent("SAPI", "world", "closeCustomForm", self, self.closeCustomForm)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.playerSpawn)
 
     def initUI(self, data):
         clientApi.RegisterUI("server_ui", "ActionForm", "Scripts_SAPI.Classes.Forms.ActionForm", "server_forms.action_form")
         clientApi.RegisterUI("server_ui", "ModalForm", "Scripts_SAPI.Classes.Forms.ModalForm", "server_forms.modal_form")
+        clientApi.RegisterUI("server_ui", "CustomForm", "Scripts_SAPI.Classes.Forms.CustomFormUI", "server_forms.custom_form")
+        clientApi.RegisterUI("server_ui", "CustomForm", "Scripts_SAPI.Classes.Forms.More", "server_forms.moreui")
         clientApi.RegisterUI("modsapi", "CustomUI", "Scripts_SAPI.Classes.UI._CustomUI", "server_forms.custom_ui")
+
+    def sendCustomForm(self, data):
+        screen = clientApi.GetTopScreen()
+        if hasattr(screen, "update"):
+            return
+        clientApi.PushScreen("server_ui", "CustomForm", data)
+
+    def updateCustomForm(self, data):
+        screen = clientApi.GetTopScreen()
+        if hasattr(screen, "update"):
+            screen.update(data)
+
+    def closeCustomForm(self, data):
+        screen = clientApi.GetTopScreen()
+        if hasattr(screen, "update"):
+            clientApi.PopScreen()
 
     def getData(self, data):
         """receive request from server"""

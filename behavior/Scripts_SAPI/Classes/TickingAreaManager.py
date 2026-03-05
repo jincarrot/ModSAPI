@@ -1,6 +1,5 @@
 import types
 import mod.server.extraServerApi as serverApi
-import mod.client.extraClientApi as clientApi
 
 from ..Interfaces.Vector import Vector3
 from ..Interfaces.TickingAreaOptions import *
@@ -17,7 +16,7 @@ def hasArg(callback):
         return args > 0
 
 class Promise(object):
-    """Promise"""
+    """Promise<TickingArea.>"""
 
     def __init__(self):
         def default(arg):
@@ -49,14 +48,16 @@ class TickingAreaManager:
     @property
     def maxChunkCount(self):
         """The maximum number of allowed ticking chunks. Overlapping ticking area chunks do count towards total."""
-        return 300
+        return 30000
     
     def hasCapacity(self, options):
         """
         Returns true if the manager has enough chunk capacity for the ticking area and false otherwise. 
         Will also return false if the length or width exceeds the 255 chunk limit.
+
+        Always returns true because ModSDK has no limit.
         """
-        return self.maxChunkCount > self.chunkCount
+        return True
     
     def createTickingArea(self, identifier, options):
         # type: (str, TickingAreaOptions | dict) -> None
