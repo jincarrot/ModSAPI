@@ -5,7 +5,7 @@ import mod.client.extraClientApi as clientApi
 import mod.server.extraServerApi as serverApi
 
 from .level.server import LevelServer
-from .component.index import registerComponents, getEntities
+from .component import registerComponents, getEntities
 from .query.queryClient import callQueries as callClientQueries
 from .query.queryServer import callQueries as callServerQueries
 from .event.client import event as eventClient
@@ -138,9 +138,13 @@ class SubsystemManager:
 
     def addSubsystem(self, subsystemCls):
         subSys = subsystemCls(self.system, self.engine, self.sysName)
-        self.getSubsystems()[subsystemCls.__name__] = subSys
-        subSys._init()
+        self.addSubsystemInst(subSys)
         print('[INFO] {} Subsystem "{}" has been initialized'.format('Server' if isServer() else 'Client', subSys.__class__.__name__))
+
+
+    def addSubsystemInst(self, subsystem):
+        self.getSubsystems()[subsystem.__class__.__name__] = subsystem
+        subsystem._init()
 
 
     def getSubsystem(self, subsystemCls):
@@ -310,55 +314,36 @@ class Subsystem:
     def getSysName(self):
         return self.sysName
     
-    def on(self, eventName, handler):
-        self.system.ListenForEvent(
-            self.engine,
-            self.sysName,
-            eventName,
-            self,
-            handler
-        )
+    def on(self, eventName, handler, isCustomEvent=True):
+        return self._addListener(eventName, handler, isCustomEvent)
 
-    def off(self, eventName, handler):
-        self.system.UnListenForEvent(
-            self.engine,
-            self.sysName,
-            eventName,
-            self,
-            handler
-        )
+    def off(self, eventName, handler, isCustomEvent=True):
+        return self._removeListener(eventName, handler, isCustomEvent)
 
     def listen(self, eventName, handler):
-        manager = SubsystemManager.getInst()
-        self.system.ListenForEvent(
-            manager.rawEngine,
-            manager.rawSysName,
-            eventName,
-            self,
-            handler
-        )
+        return self._addListener(eventName, handler, False)
 
     def unlisten(self, eventName, handler):
-        manager = SubsystemManager.getInst()
-        self.system.UnListenForEvent(
-            manager.rawEngine,
-            manager.rawSysName,
-            eventName,
-            self,
-            handler
-        )
+        return self._removeListener(eventName, handler, False)
 
     def broadcast(self, eventName, eventData):
         self.system.BroadcastEvent(eventName, eventData)
 
-    def _addListeners(self):
+    def _addListener(self, eventType, fn, isCustom=False):
         event = eventServer if isServer() else eventClient
+        event(eventType, isCustom).addListener(fn)
 
+    def _removeListener(self, eventType, fn, isCustom=False):
+        event = eventServer if isServer() else eventClient
+        event(eventType, isCustom).removeListener(fn)
+
+    def _addListeners(self):
         methods = AnnotationHelper.findAnnotatedMethods(self, '_event_listener')
         for method in methods:
             eventType = AnnotationHelper.getAnnotation(method, '_event_listener')
             isCustomEvent = AnnotationHelper.getAnnotation(method, '_custom_event') or False
-            event(eventType, isCustomEvent).addListener(method.__get__(self))
+            _method = method.__get__(self)
+            self._addListener(eventType, _method, isCustomEvent)
 
     def _init(self):
         self._addListeners()
@@ -431,6 +416,7 @@ class UiSubsystem(ScreenNode, ClientSubsystem):
         manager = SubsystemManager.getInst()
         ScreenNode.__init__(self, engine, system, params)
         ClientSubsystem.__init__(self, manager.system, manager.engine, manager.sysName)
+        manager.addSubsystemInst(self)
 
     ns = 'xxx_roninUi_xxx'
     inst = None
@@ -452,8 +438,18 @@ class UiSubsystem(ScreenNode, ClientSubsystem):
         ui = clientApi.CreateUI(cls.ns, cls.__name__, params)
         cls.inst = ui
         return ui
-
     
+    @classmethod
+    def create(cls, **params):
+        ui = clientApi.CreateUI(cls.ns, cls.__name__, params)
+        return ui
+    
+    @classmethod
+    def pushScreen(cls, **params):
+        ui = clientApi.PushScreen(cls.ns, cls.__name__, **params)
+        cls.inst = ui
+        return ui
+
 
 ServerSystem = serverApi.GetServerSystemCls()
 ClientSystem = clientApi.GetClientSystemCls()

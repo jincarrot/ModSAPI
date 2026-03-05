@@ -8,15 +8,15 @@ serverCompCls = []
 
 components = {}
 
-def Component(isSingleton=False, persist=False):
+def Component(persist=False):
     def decorator(cls):
         _isServer = isServer()
         clsList = serverCompCls if _isServer else clientCompCls
         # 标记类为组件
         AnnotationHelper.addAnnotation(cls, '_component', {
-            'isSingleton': isSingleton,
             'persist': persist
         })
+
         clsList.append(cls)
         return cls
 
@@ -32,9 +32,6 @@ def registerComponents(isServer):
 def getComponentAnnotation(cls):
     return AnnotationHelper.getAnnotation(cls, '_component')
 
-def isSingletonComponent(cls):
-    ann = getComponentAnnotation(cls)
-    return ann is not None and ann.get('isSingleton', False)
 
 def isPersistComponent(cls):
     ann = getComponentAnnotation(cls)
@@ -48,6 +45,9 @@ def createComponent(entityId, cls):
     api = serverApi if isServer() else clientApi
     comp = api.CreateComponent(entityId, COMPONENT_NAMESPACE, cls.__name__)
     components[(entityId, cls)] = comp
+    if isPersistComponent(cls) and hasattr(comp, 'loadData'):
+        comp.loadData(entityId)
+
     if hasattr(comp, 'onCreate'):
         comp.onCreate(entityId)
 
@@ -88,3 +88,18 @@ def getComponent(entityId, clsList, filter=None):
 def getEntities():
     entities = entitiesServer if isServer() else entitiesClient
     return list(entities.keys())
+
+
+class BaseCompServer(serverApi.GetComponentCls()):
+    def onCreate(self):
+        pass
+
+    def loadData(self, entityId):
+        pass
+
+class BaseCompClient(clientApi.GetComponentCls()):
+    def onCreate(self):
+        pass
+
+    def loadData(self, entityId):
+        pass
