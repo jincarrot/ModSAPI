@@ -2,10 +2,10 @@
 # from typing import Union, Dict
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
-from ..Interfaces.Vector import *
-from ..Interfaces.EntityOptions import *
+from ..interfaces.Vector import *
+from ..interfaces.EntityOptions import *
 from ..minecraft import *
-from ..Interfaces.WorldOptions import *
+from ..interfaces.WorldOptions import *
 import time
 
 SComp = serverApi.GetEngineCompFactory()

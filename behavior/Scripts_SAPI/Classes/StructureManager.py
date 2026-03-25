@@ -1,9 +1,9 @@
 import types
 import mod.server.extraServerApi as serverApi
 
-from ..Interfaces.Vector import Vector3
-from ..Interfaces.BlockBoundingBox import *
-from ..Interfaces.StructureSaveMode import *
+from ..interfaces.Vector import Vector3
+from ..interfaces.BlockBoundingBox import *
+from ..interfaces.StructureSaveMode import *
 
 SComp = serverApi.GetEngineCompFactory()
 

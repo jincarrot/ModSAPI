@@ -1,8 +1,8 @@
 # coding = utf-8
 
 # from typing import Union, Dict, List
-from ..Interfaces.Vector import *
-from ..Interfaces.CameraOptions import *
+from ..interfaces.Vector import *
+from ..interfaces.CameraOptions import *
 import mod.client.extraClientApi as clientApi
 
 CComp = clientApi.GetEngineCompFactory()

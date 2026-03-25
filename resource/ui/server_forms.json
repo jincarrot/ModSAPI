@@ -59,6 +59,48 @@
             }
         ]
     },
+    "custom_form_panel": {
+        "type": "panel",
+        "size": [
+            "40%",
+            "80%"
+        ],
+        "controls": [
+            {
+                "panel@oreui_controls.body": {
+                    "layer": 1,
+                    "size": [
+                        "100%",
+                        "100%"
+                    ]
+                }
+            },
+            {
+                "move@oreui_controls.move_btn": {
+                    "offset": [
+                        -2,
+                        "-50%+8px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            },
+            {
+                "resize@oreui_controls.resize_btn": {
+                    "offset": [
+                        "50%+-8px",
+                        "50%+-17px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            }
+        ]
+    },
     "custom_ui": {
         "type": "screen",
         "button_mappings": [

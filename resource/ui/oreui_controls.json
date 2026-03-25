@@ -363,7 +363,589 @@
             }
         ]
     },
-    "dropdown@common.dropdown": {},
+    "dropdown": {
+        "type": "panel",
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "size": [
+            "100%",
+            "50px"
+        ],
+        "controls": [
+            {
+                "label": {
+                    "type": "label",
+                    "anchor_from": "top_left",
+                    "anchor_to": "top_left",
+                    "offset": [
+                        4.0,
+                        4.0
+                    ],
+                    "font_type": "smooth",
+                    "text": "Label"
+                }
+            },
+            {
+                "dropdown_box": {
+                    "type": "button",
+                    "$control_alpha": 1.0,
+                    "$is_new_nine_slice": false,
+                    "$label_color": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "$label_font_scale_factor": 0.5,
+                    "$label_font_size": "large",
+                    "$label_layer": 2,
+                    "$label_offset": [
+                        8,
+                        -2
+                    ],
+                    "$label_text": "Button",
+                    "$nine_slice_buttom": 0,
+                    "$nine_slice_left": 0,
+                    "$nine_slice_right": 0,
+                    "$nine_slice_top": 0,
+                    "$nineslice_size": [
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "$pressed_button_name": "%netease_editor_template_namespace.click",
+                    "$pressed_texture": "textures/netease/common/button/pressed",
+                    "$texture_layer": 2,
+                    "anchor_from": "bottom_middle",
+                    "anchor_to": "bottom_middle",
+                    "size": [
+                        "100%-4px",
+                        "30px"
+                    ],
+                    "button_mappings": [],
+                    "default_control": "default",
+                    "hover_control": "hover",
+                    "is_handle_button_move_event": true,
+                    "pressed_control": "pressed",
+                    "bindings": [
+                        {
+                            "binding_type": "collection_details",
+                            "binding_collection_name": "",
+                            "binding_condition": "always_when_visible"
+                        }
+                    ],
+                    "controls": [
+                        {
+                            "default": {
+                                "type": "panel",
+                                "controls": [
+                                    {
+                                        "border_linear@oreui_controls.background": {
+                                            "color": [
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "size": [
+                                                "100%+2px",
+                                                "100%+2px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "main@oreui_controls.background": {
+                                            "color": [
+                                                0.815,
+                                                0.819,
+                                                0.831
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "100%"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_left@oreui_controls.background": {
+                                            "alpha": 0.6,
+                                            "offset": [
+                                                "-50%+1.5px",
+                                                "-2px"
+                                            ],
+                                            "size": [
+                                                "3px",
+                                                "100%-4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_right@oreui_controls.background": {
+                                            "alpha": 0.4,
+                                            "offset": [
+                                                "50%+-1.5px",
+                                                "-2px"
+                                            ],
+                                            "size": [
+                                                "3px",
+                                                "100%-4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_top@oreui_controls.background": {
+                                            "alpha": 0.6,
+                                            "offset": [
+                                                0,
+                                                "-50%+1.5px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "3px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_bottom@oreui_controls.background": {
+                                            "alpha": 0.4,
+                                            "offset": [
+                                                0,
+                                                "50%+-5.5px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "3px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "bottom@oreui_controls.background": {
+                                            "color": [
+                                                0.345,
+                                                0.345,
+                                                0.352
+                                            ],
+                                            "offset": [
+                                                0,
+                                                "50%-2px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "button_label@netease_editor_template_namespace.button_label": {
+                                            "anchor_from": "left_middle",
+                                            "anchor_to": "left_middle",
+                                            "font_scale_factor": 0.5,
+                                            "font_type": "smooth"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "pressed": {
+                                "type": "panel",
+                                "visible": false,
+                                "controls": [
+                                    {
+                                        "border_linear@oreui_controls.background": {
+                                            "color": [
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "size": [
+                                                "100%+2px",
+                                                "100%+2px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "main@oreui_controls.background": {
+                                            "color": [
+                                                0.694,
+                                                0.698,
+                                                0.709
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "100%"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_left@oreui_controls.background": {
+                                            "alpha": 0.4,
+                                            "offset": [
+                                                "-50%+1.5px",
+                                                "-2px"
+                                            ],
+                                            "size": [
+                                                "3px",
+                                                "100%-4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_right@oreui_controls.background": {
+                                            "alpha": 0.3,
+                                            "offset": [
+                                                "50%+-1.5px",
+                                                "-2px"
+                                            ],
+                                            "size": [
+                                                "3px",
+                                                "100%-4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_top@oreui_controls.background": {
+                                            "alpha": 0.4,
+                                            "offset": [
+                                                0,
+                                                "-50%+1.5px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "3px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_bottom@oreui_controls.background": {
+                                            "alpha": 0.3,
+                                            "offset": [
+                                                0,
+                                                "50%+-5.5px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "3px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "bottom@oreui_controls.background": {
+                                            "color": [
+                                                0.345,
+                                                0.345,
+                                                0.352
+                                            ],
+                                            "offset": [
+                                                0,
+                                                "50%-2px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "button_label@netease_editor_template_namespace.button_label": {
+                                            "anchor_from": "left_middle",
+                                            "anchor_to": "left_middle",
+                                            "font_scale_factor": 0.5,
+                                            "font_type": "smooth"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "hover": {
+                                "type": "panel",
+                                "visible": false,
+                                "controls": [
+                                    {
+                                        "border_linear@oreui_controls.background": {
+                                            "color": [
+                                                0,
+                                                0,
+                                                0
+                                            ],
+                                            "size": [
+                                                "100%+2px",
+                                                "100%+2px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "main@oreui_controls.background": {
+                                            "color": [
+                                                0.694,
+                                                0.698,
+                                                0.709
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "100%"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_left@oreui_controls.background": {
+                                            "alpha": 0.4,
+                                            "offset": [
+                                                "-50%+1.5px",
+                                                "-2px"
+                                            ],
+                                            "size": [
+                                                "3px",
+                                                "100%-4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_right@oreui_controls.background": {
+                                            "alpha": 0.3,
+                                            "offset": [
+                                                "50%+-1.5px",
+                                                "-2px"
+                                            ],
+                                            "size": [
+                                                "3px",
+                                                "100%-4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_top@oreui_controls.background": {
+                                            "alpha": 0.4,
+                                            "offset": [
+                                                0,
+                                                "-50%+1.5px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "3px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "border_bottom@oreui_controls.background": {
+                                            "alpha": 0.3,
+                                            "offset": [
+                                                0,
+                                                "50%+-5.5px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "3px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "bottom@oreui_controls.background": {
+                                            "color": [
+                                                0.345,
+                                                0.345,
+                                                0.352
+                                            ],
+                                            "offset": [
+                                                0,
+                                                "50%-2px"
+                                            ],
+                                            "size": [
+                                                "100%",
+                                                "4px"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "button_label@netease_editor_template_namespace.button_label": {
+                                            "anchor_from": "left_middle",
+                                            "anchor_to": "left_middle",
+                                            "font_scale_factor": 0.5,
+                                            "font_type": "smooth"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "arrow": {
+                                "type": "image",
+                                "anchor_from": "right_middle",
+                                "anchor_to": "bottom_right",
+                                "offset": [
+                                    -8,
+                                    2
+                                ],
+                                "size": [
+                                    8,
+                                    8
+                                ],
+                                "rotate_angle": -90,
+                                "texture": "textures/ui/arrow_r_default"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "content_panel": {
+                    "type": "panel",
+                    "anchor_from": "bottom_middle",
+                    "anchor_to": "bottom_middle",
+                    "size": [
+                        "100%",
+                        "32px"
+                    ],
+                    "layer": 10,
+                    "controls": [
+                        {
+                            "border@oreui_controls.background": {
+                                "color": [
+                                    0,
+                                    0,
+                                    0
+                                ]
+                            }
+                        },
+                        {
+                            "bg@oreui_controls.background": {
+                                "color": [
+                                    0.549,
+                                    0.5529,
+                                    0.5647
+                                ],
+                                "size": [
+                                    "100%-2px",
+                                    "100%-2px"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "dropdown_items": {
+        "type": "button",
+        "$control_alpha": 1.0,
+        "$is_new_nine_slice": false,
+        "$label_color": [
+            1,
+            1,
+            1
+        ],
+        "$label_font_scale_factor": 0.5,
+        "$label_font_size": "large",
+        "$label_layer": 2,
+        "$label_offset": [
+            8,
+            0
+        ],
+        "$label_text": "Button",
+        "$nine_slice_buttom": 0,
+        "$nine_slice_left": 0,
+        "$nine_slice_right": 0,
+        "$nine_slice_top": 0,
+        "$nineslice_size": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "$pressed_button_name": "%netease_editor_template_namespace.click",
+        "$pressed_texture": "textures/netease/common/button/pressed",
+        "$texture_layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "offset": [
+            0,
+            2
+        ],
+        "size": [
+            "100%-4px",
+            "24px"
+        ],
+        "layer": 11,
+        "button_mappings": [],
+        "default_control": "default",
+        "hover_control": "hover",
+        "is_handle_button_move_event": true,
+        "pressed_control": "pressed",
+        "bindings": [
+            {
+                "binding_type": "collection_details",
+                "binding_collection_name": "",
+                "binding_condition": "always_when_visible"
+            }
+        ],
+        "controls": [
+            {
+                "value": {
+                    "type": "label",
+                    "visible": false,
+                    "text": "0"
+                }
+            },
+            {
+                "default": {
+                    "type": "panel",
+                    "controls": [
+                        {
+                            "main@oreui_controls.background": {
+                                "color": [
+                                    0.39,
+                                    0.39,
+                                    0.39
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "pressed": {
+                    "type": "panel",
+                    "visible": false,
+                    "controls": [
+                        {
+                            "main@oreui_controls.background": {
+                                "color": [
+                                    0.282,
+                                    0.286,
+                                    0.29
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "hover": {
+                    "type": "panel",
+                    "visible": false,
+                    "controls": [
+                        {
+                            "main@oreui_controls.background": {
+                                "color": [
+                                    0.282,
+                                    0.286,
+                                    0.29
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "button_label@netease_editor_template_namespace.button_label": {
+                    "anchor_from": "left_middle",
+                    "anchor_to": "left_middle",
+                    "font_scale_factor": 0.5,
+                    "font_type": "smooth"
+                }
+            }
+        ]
+    },
     "green_btn@common.button": {
         "type": "button",
         "$control_alpha": 1.0,
@@ -1345,6 +1927,27 @@
             }
         ]
     },
+    "raw_label": {
+        "type": "label",
+        "anchor_from": "left_middle",
+        "anchor_to": "left_middle",
+        "font_type": "smooth",
+        "text": "Label",
+        "controls": [
+            {
+                "image": {
+                    "type": "image",
+                    "anchor_from": "right_middle",
+                    "anchor_to": "left_middle",
+                    "size": [
+                        "100%y+0px",
+                        "100%+0px"
+                    ],
+                    "texture": "textures/ui/achievements"
+                }
+            }
+        ]
+    },
     "red_btn@common.button": {
         "type": "button",
         "$control_alpha": 1.0,
@@ -1941,15 +2544,6 @@
                                 "size": [
                                     "100%",
                                     "4px"
-                                ]
-                            }
-                        },
-                        {
-                            "button_label@netease_editor_template_namespace.button_label": {
-                                "font_type": "smooth",
-                                "offset": [
-                                    0,
-                                    "-2px"
                                 ]
                             }
                         }
@@ -2974,11 +3568,11 @@
                         0.1
                     ],
                     "offset": [
-                        -1,
+                        -0.5,
                         0
                     ],
                     "size": [
-                        "100%+0px",
+                        "100%+-1px",
                         "100%+2px"
                     ]
                 }
@@ -3069,11 +3663,11 @@
                     "layer": 1,
                     "offset": [
                         0,
-                        -2
+                        -1.5
                     ],
                     "size": [
                         1,
-                        "100%+4px"
+                        "100%+4.5px"
                     ]
                 }
             },
@@ -3205,7 +3799,7 @@
                         0
                     ],
                     "size": [
-                        1.5,
+                        2,
                         "0%+4px"
                     ]
                 }

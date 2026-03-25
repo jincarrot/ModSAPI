@@ -1,6 +1,6 @@
 # coding=utf-8
 from ..Classes.Entity import *
-from ..Interfaces.Sources import *
+from ..interfaces.Sources import *
 
 class BlockEvent(object):
     """Contains information regarding an event that impacts a specific block."""

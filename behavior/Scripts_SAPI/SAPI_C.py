@@ -10,6 +10,7 @@ from Classes.Audio import *
 from Classes.Particle import *
 from .architect.scheduler import Scheduler
 # from minecraft import *
+from Classes.Forms import CustomFormUI
 
 ClientSystem = clientApi.GetClientSystemCls()
 
@@ -46,6 +47,8 @@ class SAPI_C(ClientSystem):
         self.ListenForEvent("SAPI", "world", "sendCustomForm", self, self.sendCustomForm)
         self.ListenForEvent("SAPI", "world", "updateCustomForm", self, self.updateCustomForm)
         self.ListenForEvent("SAPI", "world", "closeCustomForm", self, self.closeCustomForm)
+        self.ListenForEvent("SAPI", "world", "combineCustomForm", self, self.combineCustomForm)
+        self.ListenForEvent("SAPI", "world", "sendMoreCustomForm", self, self.sendMoreCustomForm)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.playerSpawn)
 
@@ -53,11 +56,15 @@ class SAPI_C(ClientSystem):
         clientApi.RegisterUI("server_ui", "ActionForm", "Scripts_SAPI.Classes.Forms.ActionForm", "server_forms.action_form")
         clientApi.RegisterUI("server_ui", "ModalForm", "Scripts_SAPI.Classes.Forms.ModalForm", "server_forms.modal_form")
         clientApi.RegisterUI("server_ui", "CustomForm", "Scripts_SAPI.Classes.Forms.CustomFormUI", "server_forms.custom_form")
-        clientApi.RegisterUI("server_ui", "CustomForm", "Scripts_SAPI.Classes.Forms.More", "server_forms.moreui")
+        clientApi.RegisterUI("server_ui", "MoreUI", "Scripts_SAPI.Classes.Forms.More", "server_forms.moreui")
         clientApi.RegisterUI("modsapi", "CustomUI", "Scripts_SAPI.Classes.UI._CustomUI", "server_forms.custom_ui")
 
     def sendCustomForm(self, data):
         screen = clientApi.GetTopScreen()
+        if hasattr(screen, "isMoreUI"):
+            for form in screen.forms:
+                if form.formId == data['formId']:
+                    screen.GetBaseUIControl(form.basePath).SetVisible(True)
         if hasattr(screen, "update"):
             return
         clientApi.PushScreen("server_ui", "CustomForm", data)
@@ -69,8 +76,27 @@ class SAPI_C(ClientSystem):
 
     def closeCustomForm(self, data):
         screen = clientApi.GetTopScreen()
-        if hasattr(screen, "update"):
+        if hasattr(screen, "onButtonClick"):
             clientApi.PopScreen()
+        if hasattr(screen, "isMoreUI"):
+            for form in screen.forms:
+                if form.formId == data['formId']:
+                    form.close({})
+
+    def combineCustomForm(self, data):
+        screen = clientApi.GetTopScreen()
+        if hasattr(screen, "isMoreUI"):
+            fm = CustomFormUI("", "", data)
+            def repeat():
+                if screen.GetBaseUIControl("/screen"):
+                    screen.combine(fm)
+                    clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId()).CancelTimer(timerId)
+            timerId = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId()).AddTimer(0.01, repeat)
+
+    def sendMoreCustomForm(self, data):
+        screen = clientApi.GetTopScreen()
+        if not hasattr(screen, "isMoreUI"):
+            clientApi.PushScreen("server_ui", "MoreUI", data)
 
     def getData(self, data):
         """receive request from server"""

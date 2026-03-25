@@ -3,7 +3,7 @@
   "CreateVersion": "3.3.0.997434",
   "EditVersion": "3.7.0.211586",
   "OldEditCount": 0,
-  "NewEditCount": 33,
+  "NewEditCount": 37,
   "OldComponents": [],
   "Account": "jincarrot@outlook.com",
   "UserName": "jincarrot",
@@ -35,7 +35,7 @@
   "EditMaterialPaths": [],
   "EditLogFilePath": "D:\\MCStudioDownload\\work\\editor\\edit.log",
   "ServerName": "EXPR",
-  "StudioPort": 11331,
+  "StudioPort": 10178,
   "DCWebUrl": "https://x19apigatewayexpr.nie.netease.com",
   "ShowGuide": false,
   "AssertCacheDir": "D:\\MCStudioDownload\\EngineAssert",
@@ -44,6 +44,6 @@
   "StudioTempPath": "D:\\MCStudioDownload\\temp\\editorTemp",
   "EditorResourcePackPath": "D:\\Program Files (x86)\\Netease\\MCStudio\\data\\inner_res",
   "EditDate": 1747018424,
-  "EditDuration": 53584,
-  "TestDuration": 54239
+  "EditDuration": 62439,
+  "TestDuration": 102345
 }

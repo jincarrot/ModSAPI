@@ -7,7 +7,7 @@ import types
 import inspect
 
 from ControlData import *
-from ..Interfaces.Vector import Vector2
+from ..interfaces.Vector import Vector2
 from ..Utils.Expression import *
 from ..Utils.Counter import *
 

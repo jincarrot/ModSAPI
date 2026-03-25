@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # from typing import Any, List, Union, Dict
-from ..Interfaces.Vector import *
+from ..interfaces.Vector import *
 from ..Classes.ItemStack import *
 
 class BlockPaletteData(object):

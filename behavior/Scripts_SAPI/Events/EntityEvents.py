@@ -1,6 +1,6 @@
 # coding=utf-8
 from ..Classes.Entity import *
-from ..Interfaces.Sources import *
+from ..interfaces.Sources import *
 
 
 class EntityDieAfterEvent(object):

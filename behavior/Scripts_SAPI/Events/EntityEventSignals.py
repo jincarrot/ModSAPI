@@ -2,7 +2,7 @@
 
 import types
 from EventBases import *
-from ..Interfaces.EntityOptions import *
+from ..interfaces.EntityOptions import *
 import mod.server.extraServerApi as serverApi
 from ..minecraft import *
 from ..decorators import *

@@ -60,6 +60,11 @@
                 "oreui_controls.divider": [
                     "/netease_prefab_screen"
                 ],
+                "oreui_controls.dropdown": [
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/dropdown",
+                    "/netease_prefab_screen/dropdown/content_panel"
+                ],
                 "oreui_controls.green_btn": [
                     "/netease_prefab_screen"
                 ],
@@ -71,7 +76,8 @@
                     "/netease_prefab_screen"
                 ],
                 "oreui_controls.label": [
-                    "/netease_prefab_screen"
+                    "/netease_prefab_screen",
+                    "/netease_prefab_screen/label"
                 ],
                 "oreui_controls.move_btn": [
                     "/netease_prefab_screen"
@@ -82,6 +88,9 @@
                 "oreui_controls.normal_button": [
                     "/netease_prefab_screen",
                     "/netease_prefab_screen/normal_button"
+                ],
+                "oreui_controls.raw_label": [
+                    "/netease_prefab_screen"
                 ],
                 "oreui_controls.red_btn": [
                     "/netease_prefab_screen"

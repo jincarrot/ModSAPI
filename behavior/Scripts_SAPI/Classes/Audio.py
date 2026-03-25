@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
-from ..Interfaces.EntityOptions import *
-from ..Interfaces.Vector import *
+from ..interfaces.EntityOptions import *
+from ..interfaces.Vector import *
 
 CComp = clientApi.GetEngineCompFactory()
 
