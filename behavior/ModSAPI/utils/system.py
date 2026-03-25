@@ -5,6 +5,7 @@ class Systems:
 
     _world = None
     _modules = None
+    _system = None
 
     @property
     def world(self):
@@ -13,6 +14,14 @@ class Systems:
         world = serverApi.GetSystem("ModSAPI", "world")
         self._world = world
         return world
+    
+    @property
+    def system(self):
+        if self._system:
+            return self._system
+        system = serverApi.GetSystem("ModSAPI", "system")
+        self._system = system
+        return system
     
     @property
     def modules(self):

@@ -13,8 +13,14 @@ class S(ServerSystem):
             self, self.main)
 
     def main(self, data):
-        print(world)
+        def test():
+            print(serverApi.GetPlayerList())
+            item = ItemStack("minecraft:stone", 1)
+            # print(world.getAllPlayers())[0].container.addItem(item)
+        system.runInterval(test, 40)
         def onChatSend(arg):
+            # type: (ChatSendAfterEvent) -> None
+            print(world.getAllPlayers())
             item = ItemStack(arg.message, 1)
             container = arg.sender.container
             container.addItem(item)

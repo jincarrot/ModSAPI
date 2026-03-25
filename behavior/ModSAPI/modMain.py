@@ -22,6 +22,8 @@ class ModSAPI(object):
     def ModSAPIServerInit(self):
         serverApi.RegisterSystem("ModSAPI", "world",
                                  "ModSAPI.modules.server.World.World")
+        serverApi.RegisterSystem("ModSAPI", "system",
+                                 "ModSAPI.modules.server.System.System")
         serverApi.RegisterSystem("ModSAPI", "modules",
                                  "ModSAPI.utils.modules.Modules")
         
