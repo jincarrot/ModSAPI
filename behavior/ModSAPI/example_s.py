@@ -13,18 +13,16 @@ class S(ServerSystem):
             self, self.main)
 
     def main(self, data):
-        def test():
-            print(serverApi.GetPlayerList())
-            item = ItemStack("minecraft:stone", 1)
-            # print(world.getAllPlayers())[0].container.addItem(item)
-        system.runInterval(test, 40)
         def onChatSend(arg):
             # type: (ChatSendAfterEvent) -> None
-            print(world.getAllPlayers())
-            item = ItemStack(arg.message, 1)
-            container = arg.sender.container
-            container.addItem(item)
-            existed = container.getItem(0)
-            existed.setLore(["aaa1", "bbb2"])
-            container.addItem(existed)
+            player = arg.sender
+            loc = player.location
+            a = world.structureManager.createFromWorld("test", player.dimension, loc, loc + (5, 5, 5))
+            # world.structureManager.place(a, player.dimension, loc + (10, 0, 0))
+            # world.structureManager.place(a, player.dimension, loc + (0, 0, 10), {"mirror": StructureMirrorAxis.XZ})
+            # world.structureManager.place(a, player.dimension, loc + (0, 0, -10), {"mirror": StructureMirrorAxis.X})
+            # world.structureManager.place(a, player.dimension, loc + (10, 0, -10), {"mirror": StructureMirrorAxis.Z})
+            world.structureManager.place(a, player.dimension, loc + (10, 0, 10), {"rotation": StructureRotation.Rotate90})
+            world.structureManager.place(a, player.dimension, loc + (10, 0, 5), {"rotation": StructureRotation.Rotate180})
+            world.structureManager.place(a, player.dimension, loc + (5, 0, 5), {"rotation": StructureRotation.Rotate270})
         world.afterEvents.chatSend.subscribe(onChatSend)

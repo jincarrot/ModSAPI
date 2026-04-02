@@ -26,6 +26,8 @@ class ModSAPI(object):
                                  "ModSAPI.modules.server.System.System")
         serverApi.RegisterSystem("ModSAPI", "modules",
                                  "ModSAPI.utils.modules.Modules")
+        serverApi.RegisterSystem("ModSAPI", "enums",
+                                 "ModSAPI.utils.enums.Enums")
         
         serverApi.RegisterSystem("Sample", "s",
                                  "ModSAPI.example_s.S")

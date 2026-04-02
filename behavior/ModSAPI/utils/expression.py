@@ -71,13 +71,13 @@ class New:
 
 new = New()
 
-math.pow = new.pow
+"""math.pow = new.pow
 math.sin = new.sin
 math.cos = new.cos
 math.sqrt = new.sqrt
 max = new.max
 min = new.min
-abs = new.abs
+abs = new.abs"""
 
 class Expression(object):
     """表达式"""

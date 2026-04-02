@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from ...enums.Dimension import *
-from ..components.ItemComponents import *
+from .components.ItemComponents import *
 import mod.server.extraServerApi as serverApi
 import ast
 from ...utils.dict import *

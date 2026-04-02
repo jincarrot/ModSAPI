@@ -8,7 +8,8 @@ from Scoreboard import *
 from ...interfaces.Game import *
 from Container import *
 # from .architect.scheduler import Scheduler
-from TickingAreaManager import *
+from managers.TickingAreaManager import *
+from managers.StructureManager import *
 # from decorators import *
 
 ServerSystem = serverApi.GetServerSystemCls()
@@ -23,7 +24,7 @@ class World(ServerSystem):
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
         self.__tickingAreaManager = TickingAreaManager()
-        # print("ModSAPI: world loaded")
+        self.__structureManager = StructureManager()
 
     @property
     def afterEvents(self):
@@ -44,6 +45,10 @@ class World(ServerSystem):
     @property
     def tickingAreaManager(self):
         return self.__tickingAreaManager
+
+    @property
+    def structureManager(self):
+        return self.__structureManager
 
     @staticmethod
     def getAllPlayers():

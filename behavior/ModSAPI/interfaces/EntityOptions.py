@@ -216,7 +216,6 @@ class EntityApplyDamageByProjectileOptions(object):
     """
 
     def __init__(self, data):
-        # type: (Dict[str, Entity]) -> None
         self.damagingProjectile = data['damagingProjectile']
         self.damagingEntity = data['damagingEntity'] if 'damagingEntity' in data else None
         """Optional entity that caused the damage."""

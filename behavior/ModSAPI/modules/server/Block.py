@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
 from ...interfaces.Vector import *
-from ..components.BlockComponents import *
+from .components.BlockComponents import *
 from ItemStack import *
 
 class BlockVolumeBase(object):

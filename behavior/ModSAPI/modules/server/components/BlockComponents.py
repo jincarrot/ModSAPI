@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 # from typing import Union, Dict
-from behavior.ModSAPI.modules.components.Components import *
+from Components import *
 import mod.server.extraServerApi as serverApi
-from Container import *
+from ..Container import *
 
 SComp = serverApi.GetEngineCompFactory()
 
 class BlockComponent(Component):
     """Base type for components associated with blocks."""
     __componentId = ""
-    import behavior.ModSAPI.modules.server.Block as bl
 
     def __init__(self, data):
         Component.__init__(self, data)
@@ -24,7 +23,6 @@ class BlockComponent(Component):
     
     @property
     def block(self):
-        # type: () -> bl.Block
         """Block instance that this component pertains to."""
         return self.__block
     
@@ -35,11 +33,10 @@ class BlockComponent(Component):
 class BlockInventoryComponent(BlockComponent):
     """Represents the inventory of a block in the world. Used with blocks like chests."""
     __componentId = "minecraft:inventory"
-    import behavior.ModSAPI.modules.server.Block as b
 
     def __init__(self, data):
         BlockComponent.__init__(self, data)
-        self.__block = data['block'] # type: BlockInventoryComponent.b.Block
+        self.__block = data['block']
         self.__container = None
 
     @property

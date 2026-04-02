@@ -1,6 +1,4 @@
 # coding=utf-8
-
-import sys
 import types
 from ..EventBases import *
 from ...interfaces.EntityOptions import *

@@ -10,7 +10,7 @@ import time
 from Player import Player
 from Entity import Entity
 from ItemStack import ItemStack
-from Block import *
+from Block import Block
 from Command import CommandResult
 
 SComp = serverApi.GetEngineCompFactory()
@@ -80,7 +80,7 @@ class Dimension(object):
         """
 
     def getBlock(self, location):
-        # type: (dict | Vector3) -> Block
+        # type: (Vector3) -> Block
         """
         Returns a block instance at the given location.
         """
@@ -92,7 +92,7 @@ class Dimension(object):
         """
     
     def getEntitiesAtBlockLocation(self, location):
-        # type: (dict | Vector3) -> list[Entity]
+        # type: (Vector3) -> list[Entity]
         """
         Returns a set of entities at a particular location.
         """
@@ -115,19 +115,19 @@ class Dimension(object):
         """
 
     def spawnEntity(self, identifier, location, options=SpawnEntityOptions):
-        # type: (str, dict | Vector3, dict | SpawnEntityOptions) -> Dimension.__e.Entity
+        # type: (str, Vector3,  SpawnEntityOptions) -> Dimension.__e.Entity
         """
         Creates a new entity (e.g., a mob) at the specified location.
         """
 
     def spawnItem(self, itemStack, location):
-        # type: (Dimension.__i.ItemStack, Vector3 | dict) -> Dimension.__e.Entity
+        # type: (Dimension.__i.ItemStack, Vector3) -> Dimension.__e.Entity
         """
         Creates a new item stack as an entity at the specified location.
         """
 
     def createExplosion(self, location, radius, explosionOptions={}):
-        # type: (Vector3 | dict, float, dict | ExplosionOptions) -> bool
+        # type: (Vector3, float, dict | ExplosionOptions) -> bool
         """Creates an explosion at the specified location."""
 
     def fillBlocks(self, volume, block, options):

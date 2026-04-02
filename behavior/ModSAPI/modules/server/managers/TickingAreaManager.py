@@ -1,10 +1,10 @@
 import types
 import mod.server.extraServerApi as serverApi
 
-from ...interfaces.Vector import Vector3
-from ...interfaces.TickingAreaOptions import *
-from ...interfaces.TickingArea import *
-from ...interfaces.BlockBoundingBox import *
+from ....interfaces.Vector import Vector3
+from ....interfaces.TickingAreaOptions import *
+from ....interfaces.TickingArea import *
+from ....interfaces.BlockBoundingBox import *
 
 SComp = serverApi.GetEngineCompFactory()
 

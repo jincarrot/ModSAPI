@@ -2,7 +2,7 @@
 # from typing import Union, Dict
 from Components import *
 import mod.server.extraServerApi as serverApi
-from ...interfaces.Enchant import *
+from ....interfaces.Enchant import *
 
 SComp = serverApi.GetEngineCompFactory()
 

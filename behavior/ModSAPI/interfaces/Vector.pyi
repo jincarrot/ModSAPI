@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# from typing import List, Dict, Union
+from typing import TypedDict
 
 import mod.server.extraServerApi as serverApi
 from ..modules.server.Dimension import Dimension
@@ -7,25 +7,11 @@ from ..modules.server.Dimension import Dimension
 comp = serverApi.GetEngineCompFactory()
 
 
-class Vector3(object):
+class Vector3(TypedDict):
 
-    def __init__(self, data):
-        # type: (dict | tuple) -> None
-        """
-        Contains a description of a vector.
-        """
-        if type(data) == dict:
-            self.x = data['x'] if 'x' in data else 0 # type: float
-            self.y = data['y'] if 'y' in data else 0 # type: float
-            self.z = data['z'] if 'z' in data else 0 # type: float
-        elif type(data) == tuple:
-            self.x = data[0]
-            self.y = data[1]
-            self.z = data[2]
-        elif isinstance(data, Vector3):
-            self.x = data.x
-            self.y = data.y
-            self.z = data.z
+    x: float
+    y: float
+    z: float
 
     def __str__(self):
         data = {
@@ -36,55 +22,38 @@ class Vector3(object):
         return "<Vector3> %s" % data
     
     def __eq__(self, data):
-        # type: (Vector3 | dict) -> bool
-        if type(data) == dict:
-            data = Vector3(data)
-        return data.x == self.x and data.y == self.y and data.z == self.z
+        # type: (Vector3) -> bool
+        pass
 
     def __sub__(self, data):
-        # type: (Vector3 | dict | tuple) -> Vector3
-        if type(data) != Vector3:
-            data = Vector3(data)
-        data = {
-            "x": self.x - data.x,
-            "y": self.y - data.y,
-            "z": self.z - data.z
-        }
-        return Vector3(data)
+        # type: (Vector3 | tuple) -> Vector3
+        pass
     
     def __add__(self, data):
-        # type: (Vector3 | dict | tuple) -> Vector3
-        if type(data) != Vector3:
-            data = Vector3(data)
-        data = {
-            "x": self.x + data.x,
-            "y": self.y + data.y,
-            "z": self.z + data.z
-        }
-        return Vector3(data)
+        # type: (Vector3 | tuple) -> Vector3
+        pass
     
     def getData(self):
         # type: () -> dict
         """获取字典数据"""
-        return {"x": self.x, "y": self.y, "z": self.z}
+        pass
     
-    def getTuple(self):
+    def rotateY(self, angle) -> Vector3: ...
+
+    def getTuple(self) -> tuple[float, float, float]:
         return (self.x, self.y, self.z)
+    
+    def getIntTuple(self) -> tuple[int, int, int]:
+        """"""
 
 
-class Vector2(object):
+class Vector2(TypedDict):
     """
     Represents a two-directional vector.
     """
 
-    def __init__(self, data):
-        # type: (dict | tuple) -> None
-        if type(data) == dict:
-            self.x = data['x'] if 'x' in data else 0
-            self.y = data['y'] if 'y' in data else 0
-        else:
-            self.x = data[0]
-            self.y = data[1]
+    x: float
+    y: float
 
     def __str__(self):
         data = {
@@ -94,12 +63,16 @@ class Vector2(object):
         return "<Vector2> %s" % data
 
 
-class VectorXZ(object):
+class VectorXZ(TypedDict):
     """
     Contains a description of a vector in xz.
     """
 
-    def __init__(self, data):
+    x: float
+    z: float
+
+    def __str__(self):
+        return "<VectorXZ> %s" % {"x": self.x, "z": self.z}
         self.x = data['x'] if 'x' in data else 0.0
         self.z = data['z'] if 'z' in data else 0.0
 
@@ -115,10 +88,6 @@ class Motion(object):
     """
     运动器
     """
-
-    def __init__(self, type, id):
-        self.__motionId = id
-        self.__type = type
     
     @property
     def type(self):
@@ -128,17 +97,10 @@ class Motion(object):
     def id(self):
         return self.__motionId
 
-class DimensionLocation(object):
+class DimensionLocation(TypedDict):
     """An exact coordinate within the world, including its dimension and location."""
 
-    def __init__(self, dimension, location):
-        # type: (Dimension, Vector3) -> None
-        self.__dimension = dimension
-        self.__location = location
-
-    @property
-    def dimension(self):
-        return self.__dimension
+    dimension: Dimension
     
     @dimension.setter
     def dimension(self, value):

@@ -7,7 +7,8 @@ from Dimension import *
 from Scoreboard import *
 from ...interfaces.Game import *
 from Container import *
-from TickingAreaManager import *
+from .managers.TickingAreaManager import *
+from .managers.StructureManager import *
 
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
@@ -43,6 +44,10 @@ class World(ServerSystem):
     @property
     def tickingAreaManager(self) -> TickingAreaManager:
         """Manager for adding, removing and querying pack specific ticking areas."""
+
+    @property
+    def structureManager(self) -> StructureManager:
+        """Returns the manager for @minecraft/server.Structure related APIs."""
 
     @staticmethod
     def getAllPlayers() -> list[Player]:
@@ -125,11 +130,4 @@ class World(ServerSystem):
     @staticmethod
     def getLootTableManager():
         """Returns a manager capable of generating loot from an assortment of sources."""
-    
-    def listen(self, eventName, callback, namesapce=serverApi.GetEngineNamespace(), systemName=serverApi.GetEngineSystemName()):
-        # type: (str, types.FunctionType, str, str) -> None
-        """
-        listen for an event
-        """
-        pass
     

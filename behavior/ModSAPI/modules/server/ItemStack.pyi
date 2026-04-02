@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from ...enums.Dimension import *
 import mod.server.extraServerApi as serverApi
-import ast
-from ..components.ItemComponents import *
+from .components.ItemComponents import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -12,17 +11,12 @@ class ItemType(object):
     Defines the type of an item.
     """
 
-    def __init__(self, id):
-        # type: (str) -> None
-        self.__id = id
-
     @property
     def id(self):
         # type: () -> str
         """
         Item type name
         """
-        return self.__id
 
 
 class ItemStack(object):
@@ -116,35 +110,4 @@ class ItemStack(object):
 
 def createItemStack(itemDict):
     # type: (dict) -> ItemStack | None
-    if not itemDict:
-        return None
-    item = ItemStack(itemDict['newItemName'], itemDict['count'])
-    if 'userData' in itemDict and itemDict['userData']:
-        userData = itemDict['userData']
-        if 'minecraft:keep_on_death' in userData:
-            item.keepOnDeath = userData['minecraft:keep_on_death']['__value__'] == 1
-        if 'minecraft:item_lock' in userData:
-            v = userData['minecraft:item_lock']['__value__']
-            item.lockMode = "none" if not v else ("inventory" if v == 2 else "slot")
-        if 'display' in userData:
-            item.nameTag = userData['display']['__value__']
-    if 'customTips' in itemDict:
-        item.setLore(itemDict['customTips'].split("\n"))
-    if 'extraId' in itemDict and itemDict['extraId'] and itemDict['extraId'][0] == '{' and itemDict['extraId'][-1] == '}':
-        try:
-            item.setDynamicProperties(ast.literal_eval(itemDict['extraId']))
-        finally:
-            pass
-    if item.hasComponent("minecraft:enchantable"):
-        enchantData = itemDict['enchantData']
-        customEnchantData = itemDict['modEnchantData']
-        enchantList = []
-        for enchant in enchantData:
-            enchantList.append({"type": EnchantTypes[enchant[0]], "level": enchant[1]})
-        for enchant in customEnchantData:
-            enchantList.append({"type": enchant[0], 'level': enchant[1]})
-        item.getComponent("minecraft:enchantable").asEnchantableComponent().addEnchantments(enchantList)
-    if item.hasComponent("minecraft:durability"):
-        remain = itemDict['durability']
-        item.getComponent("minecraft:durability").asDurabilityComponent().remain = remain
-    return item
+    pass

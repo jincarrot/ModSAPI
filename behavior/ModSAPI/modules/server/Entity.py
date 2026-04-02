@@ -8,7 +8,7 @@ from ...interfaces.EntityOptions import *
 from ...interfaces.TeleportOptions import *
 from ...interfaces.Raycasts import *
 from ...enums.Dimension import *
-from ..components.EntityComponents import *
+from .components.EntityComponents import *
 import math
 import mod.server.extraServerApi as serverApi
 from Command import *
@@ -49,8 +49,9 @@ class Entity(object):
     
     @property
     def isValid(self):
-        
-        """"""
+        """
+        Returns whether the entity is valid. An entity may become invalid if it is removed from the world.
+        """
         return SComp.CreateGame(serverApi.GetLevelId()).IsEntityAlive(self.__id)
 
     @property
@@ -155,11 +156,10 @@ class Entity(object):
 
     @property
     def location(self):
-        
         """
         Current location of the entity.
         """
-        pos = SComp.CreatePos(self.__id).GetPos()
+        pos = SComp.CreatePos(self.__id).GetFootPos()
         loc = Vector3({"x": pos[0], "y": pos[1], "z": pos[2]})
         return loc
 
@@ -343,7 +343,7 @@ class Entity(object):
         if componentId.find("minecraft:") >= 0:
             componentId = componentId[10::].lower()
         if componentId in vars(EntityComponentType).keys():
-            import behavior.ModSAPI.modules.components.Components as comp
+            import components.Components as comp
             return comp.EntityComponentGenerater(self, componentId).get()
         else:
             print("Get entity component error! No such component name '%s'" % componentId)
@@ -465,6 +465,15 @@ class Entity(object):
         v = SComp.CreateActorMotion(self.__id).GetMotion()
         return Vector3({"x": v[0], 'y': v[1], 'z': v[2]})
 
+    def getNbt(self):
+        """
+        Returns the NBT data of the entity as a JSON object.
+        """
+        if not self.isValid:
+            return None
+        nbt = SComp.CreateEntityDefinitions(self.__id).GetEntityNBTTags()
+        return nbt
+    
     def getProperty(self, identifier):
         """
         Gets an entity Property value.

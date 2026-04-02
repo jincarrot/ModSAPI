@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from http import server
+
 import mod.server.extraServerApi as serverApi
 
 class Systems:
@@ -6,6 +8,7 @@ class Systems:
     _world = None
     _modules = None
     _system = None
+    _enums = None
 
     @property
     def world(self):
@@ -30,5 +33,13 @@ class Systems:
         modules = serverApi.GetSystem("ModSAPI", "modules")
         self._modules = modules
         return modules
+    
+    @property
+    def enums(self):
+        if self._enums:
+            return self._enums
+        enums = serverApi.GetSystem("ModSAPI", "enums")
+        self._enums = enums
+        return enums
     
 systems = Systems()

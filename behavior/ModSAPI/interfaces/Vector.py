@@ -2,7 +2,7 @@
 # from typing import List, Dict, Union
 
 import mod.server.extraServerApi as serverApi
-
+import math
 comp = serverApi.GetEngineCompFactory()
 
 
@@ -62,6 +62,16 @@ class Vector3(object):
         }
         return Vector3(data)
     
+    def rotateY(self, angle):
+        # type: (float) -> Vector3
+        """Rotates the vector around the y axis counterclockwise (left hand rule)"""
+        rad = math.radians(angle)
+        cos = math.cos(rad)
+        sin = math.sin(rad)
+        x = self.x * cos + self.z * sin
+        z = -self.x * sin + self.z * cos
+        return Vector3({"x": x, "y": self.y, "z": z})
+    
     def getData(self):
         # type: () -> dict
         """获取字典数据"""
@@ -69,6 +79,9 @@ class Vector3(object):
     
     def getTuple(self):
         return (self.x, self.y, self.z)
+    
+    def getIntTuple(self):
+        return (int(math.floor(self.x)), int(math.floor(self.y)), int(math.floor(self.z)))
 
 
 class Vector2(object):

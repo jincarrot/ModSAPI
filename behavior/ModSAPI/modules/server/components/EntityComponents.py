@@ -243,7 +243,7 @@ class EntityInventoryComponent(EntityComponent):
     def __init__(self, data):
         EntityComponent.__init__(self, data)
         self.__entity = data['entity'] # type: EntityInventoryComponent.__en
-        from ..server.Container import Container
+        from ..Container import Container
         self.__container = Container(None, self.__entity.id)
 
     def __str__(self):

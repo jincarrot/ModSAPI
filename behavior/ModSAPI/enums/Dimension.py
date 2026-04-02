@@ -64,30 +64,23 @@ class Direction(object):
     """
     A general purpose relative direction enumeration.
     """
-    @property
-    def Down(self):
-        """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
-        return "Down"
-    @property
-    def East(self):
-        """Returns the @minecraft/server.Block to the east (x + 1) of this item."""
-        return "East"
-    @property
-    def North(self):
-        """Returns the @minecraft/server.Block to the east (z + 1) of this item."""
-        return "North"
-    @property
-    def South(self):
-        """Returns the @minecraft/server.Block to the south (z - 1) of this item."""
-        return "South"
-    @property
-    def Up(self):
-        """Returns the @minecraft/server.Block above (y + 1) of this item."""
-        return "Up"
-    @property
-    def West(self): 
-        """Returns the @minecraft/server.Block to the west (x - 1) of this item."""
-        return "West"
+    Down = "Down"
+    """Returns the @minecraft/server.Block beneath (y - 1) of this item."""
+
+    East = "East"
+    """Returns the @minecraft/server.Block to the east (x + 1) of this item."""
+
+    North = "North"
+    """Returns the @minecraft/server.Block to the east (z + 1) of this item."""
+
+    South = "South"
+    """Returns the @minecraft/server.Block to the south (z - 1) of this item."""
+
+    Up = "Up"
+    """Returns the @minecraft/server.Block above (y + 1) of this item."""
+
+    West = "West"
+    """Returns the @minecraft/server.Block to the west (x - 1) of this item."""
 
 
 class EntityComponentTypes(object):

@@ -9,11 +9,14 @@ class System(ServerSystem):
     A class that provides system-level events and functions.
     """
 
-    _scriptScheduler = Scheduler()
+    # _scriptScheduler = Scheduler()
 
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
-        self._initScheduler()
+        # self._initScheduler()
+        self.__timers = {}
+        self.__timerId = 0
+        self.__comp = serverApi.GetEngineCompFactory().CreateGame(serverApi.GetLevelId())
 
     def _OnScriptTickServer(self):
         self._scriptScheduler.executeSequenceAsync()
@@ -35,25 +38,34 @@ class System(ServerSystem):
         When run in other code (a system.run callout), this will run the function in the next tick. 
         
         Note, however, that depending on load on the system, running in the same or next tick is not guaranteed."""
-        return self._scriptScheduler.run(callback)
+        self.__timers[self.__timerId] = self.__comp.AddTimer(0.05, callback)
+        self.__timerId += 1
+        return self.__timerId - 1
 
     def runTimeout(self, callback, tickDelay=1):
         """
         Runs a set of code at a future time specified by tickDelay.
         """
-        return self._scriptScheduler.runTimer(callback, tickDelay)
+        self.__timers[self.__timerId] = self.__comp.AddTimer(0.05 * tickDelay, callback)
+        self.__timerId += 1
+        return self.__timerId - 1
 
     def runInterval(self, callback, tickInterval=1):
         """
         Runs a set of code on an interval.
         """
-        return self._scriptScheduler.runTimer(callback, tickInterval, True)
+        self.__timers[self.__timerId] = self.__comp.AddRepeatedTimer(0.05 * tickInterval, callback)
+        self.__timerId += 1
+        return self.__timerId - 1
 
     def clearRun(self, runId):
         """
         Cancels the execution of a function run that was previously scheduled via @minecraft/server.System.run.
         """
-        self._scriptScheduler.removeTask('SchedulerTask', runId)
+        if runId not in self.__timers:
+            return
+        self.__comp.CancelTimer(self.__timers[runId])
+        del self.__timers[runId]
 
     def send(self, player, eventName, data):
         """Send data to client"""
