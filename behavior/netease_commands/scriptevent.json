@@ -1,0 +1,17 @@
+{
+	"format_version": "0.0.1",
+	"name": "scriptevent",
+	"description": "[ModSAPI]通过ID和消息来触发脚本事件。",
+	"permission_level": "game_directors",
+	"args": [
+        {
+            "type": "str",
+            "name": "messageId"
+        },
+        {
+            "type": "str",
+            "name": "message",
+            "default": ""
+        }
+    ]
+}

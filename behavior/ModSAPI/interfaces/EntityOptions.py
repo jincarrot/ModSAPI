@@ -2,12 +2,26 @@
 # from typing import List, Dict, Union
 from Vector import *
 from ..enums.Entity import *
+from ..enums.Game import *
 # from ..Classes.Entity import *
 import math
 import mod.server.extraServerApi as serverApi
+from ..utils.system import systems
 
 comp = serverApi.GetEngineCompFactory()
 
+class EntityQueryScoreOptions:
+    """Contains additional options for filtering players based on their score for an objective."""
+
+    def __init__(self, data):
+        self.exclude = data['exclude'] if 'exclude' in data else False
+        """If set to true, entities and players within this score range are excluded from query results."""
+        self.objective = data['objective'] if 'objective' in data else ""
+        """Identifier of the scoreboard objective to filter on."""
+        self.minScore = data['minScore'] if 'minScore' in data else -2147483648
+        """If defined, only players that have a score equal to or over minScore are included."""
+        self.maxScore = data['maxScore'] if 'maxScore' in data else 2147483647
+        """If defined, only players that have a score equal to or under maxScore are included."""
 
 class EntityFilter(object):
     """
@@ -19,7 +33,7 @@ class EntityFilter(object):
         """If this value is set, this event will only fire for entities that do not match the entity families within this collection."""
         self.excludeTypes = data['excludeTypes'] if 'excludeTypes' in data else []
         """If this value is set, this event will only fire if the impacted entities' type matches this parameter."""
-        self.excludeGameModes = data['excludeGameModes'] if 'excludeGameModes' in data else []
+        self.excludeGameModes = data['excludeGameModes'] if 'excludeGameModes' in data else [] # type: list[GameMode]
         """If this value is set, this event will only fire if the impacted entities' game mode matches this parameter."""
         self.excludeNames = data['excludeNames'] if 'excludeNames' in data else []
         """If this value is set, this event will only fire if the impacted entities' name matches this parameter."""
@@ -27,7 +41,7 @@ class EntityFilter(object):
         """If this value is set, this event will only fire if the impacted entities' tags match this parameter."""
         self.families = data['families'] if 'families' in data else []
         """If this value is set, this event will only fire if the impacted entities' family matches this parameter."""
-        self.gameMode = data['gameMode'] if 'gameMode' in data else None
+        self.gameMode = data['gameMode'] if 'gameMode' in data else None # type: GameMode
         """If this value is set, this event will only fire if the impacted entities' game mode matches this parameter."""
         self.maxHorizontalRotation = data['maxHorizontalRotation'] if 'maxHorizontalRotation' in data else None
         """If this value is set, this event will only fire if the impacted entities' max horizontal rotation matches this parameter."""
@@ -45,7 +59,7 @@ class EntityFilter(object):
         """If this value is set, this event will only fire if the impacted"""
         self.propertyOptions = data['propertyOptions'] if 'propertyOptions' in data else None
         """If this value is set, this event will only fire if the impacted entities' property options match this parameter."""
-        self.scoreOptions = data['scoreOptions'] if 'scoreOptions' in data else None
+        self.scoreOptions = data['scoreOptions'] if 'scoreOptions' in data else None # type: list[EntityQueryScoreOptions]
         """If this value is set, this event will only fire if the impacted entities' score options match this parameter."""
         self.tags = data['tags'] if 'tags' in data else []
         """If this value is set, this event will only fire if the impacted entities' tags match this parameter."""
@@ -86,7 +100,7 @@ class EntityEventOptions(object):
         self.__entityTypes = data
 
 
-class EntityQueryOptions(object):
+class EntityQueryOptions(EntityFilter):
     """
     Contains options for selecting entities within an area.
     """
@@ -94,6 +108,7 @@ class EntityQueryOptions(object):
     def __init__(self, data):
         # type: (dict) -> None
         self.data = data
+        EntityFilter.__init__(self, data)
         self.closest = data['closest'] if 'closest' in data else -1
         # type: int
         """
@@ -189,8 +204,90 @@ class EntityQueryOptions(object):
             if min(x) <= location[0] <= max(x) and min(y) <= location[1] <= max(y) and min(z) <= location[2] <= max(z):
                 checkOuts.append(entityId)
         return checkOuts
+    
+    def checkProperties(self, entityIds):
+        # type: (list[str]) -> list[str]
+        checkOuts = []
+        for entityId in entityIds:
+            # types
+            entityType = comp.CreateEngineType(entityId).GetEngineTypeStr()
+            if (not self.type or entityType == self.type) and entityType not in self.excludeTypes:
+                checkOuts.append(entityId)
+            # families
+            families = comp.CreateAttr(entityId).GetTypeFamily()
+            if self.families:
+                temp = 1
+                for family in self.families:
+                    if family not in families or family in self.excludeFamilies:
+                        temp = 0
+                        break
+                if temp:
+                    checkOuts.append(entityId)
+            # gameModes
+            if self.gameMode:
+                if entityType == "minecraft:player":
+                    gameMode = comp.CreateGame(serverApi.GetLevelId()).GetPlayerGameType(entityId)
+                    if gameMode == self.gameMode and gameMode not in self.excludeGameModes:
+                        checkOuts.append(entityId)
+            else:
+                checkOuts.append(entityId)
+            # names
+            name = comp.CreateName(entityId).GetName()
+            if (not self.name or name == self.name) and name not in self.excludeNames:
+                checkOuts.append(entityId)
+            # tags
+            tags = comp.CreateTag(entityId).GetEntityTags()
+            if self.tags:
+                temp = 1
+                for tag in self.tags:
+                    if tag not in tags or tag in self.excludeTags:
+                        temp = 0
+                        break
+                if temp:
+                    checkOuts.append(entityId)
+            # level
+            if self.minLevel is not None or self.maxLevel is not None:
+                if entityType == "minecraft:player":
+                    level = comp.CreateLv(entityId).GetPlayerLevel()
+                    minLevel = self.minLevel if self.minLevel is not None else 0
+                    maxLevel = self.maxLevel if self.maxLevel is not None else 2147483647
+                    if minLevel <= level <= maxLevel:
+                        checkOuts.append(entityId)
+            else:
+                checkOuts.append(entityId)
+            # direction
+            rot = comp.CreateRot(entityId).GetRot()
+            if self.minHorizontalRotation is not None or self.maxHorizontalRotation is not None:
+                minH = self.minHorizontalRotation if self.minHorizontalRotation is not None else 0
+                maxH = self.maxHorizontalRotation if self.maxHorizontalRotation is not None else 360
+                if minH <= rot[0] <= maxH:
+                    checkOuts.append(entityId)
+            else:
+                checkOuts.append(entityId)
+            if self.minVerticalRotation is not None or self.maxVerticalRotation is not None:
+                minV = self.minVerticalRotation if self.minVerticalRotation is not None else 0
+                maxV = self.maxVerticalRotation if self.maxVerticalRotation is not None else 360
+                if minV <= rot[1] <= maxV:
+                    checkOuts.append(entityId)
+            else:
+                checkOuts.append(entityId)
+            # property
+            # score
+            if self.scoreOptions:
+                for scoreOption in self.scoreOptions:
+                    scoreboard = systems.world.scoreboard.getObjective(scoreOption.objective)
+                    if not scoreboard:
+                        continue
+                    score = scoreboard.getScore(systems.world.getEntity(entityId))
+                    if not scoreOption.exclude:
+                        if scoreOption.minScore <= score <= scoreOption.maxScore:
+                            checkOuts.append(entityId)
+                    else:
+                        if not (scoreOption.minScore <= score <= scoreOption.maxScore):
+                            checkOuts.append(entityId)
 
     def check(self, entityIds):
+        entityIds = self.checkProperties(entityIds)
         entityIds = self.checkVolume(entityIds)
         entityIds = self.checkLocation(entityIds)
         entityIds = self.checkDistance(entityIds)
@@ -226,7 +323,6 @@ class EntityApplyDamageOptions(object):
     Additional descriptions and metadata for a damage event.
     """
     def __init__(self, data):
-        # type: (Dict[str, Union[str, Entity]]) -> None
         self.cause = data['cause'] if 'cause' in data else 'none'
         """Underlying cause of the damage."""
         self.cause = getattr(EntityDamageCause, self.cause)

@@ -20,6 +20,8 @@ def Destroy():
 class ModSAPI(object):
     @Mod.InitServer()
     def ModSAPIServerInit(self):
+        serverApi.RegisterSystem("ModSAPI", "core",
+                                 "ModSAPI.utils.core.CoreSystem")
         serverApi.RegisterSystem("ModSAPI", "world",
                                  "ModSAPI.modules.server.World.World")
         serverApi.RegisterSystem("ModSAPI", "system",

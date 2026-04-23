@@ -2,7 +2,9 @@
 from ...modules.server.Entity import *
 from ...modules.server.Player import *
 from ...interfaces.Sources import *
-
+from ...enums.Events import ScriptEventSource
+from ...modules.server.Block import Block
+from ...modules.server.Dimension import Dimension
 
 class ExplosionAfterEvent(object):
     """
@@ -48,13 +50,58 @@ class ScriptEventCommandMessageAfterEvent(object):
     """
 
     def __init__(self, data):
-        self.__id = None
+        self.__id = data['args'][0]['value'] # type: str
+        self.__message = data['args'][1]['value'] # type: str
+        self.__sourceData = data['origin'] # type: dict
+        self.__source = None
+        self.__sourceType = ScriptEventSource.Server
+        if self.__sourceData.get('entityId', None):
+            self.__source = createEntity(self.__sourceData['entityId'])
+            self.__sourceType = ScriptEventSource.Entity
+            if self.__source.typeId == 'minecraft:npc':
+                self.__sourceType = ScriptEventSource.NPCDialogue
+        else:
+            self.__source = Block({"dimension": Dimension(self.__sourceData['dimension']), "location": Vector3(self.__sourceData['blockPos'])})
+            self.__sourceType = ScriptEventSource.Block
 
     def __str__(self):
         data = {
-            "id": self.__id
+            "id": self.__id,
+            "message": self.__message
         }
         return "<ScriptEventCommandMessageAfterEvent> %s" % data
+    
+    @property
+    def id(self):
+        # type: () -> str
+        """Identifier of this ScriptEvent command message."""
+        return self.__id
+    
+    @property
+    def message(self):
+        # type: () -> str
+        """Optional additional data passed in with the script event command."""
+        return self.__message
+    
+    @property
+    def initiator(self):
+        """If this command was initiated via an NPC, returns the entity that initiated the NPC dialogue."""
+        return self.__source if self.__sourceType == ScriptEventSource.NPCDialogue else None
+    
+    @property
+    def sourceEntity(self):
+        """Source entity if this command was triggered by an entity (e.g., a NPC)."""
+        return self.__source if self.__sourceType == ScriptEventSource.Entity else None
+    
+    @property
+    def sourceBlock(self):
+        """Source block if this command was triggered via a block (e.g., a commandblock.)"""
+        return self.__source if self.__sourceType == ScriptEventSource.Block else None
+    
+    @property
+    def sourceType(self):
+        """Returns the type of source that fired this command."""
+        return self.__sourceType
     
 
 class ExplosionBeforeEvent(object):

@@ -8,6 +8,7 @@ from ...enums.Structure import *
 from copy import deepcopy
 from ...utils.block import BlockPaletteData
 from ...utils.system import systems
+from ...errors.structure import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -23,12 +24,13 @@ class Structure:
         self.__size = data['size'] # type: Vector3
         self.__data = data['data'] if 'data' in data else None # type: dict
         self.__saveMode = data['saveMode'] if 'saveMode' in data else StructureSaveMode.Memory
+        self.__includeAir = data['includeAir'] if 'includeAir' in data else True
         self.__entities = data['entities'] if 'entities' in data else {} # type: dict[tuple[float, float, float], list[dict]]
         """Key is the location and the value is a list includes nbt."""
         self._isValid = True
         self.__bp = BlockPaletteData(self.__data, False)
         if self.__saveMode == StructureSaveMode.World and self.__data:
-            systems.world.setDynamicProperty("structure.%s" % self.__id, {"size": self.__size, "saveMode": self.__saveMode, "data": self.__data, "entities": self.__entities})
+            systems.world.setDynamicProperty("structure.%s" % self.__id, {"includeAir": self.__includeAir, "size": self.__size, "data": self.__data, "entities": self.__entities})
 
     def __str__(self):
         return "<Structure> {id: '%s', size: '%s'}" % (self.__id, self.__size)
@@ -60,7 +62,7 @@ class Structure:
         return self.__size
     
     @property
-    def enableEdit(self):
+    def isEditable(self):
         # type: () -> bool
         """Returns whether the Structure can be edited."""
         return self.__data is not None
@@ -68,6 +70,8 @@ class Structure:
     def getBlockPermutation(self, location):
         # type: (Vector3) -> BlockPermutation
         """Returns a BlockPermutation representing the block contained within the Structure at the given location."""
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         blockData = self.__bp.getBlock(location.getIntTuple())
         if blockData:
             states = SComp.CreateBlockState(serverApi.GetLevelId()).GetBlockStatesFromAuxValue(blockData[0], blockData[1])
@@ -77,15 +81,22 @@ class Structure:
     def getIsWaterLogged(self, location):
         # type: (Vector3) -> bool
         """Returns whether the block at the given location is waterlogged."""
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         block = self.__bp.getExtraBlock(location.getIntTuple())
         return block and block[0] == "minecraft:water"
 
     def saveAs(self, identifier, saveMode):
         # type: (str, StructureSaveMode) -> None
         """Creates a copy of a Structure and saves it with a new name."""
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
+        systems.world.structureManager._setStructure(identifier, self, saveMode)
 
     def saveToWorld(self):
         """Saves a modified Structure to the world file."""
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         self.__saveMode = StructureSaveMode.World
         if self.__data:
             systems.world.setDynamicProperty("structure.%s" % self.__id, {"size": self.__size, "saveMode": self.__saveMode, "data": self.__data, "entities": self.__entities})
@@ -93,13 +104,19 @@ class Structure:
     def setBlockPermutation(self, location, blockPermutation=None, waterlogged=False):
         # type: (Vector3, BlockPermutation, bool) -> None
         """Sets the block contained within the Structure at the given location to the given BlockPermutation."""
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         if not blockPermutation:
             blockPermutation = BlockPermutation(None, "minecraft:air")
         aux = SComp.CreateBlockState(serverApi.GetLevelId()).GetBlockAuxValueFromStates(blockPermutation.type.id, blockPermutation.getAllStates())
         self.__bp.setBlock(location.getIntTuple(), (blockPermutation.type.id, aux))
+        if self.__saveMode == StructureSaveMode.World and self.__data:
+            systems.world.setDynamicProperty("structure.%s" % self.__id, {"includeAir": self.__includeAir, "size": self.__size, "data": self.__data, "entities": self.__entities})
 
     def getBlockPalette(self, options):
         # type: (StructurePlaceOptions) -> any
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         if self.__data:
             # Generate data.
             data = deepcopy(self.__data)
@@ -117,6 +134,10 @@ class Structure:
             bpd.damage(seed, integrity)
             if not options['waterlogged']:
                 bpd.clearExtraWater()
+            if self.__includeAir:
+                bpd.setSize(self.__size.getIntTuple())
+                bpd.fillVoid()
+                bpd.clearStructureVoid()
             data = bpd.getData()
             bp = SComp.CreateBlock(serverApi.GetLevelId()).GetBlankBlockPalette()
             bp.DeserializeBlockPalette(data)
@@ -126,6 +147,8 @@ class Structure:
 
     def getEntities(self, options):
         # type: (StructurePlaceOptions) -> dict[tuple[float, float, float], list[dict]]
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         rot = options['rotation']
         if rot == StructureRotation.none:
             rot = "Rotate0"
@@ -138,14 +161,38 @@ class Structure:
                 newPos.x = self.size.x - newPos.x - 1
             if "X" in mirror:
                 newPos.z = self.size.z - newPos.z - 1
+            if rot == 90:
+                newPos.x = newPos.z
+                newPos.z = self.size.x - newPos.z - 1
+            elif rot == 180:
+                newPos.x = self.size.x - newPos.x - 1
+                newPos.z = self.size.z - newPos.z - 1
+            elif rot == 270:
+                newPos.x = self.size.z - newPos.z - 1
+                newPos.z = newPos.x
+
             data[newPos.getTuple()] = self.__entities[pos]
         return data
 
     def setEntity(self, location, entity):
         # type: (Vector3, any) -> None
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
         pos = location.getTuple()
         if pos not in self.__entities:
             self.__entities[pos] = []
         self.__entities[pos].append(entity.getNbt())
         if self.__saveMode == StructureSaveMode.World:
-            systems.world.setDynamicProperty("structure.%s" % self.__id, {"size": self.__size, "saveMode": self.__saveMode, "data": self.__data, "entities": self.__entities})
+            systems.world.setDynamicProperty("structure.%s" % self.__id, {"includeAir": self.__includeAir, "size": self.__size, "data": self.__data, "entities": self.__entities})
+            
+    def _getData(self):
+        if not self.isEditable:
+            raise StructureUneditableError("Structure '%s' cannot be edited." % self.__id)
+        return {
+            "id": self.__id,
+            "size": self.__size,
+            "includeAir": self.__includeAir,
+            "data": self.__data,
+            "entities": self.__entities,
+            "saveMode": self.__saveMode
+        }

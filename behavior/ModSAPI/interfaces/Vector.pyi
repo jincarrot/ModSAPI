@@ -7,20 +7,12 @@ from ..modules.server.Dimension import Dimension
 comp = serverApi.GetEngineCompFactory()
 
 
-class Vector3(TypedDict):
+class Vector3:
 
     x: float
     y: float
     z: float
 
-    def __str__(self):
-        data = {
-            "x": self.x,
-            "y": self.y,
-            "z": self.z
-        }
-        return "<Vector3> %s" % data
-    
     def __eq__(self, data):
         # type: (Vector3) -> bool
         pass
@@ -45,7 +37,6 @@ class Vector3(TypedDict):
     
     def getIntTuple(self) -> tuple[int, int, int]:
         """"""
-
 
 class Vector2(TypedDict):
     """

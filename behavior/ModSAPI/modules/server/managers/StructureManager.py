@@ -21,6 +21,12 @@ class StructureManager:
     def __init__(self):
         self.__structures = {} # type: dict[str, Structure]
 
+    def _setStructure(self, identifier, structure, saveMode):
+        # type: (str, Structure, StructureSaveMode) -> None
+        data = structure._getData()
+        data['saveMode'] = saveMode
+        self.__structures[identifier] = Structure(data)
+
     def createEmpty(self, identifier, size, saveMode=StructureSaveMode.Memory):
         # type: (str, Vector3, str) -> Structure
         """Creates an empty Structure in memory. 
@@ -36,13 +42,14 @@ class StructureManager:
         This is functionally equivalent to the /structure save command."""
         options["includeBlocks"] = options["includeBlocks"] if "includeBlocks" in options else True
         options["includeEntities"] = options["includeEntities"] if "includeEntities" in options else True
+        options["includeAir"] = options["includeAir"] if "includeAir" in options else True
         options["saveMode"] = options["saveMode"] if "saveMode" in options else StructureSaveMode.Memory
         size = to - From
         size.x = abs(size.x) + 1
         size.y = abs(size.y) + 1
         size.z = abs(size.z) + 1
         bp = SComp.CreateBlock(serverApi.GetLevelId()).GetBlockPaletteBetweenPos(dimension.dimId, From.getIntTuple(), to.getIntTuple())
-        structure = Structure({'id': identifier, 'size': size, 'saveMode': options["saveMode"], 'data': bp.SerializeBlockPalette()})
+        structure = Structure({'id': identifier, 'size': size, 'saveMode': options["saveMode"], 'data': bp.SerializeBlockPalette(), 'includeAir': options["includeAir"]})
         self.__structures[identifier] = structure
         entities = dimension.getEntities({"location": {"x": min(From.x, to.x), "y": min(From.y, to.y), "z": min(From.z, to.z)}, "volume": size})
         for entity in entities:
@@ -73,9 +80,9 @@ class StructureManager:
                 {
                     "id": identifier, 
                     "size": structureData['size'], 
+                    "includeAir": structureData['includeAir'],
                     "data": structureData['data'], 
                     "entities": structureData['entities'],
-                    "saveMode": structureData['saveMode']
                 }
             )
             self.__structures[identifier] = structure

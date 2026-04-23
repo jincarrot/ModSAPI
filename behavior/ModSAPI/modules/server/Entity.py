@@ -15,7 +15,6 @@ from Command import *
 
 SComp = serverApi.GetEngineCompFactory()
 
-
 class Entity(object):
     """
     Represents the state of an entity (a mob, the player, or other moving objects like mine carts) in the world.

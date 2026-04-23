@@ -5,7 +5,6 @@ class Component(object):
     """
     Base class for downstream Component implementations.
     """
-    __componentId = ""
 
     def __init__(self, __data):
         # type: (str, dict) -> None
@@ -21,21 +20,12 @@ class Component(object):
         Identifier of the dimension.
         """
         return self.__componentId
-
-
-class EntityComponentGenerater(object):
-    """
-    实体组件加载器
-    """
-    import EntityComponents as ec
-
-    def __init__(self, entity, componentId):
-        self.__entity = entity
-        self.__componentId = componentId
-
-    def get(self):
-        # type: () -> ec.EntityComponent
-        if self.__componentId == 'health':
-            return self.ec.EntityHealthComponent({"entity": self.__entity})
-        elif self.__componentId == 'inventory':
-            return self.ec.EntityInventoryComponent({"entity": self.__entity})
+    
+    @property
+    def isValid(self):
+        # type: () -> bool
+        """
+        Returns whether the component is valid. 
+        A component is considered valid if its owner is valid, in addition to any additional validation required by the component.
+        """
+        return True

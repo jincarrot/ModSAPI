@@ -31,8 +31,7 @@ class EntityComponent(Component):
         """
         return self.__entity
 
-    def asHealthComponent(self): 
-        # type: () -> EntityHealthComponent
+    def asType(self, __componentType): 
         return self
 
 
@@ -82,7 +81,6 @@ class EntityAttributeComponent(EntityComponent):
 
     def __init__(self, data):
         EntityComponent.__init__(self, data)
-        self.__entity = data['entity'] # type: EntityAttributeComponent.en.Entity
         self.__comp = SComp.CreateAttr(self.__entity.id)
         nbt = SComp.CreateEntityDefinitions(self.entity.id).GetEntityNBTTags()['Attributes']
         for tag in nbt:
@@ -171,13 +169,8 @@ class EntityHealthComponent(EntityAttributeComponent):
     __componentId = "minecraft:health"
 
     def __init__(self, data):
-        self._entity = data['entity']
         data['componentId'] = "minecraft:health"
         EntityAttributeComponent.__init__(self, data)
-
-    @property
-    def entity(self):
-        return self._entity
 
 class EntityMovementComponent(EntityAttributeComponent):
     """

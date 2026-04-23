@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from ...architect.scheduler import Scheduler
 import mod.server.extraServerApi as serverApi
+from SystemEvents import SystemAfterEvents
 
 ServerSystem = serverApi.GetServerSystemCls()
 
@@ -14,10 +15,16 @@ class System(ServerSystem):
     def __init__(self, namespace, systemName):
         ServerSystem.__init__(self, namespace, systemName)
         # self._initScheduler()
+        self.__afterEvents = SystemAfterEvents()
         self.__timers = {}
         self.__timerId = 0
         self.__comp = serverApi.GetEngineCompFactory().CreateGame(serverApi.GetLevelId())
 
+    @property
+    def afterEvents(self):
+        """Returns a collection of after-events for system-level operations."""
+        return self.__afterEvents
+    
     def _OnScriptTickServer(self):
         self._scriptScheduler.executeSequenceAsync()
 

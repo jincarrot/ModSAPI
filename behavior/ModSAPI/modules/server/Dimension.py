@@ -6,6 +6,7 @@ from ...interfaces.Vector import *
 from ...interfaces.EntityOptions import *
 from ...utils.system import systems
 from ...interfaces.WorldOptions import *
+from ...utils.block import BlockPaletteData
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -132,7 +133,8 @@ class Dimension(object):
                     break
                 selector += commandString[index]
                 index += 1
-            return self.__c.CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
+            entityId = serverApi.GetPlayerList()[0]
+            return self.__c.CommandResult({"successCount": len(SComp.CreateEntityComponent(entityId).GetEntitiesBySelector(selector))})
         return None
 
     def spawnEntity(self, identifier, location, options=SpawnEntityOptions):
@@ -176,13 +178,13 @@ class Dimension(object):
             print("[Error][ModSAPI][TypeError] volume should be BlockVolumeBase type")
             return
         comp = SComp.CreateBlock(serverApi.GetLevelId())
-        data = comp.GetBlockPaletteBetweenPos(self.dimId, volume.fromLocation.getTuple(), volume.toLocation.getTuple(), False).SerializeBlockPalette()
-        temp = self.__b.BlockPaletteData(data)
+        data = comp.GetBlockPaletteBetweenPos(self.dimId, volume.fromLocation.getIntTuple(), volume.toLocation.getIntTuple(), False).SerializeBlockPalette()
+        temp = BlockPaletteData(data)
         temp.fillAllBlocks((block.type.id, block.type.aux))
         data = temp.getData()
         p = comp.GetBlankBlockPalette()
         p.DeserializeBlockPalette(data)
-        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation.getTuple(), 0)
+        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation.getIntTuple(), 0)
 
     def setBlockType(self, location, blockType):
         # type: (Vector3, str) -> None

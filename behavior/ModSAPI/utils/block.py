@@ -48,6 +48,10 @@ class BlockPaletteData(object):
         self.__extra = self.__data['extra'] # type: dict[tuple[str, int], list[int]]
         self.__exludeAirData = ("minecraft:air", 0) not in self.__blocks
 
+    @property
+    def size(self):
+        return (self.__volume[1], self.__volume[2], self.__volume[0])
+    
     def getExtraBlock(self, location): 
         # type: (tuple[int, int, int]) -> tuple[str, int] | None
         """Returns extra block data in this location. Extra blocks are blocks that are not necessary for the structure to be valid, but may be used for additional details. For example, when a structure is created from the world, water and lava blocks will be categorized as extra blocks."""
@@ -391,12 +395,57 @@ class BlockPaletteData(object):
             if locId not in blocks:
                 air.append(locId)
         self.__blocks[("minecraft:air", 0)] = air
+        self.__data['eliminateAir'] = False
     
     def clearStructureVoid(self):
         """Clear structure void blocks."""
         if ("minecraft:structure_void", 0) in self.__blocks:
             del self.__blocks[("minecraft:structure_void", 0)]
 
-    def setSize(self):
-        """"""
+    def setSize(self, size):
+        """Set size of this palette."""
+        if size[0] < self.__volume[1] or size[1] < self.__volume[2] or size[2] < self.__volume[0]:
+            raise ValueError("New size should be larger than current size!")
+        temp = {
+            'extra': {}, 
+            'void': self.__data['void'], 
+            'actor': {}, 
+            'volume': (size[2], size[0], size[1]),
+            'common': {}, 
+            'eliminateAir': self.__data['eliminateAir']
+        }
+        result = {
+            'extra': {}, 
+            'void': self.__data['void'], 
+            'actor': {}, 
+            'volume': (size[2], size[0], size[1]),
+            'common': {}, 
+            'eliminateAir': self.__data['eliminateAir']
+        }
+        # Transform data.
+        for key in ["extra", "common"]:
+            for blockData in self.__data[key]:
+                temp[key][blockData] = []
+                for locId in self.__data[key][blockData]:
+                    location = self.getLocation(locId)
+                    temp[key][blockData].append(location)
+        for blockData in self.__data['actor']:
+            temp['actor'][blockData] = {}
+            for locId in self.__data['actor'][blockData]:
+                location = self.getLocation(locId)
+                temp['actor'][blockData][location] = self.__data['actor'][blockData][locId]
+        # Change size and transform back data.
+        self.__data['volume'] = (size[2], size[0], size[1])
+        for key in ["extra", "common"]:
+            for blockData in temp[key]:
+                result[key][blockData] = []
+                for location in temp[key][blockData]:
+                    locId = self.getLocationId(location)
+                    result[key][blockData].append(locId)
+        for blockData in temp['actor']:
+            result['actor'][blockData] = {}
+            for location in temp['actor'][blockData]:
+                locId = self.getLocationId(location)
+                result['actor'][blockData][locId] = temp['actor'][blockData][location]
+        self.__data = result
         

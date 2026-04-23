@@ -16,5 +16,9 @@ class SystemAfterEvents(object):
     """
 
     def __init__(self):
-        self.__scriptEventReceive = None
+        self.__scriptEventReceive = ScriptEventCommandMessageAfterEventSignal()
 
+    @property
+    def scriptEventReceive(self):
+        """Fires when a script event is received. This includes events sent by both the client and the server."""
+        return self.__scriptEventReceive

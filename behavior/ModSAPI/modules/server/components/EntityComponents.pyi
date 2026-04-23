@@ -4,6 +4,9 @@ from Components import *
 import mod.server.extraServerApi as serverApi
 from mod.common.minecraftEnum import EntityComponentType
 from ..Entity import Entity
+from typing import TypeVar
+
+T = TypeVar("T")
 
 class EntityComponent(Component):
     """
@@ -11,16 +14,13 @@ class EntityComponent(Component):
     """
     
     @property
-    def entity(self):
+    def entity(self) -> Entity:
         """
         The entity that owns this component. 
         The entity will be undefined if it has been removed.
         """
-        pass
 
-    def asHealthComponent(self): 
-        # type: () -> EntityHealthComponent
-        pass
+    def asType(self, componentType: T) -> T: ...
 
 
 class EntityAddRiderComponent(EntityComponent):
@@ -111,10 +111,6 @@ class EntityHealthComponent(EntityAttributeComponent):
     """
     Defines the health properties of an entity.
     """
-
-    @property
-    def entity(self) -> Entity:
-        pass
 
 class EntityMovementComponent(EntityAttributeComponent):
     """

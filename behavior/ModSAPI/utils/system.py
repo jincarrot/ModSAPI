@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from http import server
-
 import mod.server.extraServerApi as serverApi
 
 class Systems:

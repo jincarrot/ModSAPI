@@ -3,6 +3,7 @@
 from ..EventBases import *
 import mod.server.extraServerApi as serverApi
 from ..core.WorldEvents import *
+from ...interfaces.EventOptions import ScriptEventMessageFilterOptions
 
 class ExplosionAfterEventSignal(Events):
     """
@@ -28,18 +29,34 @@ class ScriptEventCommandMessageAfterEventSignal(Events):
 
     def __init__(self):
         Events.__init__(self)
-        self.__eventName = "GlobalCommandServerEvent"
+        self.__eventName = "CustomCommandTriggerServerEvent"
 
     def _check(self, obj, data, valueName):
-        pass
+        # type: (EventListener, dict, str) -> bool
+        namespaces = obj.options.get("namespaces", [])
+        command = data['command']
+        if command == 'scriptevent':
+            messageId = data['args'][0]['value'] # type: str
+            if len(messageId.split(":")) != 2 or messageId.split(":")[0] == "minecraft":
+                data['return_failed'] = True
+                data['return_msg_key'] = "标识符的命名空间必须有一个不是'minecraft:'"
+                return False
+            if not namespaces:
+                return True
+            else:
+                if messageId.split(":")[0] in namespaces:
+                    return True
+            return False
+        else:
+            return False
 
-    def subscribe(self, callback, options=None):
-        # type: (types.FunctionType, dict) -> None
+    def subscribe(self, callback, options={}):
+        # type: (types.FunctionType, ScriptEventMessageFilterOptions) -> None
         """
         Registers a new ScriptEvent handler.
         """
         
-        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, None, ExplosionAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, None, ScriptEventCommandMessageAfterEvent)
 
 
 class ExplosionBeforeEventSignal(Events):

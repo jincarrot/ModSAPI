@@ -2,6 +2,7 @@
 import typing
 from ...architect.scheduler import Scheduler
 import mod.server.extraServerApi as serverApi
+from SystemEvents import SystemAfterEvents
 
 ServerSystem = serverApi.GetServerSystemCls()
 
@@ -9,6 +10,10 @@ class System(ServerSystem):
     """
     A class that provides system-level events and functions.
     """
+
+    @property
+    def afterEvents(self) -> SystemAfterEvents:
+        """Returns a collection of after-events for system-level operations."""
 
     def run(self, callback: typing.Callable[[], None]) -> int:
         """

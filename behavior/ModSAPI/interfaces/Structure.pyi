@@ -6,6 +6,7 @@ from ..enums.Structure import *
 class StructureCreateOptions(TypedDict):
     includeBlocks: bool
     includeEntities: bool
+    includeAir: bool
     saveMode: StructureSaveMode
 
 class StructurePlaceOptions(TypedDict):
