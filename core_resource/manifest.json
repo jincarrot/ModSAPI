@@ -1,0 +1,35 @@
+{
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "e209f56d-7cd0-4f3a-aa45-d48907e64a7a",
+      "version": [
+        0,
+        1,
+        22
+      ],
+      "description": "ModSAPI"
+    }
+  ],
+  "header": {
+    "uuid": "edfd2b10-3c45-4dc2-bcba-7a784583d2c4",
+    "version": [
+      0,
+      1,
+      23
+    ],
+    "description": "ModSAPI",
+    "name": "ModSAPI",
+    "min_engine_version": [
+      1,
+      19,
+      50
+    ]
+  },
+  "format_version": 2,
+  "metadata": {
+    "authors": [
+      "jincarrot"
+    ]
+  }
+}

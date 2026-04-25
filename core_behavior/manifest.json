@@ -1,0 +1,32 @@
+{
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "c374703c-8972-4353-9afe-bee18e4b5c9b",
+      "version": [
+        0,
+        1,
+        22
+      ],
+      "description": "ModSAPI"
+    }
+  ],
+  "header": {
+    "uuid": "54744e6b-7d7a-4729-a09d-c00fb389cacf",
+    "version": [
+      0,
+      1,
+      23
+    ],
+    "description": "ModSAPI",
+    "name": "ModSAPI",
+    "min_engine_version": [
+      1,
+      19,
+      50
+    ]
+  },
+  "format_version": 2,
+  "dependencies": [
+  ]
+}

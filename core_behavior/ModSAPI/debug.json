@@ -1,0 +1,136 @@
+{
+    "minecraft:exhaustion_values": {
+        "swim": 0.01,
+        "sprint_jump": 0.2,
+        "heal": 6,
+        "damage": 0.1,
+        "mine": 0.005,
+        "jump": 0.05,
+        "attack": 0.1,
+        "sprint": 0.1,
+        "walk": 0.0
+    },
+    "minecraft:conditional_bandwidth_optimization": {},
+    "minecraft:can_climb": {},
+    "minecraft:is_hidden_when_invisible": {},
+    "minecraft:loot": {
+        "table": "loot_tables/empty.json"
+    },
+    "minecraft:player.experience": {
+        "max": 1,
+        "value": 0
+    },
+    "minecraft:block_climber": {},
+    "minecraft:type_family": {
+        "family": [
+            "player"
+        ]
+    },
+    "minecraft:player.exhaustion": {
+        "max": 20,
+        "value": 0
+    },
+    "minecraft:player.saturation": {
+        "max": 20,
+        "value": 5
+    },
+    "minecraft:player.level": {
+        "max": 24791,
+        "value": 0
+    },
+    "minecraft:experience_reward": {
+        "on_death": "Math.Min(query.player_level * 7,100)"
+    },
+    "minecraft:hurt_on_condition": {
+        "damage_conditions": [
+            {
+                "damage_per_tick": 4,
+                "cause": "lava",
+                "filters": {
+                    "operator": "==",
+                    "test": "in_lava",
+                    "value": true,
+                    "subject": "self"
+                }
+            }
+        ]
+    },
+    "minecraft:environment_sensor": {
+        "triggers": {
+            "event": "minecraft:gain_raid_omen",
+            "filters": {
+                "all_of": [
+                    {
+                        "test": "has_mob_effect",
+                        "value": "bad_omen",
+                        "subject": "self"
+                    },
+                    {
+                        "test": "is_in_village",
+                        "value": true,
+                        "subject": "self"
+                    }
+                ]
+            }
+        }
+    },
+    "minecraft:breathable": {
+        "inhale_time": 3.75,
+        "generates_bubbles": false,
+        "suffocate_time": -1,
+        "total_supply": 15
+    },
+    "minecraft:rideable": {
+        "pull_in_entities": true,
+        "family_types": [
+            "parrot_tame"
+        ],
+        "seats": [
+            {
+                "position": [
+                    0.4,
+                    -0.2,
+                    -0.1
+                ],
+                "max_rider_count": 0,
+                "min_rider_count": 0,
+                "lock_rider_rotation": 0
+            },
+            {
+                "position": [
+                    -0.4,
+                    -0.2,
+                    -0.1
+                ],
+                "max_rider_count": 2,
+                "min_rider_count": 1,
+                "lock_rider_rotation": 0
+            }
+        ],
+        "seat_count": 2
+    },
+    "minecraft:movement": {
+        "value": 0.1
+    },
+    "minecraft:attack": {
+        "damage": 1
+    },
+    "minecraft:insomnia": {
+        "days_until_insomnia": 3
+    },
+    "minecraft:pushable": {
+        "is_pushable_by_piston": true,
+        "is_pushable": false
+    },
+    "minecraft:physics": {
+        "push_towards_closest_space": true
+    },
+    "minecraft:collision_box": {
+        "width": 0.6,
+        "height": 1.8
+    },
+    "minecraft:nameable": {
+        "always_show": true,
+        "allow_name_tag_renaming": false
+    }
+}
