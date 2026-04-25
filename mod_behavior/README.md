@@ -1,6 +1,6 @@
 # ModSAPI
 
-<img src="./core_behavior/pack_icon.png" width="300"/>
+<img src="pack_icon.png" width="300"/>
 
 A library for Minecraft Netease Edition to create mod with SAPI style!
 
