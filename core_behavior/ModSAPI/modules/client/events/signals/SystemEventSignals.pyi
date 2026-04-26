@@ -4,7 +4,7 @@ from ..EventBases import *
 import mod.server.extraServerApi as serverApi
 from ..core.SystemEvents import *
 
-class ServerSendToClientAfterEventSignal(Events):
+class ServerEventReceiveAfterEventSignal(Events):
     """
     Triggers when use ModSAPI.server.system.sendToClient.
     """
@@ -14,7 +14,7 @@ class ServerSendToClientAfterEventSignal(Events):
         pass
 
     def subscribe(self, eventName, callback, options={}):
-        # type: (str, Callable[[ServerSendToClientAfterEvent], None], dict) -> None
+        # type: (str, Callable[[ServerEventReceiveAfterEvent], None], dict) -> None
         """
         Registers a new ScriptEvent handler.
         """

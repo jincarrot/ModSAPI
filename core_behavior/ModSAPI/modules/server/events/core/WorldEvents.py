@@ -103,6 +103,30 @@ class ScriptEventCommandMessageAfterEvent(object):
         """Returns the type of source that fired this command."""
         return self.__sourceType
     
+class ClientEventReceiveAfterEvent:
+    """
+    Returns additional data about a /scriptevent command invocation.
+    """
+
+    def __init__(self, data):
+        self.__id = data['eventName']
+        self.__data = data['data']
+
+    def __str__(self):
+        data = {
+            "id": self.__id
+        }
+        return "<ClientSendToServerAfterEvent> %s" % data
+    
+    @property
+    def id(self):
+        # type: () -> str
+        """Identifier of this ScriptEvent command message."""
+        return self.__id
+    
+    @property
+    def data(self):
+        return self.__data
 
 class ExplosionBeforeEvent(object):
     """

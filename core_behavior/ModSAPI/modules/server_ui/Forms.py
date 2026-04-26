@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import math
 import random
+from ...utils.client import systems
 
+client = systems.client
 import mod.client.extraClientApi as clientApi
 
 ScreenNode = clientApi.GetScreenNodeCls()
@@ -266,14 +268,14 @@ class CustomFormUI(ScreenNode):
         for (textField, obId, value) in self.textFields:
             text = textField.GetEditText()
             if text != value:
-                clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer(
+                client.sendToServer(
                     "updateObservable%s" % obId, 
                     {"value": text}
                 )
         for (toggle, obId, value) in self.toggles:
             toggled = toggle.GetToggleState()
             if toggled != value:
-                clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer(
+                client.sendToServer(
                     "updateObservable%s" % obId, 
                     {"value": toggled}
                 )
@@ -281,7 +283,7 @@ class CustomFormUI(ScreenNode):
             steps = maxValue - minValue
             cur = int(round(slider.GetSliderValue() * steps) + minValue)
             if cur != value:
-                clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer(
+                client.sendToServer(
                     "updateObservable%s" % obId, 
                     {"value": cur}
                 )
@@ -301,7 +303,7 @@ class CustomFormUI(ScreenNode):
         content.SetVisible(False)
         self.content.SetFullSize("y", {"absoluteValue": self.height})
         if self.dropdowns[obId] != value:
-            clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer(
+            client.sendToServer(
                 "updateObservable%s" % obId, 
                 {"value": value}
             )
@@ -555,7 +557,7 @@ class CustomFormUI(ScreenNode):
             index += 1
 
     def onButtonClick(self, data):
-        clientApi.GetSystem("SAPI", "SAPI_C").NotifyToServer(
+        client.sendToServer(
             "updateForm%s" % self.formId, 
             {
                 "selection": int(data['ButtonPath'][-1]),

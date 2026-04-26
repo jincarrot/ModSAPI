@@ -5,9 +5,9 @@ class ClientAfterEvents:
     """Client events of ModSAPI."""
 
     def __init__(self, clientSystem):
-        self.__onServerSendToClient = ServerSendToClientAfterEventSignal()
+        self.__onServerSendToClient = ServerEventReceiveAfterEventSignal()
 
     @property
-    def serverSendToClient(self):
+    def serverEventReceive(self):
         """Event triggered when server sends data to client."""
         return self.__onServerSendToClient

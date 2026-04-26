@@ -58,6 +58,28 @@ class ScriptEventCommandMessageAfterEventSignal(Events):
         
         self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, None, ScriptEventCommandMessageAfterEvent)
 
+class ClientEventReceiveAfterEventSignal(Events):
+    """
+    Allows for registering an event handler that responds to inbound /scriptevent commands.
+    """
+
+    def __init__(self):
+        Events.__init__(self)
+        self.__eventName = "clientSendToServer"
+
+    def _check(self, obj, data, valueName):
+        # type: (EventListener, dict, str) -> bool
+        if data['eventName'] == valueName:
+            return True
+        return False
+
+    def subscribe(self, eventName, callback, options={}):
+        # type: (str, types.FunctionType, dict) -> None
+        """
+        Registers a new ScriptEvent handler.
+        """
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, eventName, ClientEventReceiveAfterEvent, "ModSAPI", "client")
+
 
 class ExplosionBeforeEventSignal(Events):
     """

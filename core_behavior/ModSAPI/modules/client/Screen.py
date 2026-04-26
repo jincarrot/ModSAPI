@@ -3,10 +3,7 @@ import mod.client.extraClientApi as clientApi
 from ..server_ui.UI import *
 
 class Screen(object):
-    "Contains a set of operations about screen"
-
-    def __init__(self, playerId=clientApi.GetLocalPlayerId()):
-        self.__id = playerId
+    "Contains a set of operations about screen."
 
     @property
     def isHud(self):

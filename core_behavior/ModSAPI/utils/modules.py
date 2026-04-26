@@ -10,3 +10,14 @@ class Modules(ServerSystem):
     def ItemStack(self):
         from ..modules.server.ItemStack import ItemStack as i
         return i
+    
+    @property
+    def CustomForm(self):
+        from ..modules.server_ui.FormData import CustomForm as c
+        return c
+    
+    @property
+    def Observable(self):
+        from ..modules.server_ui.FormData import Observable as o
+        return o
+    

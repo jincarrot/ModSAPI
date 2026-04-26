@@ -60,6 +60,20 @@ class ScriptEventCommandMessageAfterEvent(object):
     def sourceType(self) -> ScriptEventSource:
         """Returns the type of source that fired this command."""
 
+class ClientEventReceiveAfterEvent:
+    """
+    Returns additional data about a /scriptevent command invocation.
+    """
+
+    @property
+    def id(self):
+        # type: () -> str
+        """Identifier of this ScriptEvent command message."""
+    
+    @property
+    def data(self):
+        """data"""
+
 class ExplosionBeforeEvent(object):
     """
     Contains information regarding an explosion that has happened.

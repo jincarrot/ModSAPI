@@ -1,6 +1,6 @@
 # coding=utf-8
 
-class ServerSendToClientAfterEvent(object):
+class ServerEventReceiveAfterEvent:
     """
     Returns additional data about a /scriptevent command invocation.
     """

@@ -4,13 +4,14 @@ from copy import deepcopy
 import mod.server.extraServerApi as serverApi
 import random
 import types
+from ...utils.system import systems
 
 Observables = []
 CustomForms = {} # type: dict[int, dict[str, list]]
 
 class ActionFormData(object):
     """Builds a simple player form with buttons that let the player take action."""
-    import behavior.ModSAPI.modules.server_ui.FormResponse as fr
+    import FormResponse as fr
 
     def __init__(self):
         self.__title = ""
@@ -38,12 +39,12 @@ class ActionFormData(object):
     def show(self, player):
         """Creates and shows this modal popup form. Returns asynchronously when the player confirms or cancels the dialog."""
         id = random.randint(0, 32767)
-        serverApi.GetSystem("SAPI", "world").NotifyToClient(player.id, "showActionForm", {"formId": id, "title": self.__title, "body": self.__body, "button": self.__button})
+        systems.system.sendToClient(player.id, "showActionForm", {"formId": id, "title": self.__title, "body": self.__body, "button": self.__button})
         return self.fr.Promise(id)
 
 class ModalFormData(object):
     """Used to create a fully customizable pop-up form for a player."""
-    import behavior.ModSAPI.modules.server_ui.FormResponse as fr
+    import FormResponse as fr
 
     def __init__(self):
         self.__title = ""
@@ -94,7 +95,7 @@ class ModalFormData(object):
     def show(self, player):
         """Creates and shows this modal popup form. Returns asynchronously when the player confirms or cancels the dialog."""
         id = random.randint(0, 32767)
-        serverApi.GetSystem("SAPI", "world").NotifyToClient(player.id, "showModalForm", {"formId": id, "title": self.__title, "elements": self.__elements})
+        systems.system.sendToClient(player.id, "showModalForm", {"formId": id, "title": self.__title, "elements": self.__elements})
         return self.fr.Promise(id)
 
 def checkType(var, type, T=None):
@@ -126,7 +127,7 @@ class Observable:
             Observable.ID += 1
 
             if options['clientWritable']:
-                serverApi.GetSystem("SAPI", "world").ListenForEvent("SAPI", "SAPI_C", "updateObservable%s" % self._id, self, self._update)
+                systems.system.afterEvents.clientEventRecieve.subscribe("updateObservable%s" % self._id, self._update)
         else:
             raise TypeError("Create observable failed! Expected type int | float | str | bool, but got %s" % (type(self.__data).__name__, type(data).__name__))
 
@@ -135,6 +136,7 @@ class Observable:
         return type(self.__data)
     
     def _update(self, data):
+        data = data.data
         self.setData(data['value'], True)
 
     def getData(self):
@@ -184,7 +186,7 @@ class Observable:
 def updateForm(form, mode="update", options={}):
     # type: (CustomForm, str, dict) -> None
     if mode == 'sendMore':
-        serverApi.GetSystem("SAPI", "world").NotifyToClient(
+        systems.system.sendToClient(
             form.id, 
             "%sCustomForm" % mode, 
             {
@@ -239,7 +241,7 @@ def updateForm(form, mode="update", options={}):
 
         temp['visible'] = control['visible'].getData() if hasattr(control['visible'], "getData") else control['visible']
         data.append(temp)
-    serverApi.GetSystem("SAPI", "world").NotifyToClient(
+    systems.system.sendToClient(
             form._player.id, 
             "%sCustomForm" % mode, 
             {
@@ -263,7 +265,8 @@ class CustomForm(DynamicForm):
 
     def __init__(self, player, title, options):
         # Type checking.
-        if not isinstance(player, self.__e.Player):
+        from ..server.Player import Player
+        if not isinstance(player, Player):
             raise Exception("Create custom form failed! arg 0 excepted type Player")
         if not type(title.getData() if hasattr(title, "getData") else title) == str:
             raise Exception(
@@ -306,13 +309,14 @@ class CustomForm(DynamicForm):
             CustomForms[self._formId]['obs'].append(options['movable']._id)
         if hasattr(options['closable'], "getData"):
             CustomForms[self._formId]['obs'].append(options['closable']._id)
-        serverApi.GetSystem("SAPI", "world").ListenForEvent("SAPI", "SAPI_C", "updateForm%s" % self._formId, self, self._update)
+        systems.system.afterEvents.clientEventRecieve.subscribe("updateForm%s" % self._formId, self._update)
 
     @property
     def formId(self):
         return self._formId
     
     def _update(self, data):
+        data = data.data
         selection = data['selection']
         index = 0
         selected = None
@@ -364,7 +368,7 @@ class CustomForm(DynamicForm):
         return self
     
     def close(self):
-        serverApi.GetSystem("SAPI", "world").NotifyToClient(
+        systems.system.sendToClient(
             self._player.id, 
             "closeCustomForm", 
             {"formId": self._formId}

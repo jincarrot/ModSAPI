@@ -1,5 +1,4 @@
 from Entity import *
-from Screen import *
 from ..client.Camara import *
 from ..client.ClientSystemInfo import *
 from ...utils.system import *
@@ -18,7 +17,6 @@ class Player(Entity):
         Entity.__init__(self, playerId)
         self.__id = playerId
         self.__container = self.con.Container(None, self.__id)
-        self.__screen = Screen(self.__id)
 
     def __str__(self):
         data = {

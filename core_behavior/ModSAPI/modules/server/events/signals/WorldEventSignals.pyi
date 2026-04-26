@@ -27,6 +27,17 @@ class ScriptEventCommandMessageAfterEventSignal(Events):
         """
         ...
 
+class ClientEventReceiveAfterEventSignal(Events):
+    """
+    Allows for registering an event handler that responds to inbound /scriptevent commands.
+    """
+
+    def subscribe(self, eventName, callback, options={}):
+        # type: (str, types.FunctionType, dict) -> None
+        """
+        Registers a new ScriptEvent handler.
+        """
+
 class ExplosionBeforeEventSignal(Events):
     """
     Manages callbacks that are connected to when an explosion occurs, as it impacts individual blocks.

@@ -142,6 +142,3 @@ class World(ServerSystem):
     def getLootTableManager():
         return
     
-    def listen(self, eventName, callback, namesapce=serverApi.GetEngineNamespace(), systemName=serverApi.GetEngineSystemName()):
-        pass
-    

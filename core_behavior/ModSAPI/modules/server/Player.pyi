@@ -1,5 +1,5 @@
 from Entity import Entity
-from Screen import *
+from core_behavior.ModSAPI.modules.client.Screen import *
 from ..client.Camara import *
 from ..client.ClientSystemInfo import *
 from ...utils.system import *

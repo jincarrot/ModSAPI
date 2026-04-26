@@ -1,10 +1,14 @@
 import mod.client.extraClientApi as clientApi
 from ClientEvents import *
+from Player import *
 
 ClientSystem = clientApi.GetClientSystemCls()
 
 class Client(ClientSystem):
     """Client system of ModSAPI"""
+
+    @property
+    def localPlayer(self) -> ClientPlayer: ...
 
     @property
     def afterEvents(self) -> ClientAfterEvents:

@@ -10,7 +10,7 @@ class Client(ClientSystem):
 
     def __init__(self, namespace, systemName):
         ClientSystem.__init__(self, namespace, systemName)
-        self.__localPlayer = Player()
+        self.__localPlayer = ClientPlayer()
         self.__afterEvents = ClientAfterEvents(self)
 
     @property
@@ -24,4 +24,8 @@ class Client(ClientSystem):
         Event callbacks are called in a deferred manner.
         Event callbacks are executed in read-write mode."""
         return self.__afterEvents
+
+    def sendToServer(self, eventName, data):
+        """Sends data to server. Server can listen to this data by subscribing to the event with the same name."""
+        self.NotifyToServer("clientSendToServer", {"eventName": eventName, "data": data})
 
