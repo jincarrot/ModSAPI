@@ -37,8 +37,8 @@ class ModSAPI(object):
 
     @Mod.InitClient()
     def ModSAPIClientInit(self):
-        """ clientApi.RegisterSystem("SAPI", "manager", "Scripts_SAPI.SAPI_C.Manager")
-        SubsystemManager.createClientSystem('SAPI', 'SAPI_C', 'Scripts_SAPI.SAPI_C.SAPI_C')"""
+        clientApi.RegisterSystem("ModSAPI", "client", "ModSAPI.modules.client.Client.Client")
+        """ SubsystemManager.createClientSystem('SAPI', 'SAPI_C', 'Scripts_SAPI.SAPI_C.SAPI_C')"""
 
     @Mod.DestroyServer()
     def ModSAPIUtilsDestory(self):

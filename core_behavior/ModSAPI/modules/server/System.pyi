@@ -3,6 +3,7 @@ import typing
 from ...architect.scheduler import Scheduler
 import mod.server.extraServerApi as serverApi
 from SystemEvents import SystemAfterEvents
+from ..server.Player import Player
 
 ServerSystem = serverApi.GetServerSystemCls()
 
@@ -39,8 +40,8 @@ class System(ServerSystem):
         Cancels the execution of a function run that was previously scheduled via @minecraft/server.System.run.
         """
 
-    def send(self, player, eventName, data):
-        """Send data to client"""
+    def sendToClient(self, target: Player | str | list[Player], eventName: str, data: any):
+        """Send data to client."""
         
     def runJob(self, generator):
         """"""

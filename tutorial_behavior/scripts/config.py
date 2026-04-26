@@ -1,0 +1,11 @@
+
+NAMESPACE = "MODEXAMPLE"
+"""命名空间"""
+SYSTEM_NAME_SERVER = "TUTORIALSERVER"
+"""服务端系统名"""
+SYSTEM_NAME_CLIENT = "TUTORIALCLIENT"
+"""客户端系统名"""
+ENTRY_PATH_SERVER = "index"
+"""服务端入口文件"""
+ENTRY_PATH_CLIENT = None
+"""客户端入口文件"""

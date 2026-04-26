@@ -14,7 +14,7 @@ class ModSAPI(object):
     @Mod.InitServer()
     def ModSAPIServerInit(self):
         # =================== 不要动 =======================
-        serverApi.RegisterSystem(config.NAMESPACE, config.SYSTEM_NAME, "%s.ModSAPI.__mod_utils__.server.Server" % BASE_PATH)
+        serverApi.RegisterSystem(config.NAMESPACE, config.SYSTEM_NAME_SERVER, "%s.ModSAPI.__mod_utils__.server.Server" % BASE_PATH)
         # ==================================================
 
         serverApi.RegisterSystem("sample", "server", "scripts.example_use_modules_server.Server")
@@ -22,4 +22,6 @@ class ModSAPI(object):
 
     @Mod.InitClient()
     def ModSAPIClientInit(self):
-        pass
+        # =================== 不要动 =======================
+        clientApi.RegisterSystem(config.NAMESPACE, config.SYSTEM_NAME_CLIENT, "%s.ModSAPI.__mod_utils__.client.Client" % BASE_PATH)
+        # ==================================================

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from ...events.signals.EntityEventSignals import *
-from ...events.signals.PlayerEventSignals import *
-from ...events.signals.ProjectileEventSignals import *
-from ...events.signals.BlockEventSignals import *
-from ...events.signals.WorldEventSignals import *
+from .events.signals.EntityEventSignals import *
+from .events.signals.PlayerEventSignals import *
+from .events.signals.ProjectileEventSignals import *
+from .events.signals.BlockEventSignals import *
+from .events.signals.WorldEventSignals import *
 
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi

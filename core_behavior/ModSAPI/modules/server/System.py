@@ -74,9 +74,25 @@ class System(ServerSystem):
         self.__comp.CancelTimer(self.__timers[runId])
         del self.__timers[runId]
 
-    def send(self, player, eventName, data):
-        """Send data to client"""
-        
+    def sendToClient(self, player, eventName, data):
+        """Send data to client."""
+        from ..server.Player import Player
+        players = []
+        if isinstance(player, (list, tuple)):
+            for p in player:
+                if isinstance(p, Player):
+                    players.append(p.id)
+                else:
+                    players.append(p)
+        elif isinstance(player, Player):
+            players.append(player.id)
+        else:
+            players.append(player)
+        if len(players) == 1:
+            self.NotifyToClient(players[0], "serverSendToClient", {"eventName": eventName, "data": data})
+        else:
+            self.NotifyToMultiClients(players, "serverSendToClient", {"eventName": eventName, "data": data})
+
     def runJob(self, generator):
         return self._scriptScheduler.addSuspendableTask('SchedulerTask', generator)
     
