@@ -557,10 +557,19 @@ class CustomFormUI(ScreenNode):
             index += 1
 
     def onButtonClick(self, data):
+        selection = 0
+        i = -1
+        while True:
+            try:
+                num = int(data['ButtonPath'][i])
+                selection += num * (10 ** (-i - 1))
+            except Exception as e:
+                break
+            i -= 1
         client.sendToServer(
             "updateForm%s" % self.formId, 
             {
-                "selection": int(data['ButtonPath'][-1]),
+                "selection": selection,
                 "operation": "buttonClick"
             }
         )

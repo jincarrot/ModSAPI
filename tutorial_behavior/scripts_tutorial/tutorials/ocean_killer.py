@@ -1,6 +1,7 @@
 # Upgrade - Ocean Killer
 
 # 目标：海洋杀手-玩家在水中击杀水中怪物时能够实现一击必杀的效果
+# 尝试初步了解接口，明白如何获取游戏内数据，并编写简单逻辑
 from ..ModSAPI.server.beta import * # 导入ModSAPI-server模块
 
 def onEntityHurt(arg):

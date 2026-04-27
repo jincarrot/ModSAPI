@@ -3,6 +3,7 @@
 # 目标：兄弟兄弟，衣服借我穿穿
 # 玩家在攻击实体时，有概率夺取对方的装备并穿戴在自己身上
 # 玩家受击时，也同样有概率被夺去装备
+# 尝试使用更多的接口，编写更加复杂的功能
 from ..ModSAPI.server.beta import * # 导入ModSAPI-server模块
 import random
 
@@ -28,6 +29,6 @@ def onEntityHurt(arg):
                     if equipment:
                         # 受击者有装备，可以替换
                         attackerEquip.setEquipment(slot, equipment)
-                        entityEquip.setEquipment(slot)
+                        entityEquip.setEquipment(slot, None)
 
 world.afterEvents.entityHurt.subscribe(onEntityHurt) # 监听实体受伤事件

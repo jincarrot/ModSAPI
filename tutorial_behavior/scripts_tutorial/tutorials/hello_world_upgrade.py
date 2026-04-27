@@ -1,6 +1,7 @@
 # Hello World Upgrade
 
 # 目标：在任意玩家发送"Hello"消息时，向玩家输出 "World"
+# 尝试初步使用事件，与游戏交互
 from ..ModSAPI.server.beta import * # 导入ModSAPI-server模块
 
 def onChatSend(arg):

@@ -6,7 +6,7 @@ ServerSystem = serverApi.GetServerSystemCls()
 class ModSAPILoadException(Exception):
 
     def __init__(self, *args):
-        super().__init__(*args)
+        Exception.__init__(self, *args)
 
 class Server(ServerSystem):
     """Main system of ModSAPI loader."""
@@ -25,10 +25,10 @@ class Server(ServerSystem):
             raise ModSAPILoadException("Cannot get systems from ModSAPI! Make sure you have loaded the core pack.")
         from ...modMain import BASE_PATH
         from ...config import ENTRY_PATH_SERVER
-        try:
-            if not ENTRY_PATH_SERVER:
-                return
-            serverApi.ImportModule("%s.%s" % (BASE_PATH, ENTRY_PATH_SERVER))
-            print("[Info][ModSAPI] Load entry file '%s' successfully." % ENTRY_PATH_SERVER)
-        except Exception as e:
-            print("[Error][ModSAPI] Load scripts failed! Cannot find entry file '%s'." % ENTRY_PATH_SERVER)
+        
+        if not ENTRY_PATH_SERVER:
+            return
+        serverApi.ImportModule("%s.%s" % (BASE_PATH, ENTRY_PATH_SERVER))
+        print("[Info][ModSAPI] Load entry file '%s' successfully." % ENTRY_PATH_SERVER)
+        """except Exception as e:
+            print("[Error][ModSAPI] Load scripts failed! Cannot find entry file '%s'." % ENTRY_PATH_SERVER)"""

@@ -59,6 +59,98 @@
             }
         ]
     },
+    "bar_form": {
+        "type": "screen",
+        "button_mappings": [
+            {
+                "to_button_id": "#custom_form_close",
+                "from_button_id": "button.menu_cancel",
+                "mapping_type": "global"
+            },
+            {
+                "to_button_id": "#custom_form_close",
+                "from_button_id": "button.menu_inventory_cancel",
+                "mapping_type": "global"
+            }
+        ],
+        "controls": [
+            {
+                "panel@oreui_controls.no_scroll_body": {
+                    "layer": 1,
+                    "size": [
+                        "40%",
+                        "80%"
+                    ]
+                }
+            },
+            {
+                "move@oreui_controls.move_btn": {
+                    "offset": [
+                        -2,
+                        "-40%+8px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            },
+            {
+                "resize@oreui_controls.resize_btn": {
+                    "offset": [
+                        "20%+-8px",
+                        "40%+-17px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            }
+        ]
+    },
+    "bar_form_panel": {
+        "type": "panel",
+        "size": [
+            "40%",
+            "80%"
+        ],
+        "controls": [
+            {
+                "panel@oreui_controls.no_scroll_body": {
+                    "layer": 1,
+                    "size": [
+                        "100%",
+                        "100%"
+                    ]
+                }
+            },
+            {
+                "move@oreui_controls.move_btn": {
+                    "offset": [
+                        -2,
+                        "-50%+8px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            },
+            {
+                "resize@oreui_controls.resize_btn": {
+                    "offset": [
+                        "50%+-8px",
+                        "50%+-17px"
+                    ],
+                    "size": [
+                        "20px",
+                        "20px"
+                    ]
+                }
+            }
+        ]
+    },
     "custom_form_panel": {
         "type": "panel",
         "size": [
