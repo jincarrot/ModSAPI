@@ -23,6 +23,15 @@ class EntityQueryScoreOptions:
         self.maxScore = data['maxScore'] if 'maxScore' in data else 2147483647
         """If defined, only players that have a score equal to or under maxScore are included."""
 
+class EntityQueryPropertyOptions:
+    """"""
+
+    def __init__(self, data):
+        self.exlude = data.get("exlude", False)
+        self.propertyId = data['propertyId']
+        self.value = data.get("value", None)
+
+
 class EntityFilter(object):
     """
     Contains options for filtering entities.
@@ -57,7 +66,7 @@ class EntityFilter(object):
         """If this value is set, this event will only fire if the impacted entities' min vertical rotation matches this parameter."""
         self.name = data['name'] if 'name' in data else ""
         """If this value is set, this event will only fire if the impacted"""
-        self.propertyOptions = data['propertyOptions'] if 'propertyOptions' in data else None
+        self.propertyOptions = data['propertyOptions'] if 'propertyOptions' in data else None # type: list[EntityQueryPropertyOptions]
         """If this value is set, this event will only fire if the impacted entities' property options match this parameter."""
         self.scoreOptions = data['scoreOptions'] if 'scoreOptions' in data else None # type: list[EntityQueryScoreOptions]
         """If this value is set, this event will only fire if the impacted entities' score options match this parameter."""
@@ -272,6 +281,9 @@ class EntityQueryOptions(EntityFilter):
             else:
                 checkOuts.append(entityId)
             # property
+            if self.propertyOptions:
+                for propertyOption in self.propertyOptions:
+                    pass
             # score
             if self.scoreOptions:
                 for scoreOption in self.scoreOptions:

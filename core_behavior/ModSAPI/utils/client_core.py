@@ -22,7 +22,7 @@ class Core(ClientSystem):
     def initUI(self, data):
         clientApi.RegisterUI("server_ui", "CustomForm", "ModSAPI.modules.server_ui.Forms.CustomFormUI", "server_forms.custom_form")
         clientApi.RegisterUI("server_ui", "MoreUI", "ModSAPI.modules.server_ui.Forms.MoreUI", "server_forms.moreui")
-        clientApi.RegisterUI("modsapi", "CustomUI", "ModSAPI.modules.server_ui.UI._CustomUI", "server_forms.custom_ui")
+        clientApi.RegisterUI("ModSAPI", "CustomUI", "ModSAPI.modules.server_ui.UI._CustomUI", "server_forms.custom_ui")
 
     def sendCustomForm(self, data):
         data = data.data

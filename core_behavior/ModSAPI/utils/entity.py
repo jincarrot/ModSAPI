@@ -45,6 +45,6 @@ def getEntityFilterBySelector(selector, entity=None):
                     data['tags'] = []
                 data['tags'].append(value)
             elif key == 'r':
-                pass
+                data['maxDistance'] = int(value)
             elif key == 'scores':
                 pass

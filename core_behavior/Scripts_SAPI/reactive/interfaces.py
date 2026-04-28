@@ -15,7 +15,7 @@ class Attr:
 
     @property
     def value(self):
-        # type: () -> Any
+        # type: () -> any
         """
         获取属性值 (如label, size, color等的值)
         """
@@ -37,7 +37,8 @@ class Node:
     
     def __init__(self, control):
         # type: (Control) -> None
-        pass
+        self._control = control
+        self.__attributes = []
         
     def on(self, event, callback):
         # type: (str, function) -> None
@@ -66,14 +67,30 @@ class Node:
         """
         获取所有属性
         """
-        pass
+        if self.__attributes:
+            return self.__attributes
+        attrOrMethods = dir(self._control)
+        attrs = []
+        for propertyName in attrOrMethods:
+            if propertyName[0] == '_':
+                continue
+            if callable(getattr(self._control, propertyName)):
+                continue
+            attrs.append(propertyName)
+        result = []
+        for attr in attrs:
+            result.append(Attr(attr, self._control))
+        self.__attributes = result
+        return result
 
     def getAttr(self, name):
         # type: (str) -> Attr
         """
         获取指定属性
         """
-        pass
+        for attr in self.__attributes:
+            if attr.name == name:
+                return attr
 
 class ParentNode(Node):
 
@@ -231,7 +248,7 @@ class ChildNode(Node):
         """
         移除当前节点
         """
-        self.parent.removeChild(self)
+        return self.parent.removeChild(self)
 
 class Widget(ParentNode, ChildNode):
 

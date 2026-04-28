@@ -3,11 +3,11 @@
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 
 from Effect import *
-from ..interfaces.BlockOptions import *
-from ..interfaces.AnimeOptions import *
-from ..interfaces.EntityOptions import *
-from ..interfaces.TeleportOptions import *
-from ..interfaces.Raycasts import *
+from ..Interfaces.BlockOptions import *
+from ..Interfaces.AnimeOptions import *
+from ..Interfaces.EntityOptions import *
+from ..Interfaces.TeleportOptions import *
+from ..Interfaces.Raycasts import *
 from EntityComponents import *
 import math, time, random
 from Camara import *

@@ -6,7 +6,6 @@ import Classes.FormData as fd
 import Classes.UI as ui
 import Utils.Expression
 import math
-from interfaces.Vector import *
 
 def getWorld():
     # type: () -> SAPI.World
@@ -76,71 +75,7 @@ class SAPIS(ServerSystem):
             msg = msg[6:]
             if not world:
                 world = getWorld()
-            title = fd.Observable.create("Test", {"clientWritable": True})
-            sliderValue = fd.Observable.create(1, {"clientWritable": True})
-            maxV = fd.Observable.create(4)
-            titleLength = fd.Observable.create("title length: 4")
-            char = fd.Observable.create("T")
-            @title.subscribe
-            def onChange(value):
-                maxV.setData(len(value))
-                titleLength.setData("title length: %s" % maxV.getData())
-            @sliderValue.subscribe
-            def onMove(value):
-                char.setData(title.getData()[value - 1] if title.getData() else "")
-            toggled = fd.Observable.create(False, {"clientWritable": True})
-            fm = fd.CustomForm.create(world.getAllPlayers()[0], title, {"movable": toggled, "resizable": toggled, "closable": toggled})
-            click = {"times": 0}
-            def onClick():
-                if click['times'] % 2:
-                    b.form.close()
-                else:
-                    b.form.show()
-                click['times'] += 1
-                title.setData("")
-            fm.button("点击清空标题", onClick)
-            items = [
-                {
-                    "label": "test1",
-                    "value": 1
-                },
-                {
-                    "label": "test2",
-                    "value": 4
-                },
-                {
-                    "label": "test3",
-                    "value": 3
-                },
-                {
-                    "label": "test3",
-                    "value": 10
-                },
-                {
-                    "label": "test3",
-                    "value": 2
-                },
-                {
-                    "label": "test3",
-                    "value": 17
-                },
-                {
-                    "label": "test3",
-                    "value": 42
-                }
-            ]
-            fm.dropdown("1", sliderValue, items)
-            fm.toggle(title, toggled)
-            fm.divider()
-            fm.textField(title, title, {"visible": toggled})
-            fm.divider({"visible": toggled})
-            fm.slider(titleLength, sliderValue, 1, maxV)
-            fm.label(char)
-            # fm.show()
-            a = fd.MoreUI.create(world.getAllPlayers()[0], {"column": [1, 2], "row": [2, 1]})
-            a.addForm(fm, {"position": [0, 0], "size": [1, 1]})
-            b = a.addCustomForm(title, layout = {"position": [1, 0], "size": [1, 2], "margin": [sliderValue, sliderValue, sliderValue, sliderValue], "offset": [0, sliderValue]})
-            a.show()
+            print(msg)
             # exec(compile(msg, "<string>", "exec"))
 
     @staticmethod

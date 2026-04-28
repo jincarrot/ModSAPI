@@ -8,6 +8,3 @@ class QueryCache:
     
     def update(self):
         self._cache = self._getter()
-
-def cache(getter, default=None):
-    return QueryCache(getter).get

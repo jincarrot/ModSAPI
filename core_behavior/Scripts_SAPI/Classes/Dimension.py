@@ -2,10 +2,10 @@
 # from typing import Union, Dict
 from ..Enumerations import *
 import mod.server.extraServerApi as serverApi
-from ..interfaces.Vector import *
-from ..interfaces.EntityOptions import *
+from ..Interfaces.Vector import *
+from ..Interfaces.EntityOptions import *
 from ..minecraft import *
-from ..interfaces.WorldOptions import *
+from ..Interfaces.WorldOptions import *
 import time
 
 SComp = serverApi.GetEngineCompFactory()
@@ -229,7 +229,7 @@ class Dimension(object):
         data = temp.getData()
         p = comp.GetBlankBlockPalette()
         p.DeserializeBlockPalette(data)
-        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation.getTuple(), 0)
+        comp.SetBlockByBlockPalette(p, self.dimId, volume.fromLocation, 0)
 
     def setBlockType(self, location, blockType):
         # type: (Vector3, str) -> None

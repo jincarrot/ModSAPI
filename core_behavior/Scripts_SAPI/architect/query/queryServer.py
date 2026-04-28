@@ -1,4 +1,4 @@
-from ..level.server import compServer
+from ..levelServer import compServer
 from .cache import QueryCache
 
 class QueryServer:
@@ -50,49 +50,3 @@ class QueryServer:
     @staticmethod
     def dimension(id):
         return compServer.CreateDimension(id)
-    
-    @staticmethod
-    def definations(id):
-        return compServer.CreateEntityDefinitions(id)
-
-
-
-from ..component import getComponent
-
-class _Query:
-    def __init__(self, entityId, comps):
-        # type: (str, list) -> None
-        self.entityId = entityId
-        self.comps = comps
-
-    def iter(self):
-        return getComponent(self.entityId, self.comps) or []
-    
-    def __enter__(self):
-        result = getComponent(self.entityId, self.comps)
-        if result is None:
-            raise Exception()
-        return result
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return True
-
-def query(entityId, comps):
-    # type: (int, list) -> _Query
-    return _Query(entityId, comps)
-
-queries = []
-
-def callQueries(entityId):
-    for q in queries:
-        q(entityId)
-
-def Query(*compCls):
-    def decorator(fn):
-        def wrapper(entityId):
-            comps = getComponent(entityId, compCls)
-            if comps:
-                return fn(entityId, *comps)
-        queries.append(wrapper)
-        return wrapper
-    return decorator

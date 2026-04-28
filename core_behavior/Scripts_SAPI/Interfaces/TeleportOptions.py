@@ -3,7 +3,7 @@
 
 
 from ..Classes.Dimension import Dimension
-from ..interfaces.Vector import *
+from ..Interfaces.Vector import *
 
 
 class TeleportOptions(object):

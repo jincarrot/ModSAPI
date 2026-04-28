@@ -1,4 +1,4 @@
-from .level.client import LevelClient
+from .levelClient import LevelClient
 from .subsystem import ClientSubsystem
 
 compClient = LevelClient.compClient

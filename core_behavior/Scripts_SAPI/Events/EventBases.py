@@ -1,8 +1,8 @@
 # coding=utf-8
 import types
 from mod.common.minecraftEnum import EntityComponentType
-from ..interfaces.Sources import *
-from ..interfaces.EntityOptions import *
+from ..Interfaces.Sources import *
+from ..Interfaces.EntityOptions import *
 from ..minecraft import *
 
 ServerSystem = serverApi.GetServerSystemCls()

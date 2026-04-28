@@ -3,10 +3,9 @@
 from Classes.Entity import *
 from Classes.WorldEvents import *
 from Classes.Scoreboard import *
-from interfaces.Game import *
+from Interfaces.Game import *
 from Classes.Container import *
 from .architect.scheduler import Scheduler
-from Classes.TickingAreaManager import *
 from decorators import *
 import types
 
@@ -21,7 +20,6 @@ class World(ServerSystem):
         self.__beforeEvents = WorldBeforeEvents()
         self.__gameRules = GameRules()
         self.__scoreboard = Scoreboard()
-        self.__tickingAreaManager = TickingAreaManager()
         print("ModSAPI: world loaded")
         global world
         world = self
@@ -54,11 +52,6 @@ class World(ServerSystem):
     @property
     def scoreboard(self):
         return self.__scoreboard
-
-    @property
-    def tickingAreaManager(self):
-        """Manager for adding, removing and querying pack specific ticking areas."""
-        return self.__tickingAreaManager
 
     @staticmethod
     def getAllPlayers():

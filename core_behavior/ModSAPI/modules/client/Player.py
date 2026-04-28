@@ -1,6 +1,5 @@
 
 import mod.client.extraClientApi as clientApi
-from Screen import Screen
 CComp = clientApi.GetEngineCompFactory()
 
 class ClientPlayer:
@@ -8,7 +7,6 @@ class ClientPlayer:
     def __init__(self):
         self.__id = clientApi.GetLocalPlayerId()
         self.__name = CComp.CreateName(self.__id).GetName()
-        self.__screen = Screen()
 
     def __str__(self):
         data = {
@@ -27,7 +25,3 @@ class ClientPlayer:
         """Name of this player."""
         return self.__name
     
-    @property
-    def screen(self):
-        """Contains informations of player's screen."""
-        return self.__screen

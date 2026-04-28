@@ -81,7 +81,8 @@ class ItemStack(object):
                 v = userData['minecraft:item_lock']['__value__']
                 self.lockMode = "none" if not v else ("inventory" if v == 2 else "slot")
             if 'display' in userData:
-                self.nameTag = userData['display']['Name']['__value__']
+                self.nameTag = userData['display'].get('Name', {}).get('__value__', "")
+                self.__lore = userData['display'].get('Lore', {}).get('__value__', [])
         if 'customTips' in itemDict:
             lores = itemDict['customTips'].split("\n")
             if "%" in lores[0]:
@@ -153,8 +154,14 @@ class ItemStack(object):
         if self.nameTag:
             SComp.CreateItem(serverApi.GetLevelId()).SetCustomName(data, self.nameTag)
         if self.__lore:
-            baseInfo = "%name%%category%%enchanting%%attack_damage%\n§5§o"
-            data['customTips'] = baseInfo + "§r\n§5§o".join(self.__lore) + "§r"
+            userData['Lore'] = []
+            for lore in self.__lore:
+                temp = {
+                    "__type__": 8,
+                    "__value__": lore
+                }
+                userData['Lore'].append(temp)
+        # Set user data.
         if userData:
             data['userData'] = userData
         if self.__dynamicProperties:

@@ -26,9 +26,10 @@ class Server(ServerSystem):
         from ...modMain import BASE_PATH
         from ...config import ENTRY_PATH_SERVER
         
-        if not ENTRY_PATH_SERVER:
-            return
-        serverApi.ImportModule("%s.%s" % (BASE_PATH, ENTRY_PATH_SERVER))
-        print("[Info][ModSAPI] Load entry file '%s' successfully." % ENTRY_PATH_SERVER)
-        """except Exception as e:
-            print("[Error][ModSAPI] Load scripts failed! Cannot find entry file '%s'." % ENTRY_PATH_SERVER)"""
+        try:
+            if not ENTRY_PATH_SERVER:
+                return
+            serverApi.ImportModule("%s.%s" % (BASE_PATH, ENTRY_PATH_SERVER))
+            print("[Info][ModSAPI] Load entry file '%s' successfully." % ENTRY_PATH_SERVER)
+        except Exception as e:
+            print("[Error][ModSAPI] Load scripts failed! Cannot find entry file '%s'." % ENTRY_PATH_SERVER)

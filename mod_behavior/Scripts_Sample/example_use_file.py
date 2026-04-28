@@ -1,16 +1,30 @@
 """接近SAPI的使用方式，需要在config.py中定义入口文件名"""
 from ModSAPI.server.beta import *
 from ModSAPI.serverui.beta import *
+import mod.server.extraServerApi as serverApi
 
 def onChatSend(arg):
     # type: (ChatSendAfterEvent) -> None
     print("ChatSend event in 'example_use_file', sender: %s" % str(arg.sender))
+    item = arg.sender.mainHand.getItemDict()
+    item['userData']['display'] = {
+                "Lore": [
+                    {
+                        "__type__": 8,
+                        "__value__": "test"
+                    }
+                ]
+            }
+    print(item)
+    serverApi.GetEngineCompFactory().CreateItem(arg.sender.id).SpawnItemToPlayerInv(item, arg.sender.id)
     system.sendToClient(arg.sender, "test", 111)
 
 world.afterEvents.chatSend.subscribe(onChatSend) # 监听事件
 
 def Test(arg):
     # type: (EntityHurtAfterEvent) -> None
+    if arg.damageSource.damagingEntity.typeId != "minecraft:player":
+        return
     system.sendToClient(arg.damageSource.damagingEntity, "test", 111)
     visible = Observable.create(True)
     text = Observable.create("title", {"clientWritable": True})

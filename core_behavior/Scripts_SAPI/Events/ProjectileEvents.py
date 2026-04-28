@@ -1,6 +1,6 @@
 # coding=utf-8
 from ..Classes.Entity import *
-from ..interfaces.Sources import *
+from ..Interfaces.Sources import *
 
 
 class ProjectileHitBlockAfterEvent(object):

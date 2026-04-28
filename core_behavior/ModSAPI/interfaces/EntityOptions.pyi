@@ -8,6 +8,68 @@ from ..enums.Entity import *
 
 comp = serverApi.GetEngineCompFactory()
 
+class EqualsComparison(TypedDict):
+    """Represents an equals comparison for filtering entities."""
+
+    equals: bool | str | int
+    """The value to compare against."""
+
+class GreaterThanComparison(TypedDict):
+    """Represents a greater than comparison for filtering entities."""
+
+    greaterThan: int
+    """The value to compare against."""
+
+class LessThanComparison(TypedDict):
+    """Represents a less than comparison for filtering entities."""
+
+    lessThan: int
+    """The value to compare against."""
+
+class GreaterThanOrEqualsComparison(TypedDict):
+    """Represents a greater than or equals comparison for filtering entities."""
+
+    greaterThanOrEquals: int
+    """The value to compare against."""
+
+class LessThanOrEqualsComparison(TypedDict):
+    """Represents a less than or equals comparison for filtering entities."""
+
+    lessThanOrEquals: int
+    """The value to compare against."""
+
+class NotEqualsComparison(TypedDict):
+    """Represents a not equals comparison for filtering entities."""
+
+    notEquals: bool | str | int
+    """The value to compare against."""
+
+class RangeComparison(TypedDict):
+
+    lowerBound: int
+    """The lower bound of the range."""
+    upperBound: int
+    """The upper bound of the range."""
+
+class EntityQueryScoreOptions(TypedDict):
+    """Contains additional options for filtering players based on their score for an objective."""
+
+    exclude: bool
+    """If set to true, entities and players within this score range are excluded from query results."""
+    objective: str
+    """Identifier of the scoreboard objective to filter on."""
+    minScore: int
+    """If defined, only players that have a score equal to or over minScore are included."""
+    maxScore: int
+    """If defined, only players that have a score equal to or under maxScore are included."""
+
+class EntityQueryPropertyOptions:
+    """"""
+    
+    exlude: bool
+    propertyId: str
+    value: bool | str | EqualsComparison | GreaterThanComparison | LessThanComparison | GreaterThanOrEqualsComparison | LessThanOrEqualsComparison | NotEqualsComparison | RangeComparison
+
 class EntityFilter(TypedDict):
     """
     Contains options for filtering entities.
