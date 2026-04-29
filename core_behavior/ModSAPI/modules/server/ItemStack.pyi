@@ -26,13 +26,13 @@ class ItemStack(object):
     
     def __init__(self, itemType, amount):
         # type: (str, int) -> None
-        self.amount = amount
+        self.amount: int
         """Number of the items in the stack. Valid values range between 1-255. The provided value will be clamped to the item's maximum stack size."""
-        self.keepOnDeath = False
+        self.keepOnDeath: bool
         """Gets or sets whether the item is kept on death."""
-        self.lockMode = ItemLockMode.none
+        self.lockMode: ItemLockMode = ItemLockMode.none
         """Gets or sets the item's lock mode. The default value is ItemLockMode.none."""
-        self.nameTag = None
+        self.nameTag: str
         """Given name of this stack of items. The name tag is displayed when hovering over the item. Setting the name tag to an empty string or undefined will remove the name tag."""
 
     def __str__(self):

@@ -7,6 +7,7 @@ system = systems.system
 
 
 ItemStack = systems.modules.ItemStack
+MolangVariableMap = systems.modules.MolangVariableMap
 
 
 StructureSaveMode = systems.enums.StructureSaveMode
@@ -15,3 +16,6 @@ StructureRotation = systems.enums.StructureRotation
 StructureAnimationMode = systems.enums.StructureAnimationMode
 
 EquipmentSlot = systems.enums.EquipmentSlot
+
+EntityEquippableComponent = systems.components.EntityEquippableComponent
+EntityInventoryComponent = systems.components.EntityInventoryComponent

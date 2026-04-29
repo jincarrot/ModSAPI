@@ -6,7 +6,6 @@ SComp = serverApi.GetEngineCompFactory()
 
 class Container(object):
     """Represents a container that can hold sets of items. Used with entities such as Players, Chest Minecarts, Llamas, and more."""
-    import ItemStack as i
     def __init__(self, location=None, entityId=None, dimId=None):
         # type: (tuple, str, int) -> None
         self.__location = location
@@ -84,7 +83,6 @@ class Container(object):
             return False
 
     def addItem(self, itemStack):
-        # type: (i.ItemStack) -> i.ItemStack | None
         """
         Adds an item to the container. 
         The item is placed in the first available slot(s) and can be stacked with existing items of the same type. 
@@ -171,7 +169,6 @@ class Container(object):
             SComp.CreateBlockInfo(serverApi.GetLevelId()).SetBlockEntityData(self.__dimId, self.__location, nbt)
 
     def getItem(self, slot):
-        # type: (int) -> i.ItemStack | None
         """
         Gets an @minecraft/server.ItemStack of the item at the specified slot. 
         If the slot is empty, returns undefined. 
@@ -212,15 +209,15 @@ class Container(object):
         toContainer.setItem(toSlot, item)
 
     def setItem(self, slot, itemStack):
-        # type: (int, i.ItemStack) -> None
         """
         Sets an item stack within a particular slot.
         """
         if not self.isValid:
             return None
         if not itemStack:
-            itemStack = self.i.ItemStack("minecraft:air", 0)
-        itemDict = itemStack.getItemDict()
+            itemDict = {"newItemName": "minecraft:air", "count": 0}
+        else:
+            itemDict = itemStack.getItemDict()
         if self.__playerId:
             SComp.CreateItem(self.__entityId).SpawnItemToPlayerInv(itemDict, self.__playerId, slot)
             return itemStack
@@ -258,7 +255,6 @@ class Container(object):
         self.setItem(slot, item_b)
 
     def transferItem(self, fromSlot, toContainer):
-        # type: (int, Container) -> i.ItemStack
         """
         Moves an item from one slot to another container, 
         or to the first available slot in the same container.
@@ -270,4 +266,51 @@ class Container(object):
     
 
 class ContainerSlot:
-    pass
+    """Represents a slot within a broader container (e.g., entity inventory.)"""
+
+    def __init__(self, container, slotId):
+        # type: (Container, int) -> None
+        self.__container = container
+        self.__slotId = slotId
+
+    @property
+    def amount(self):
+        """Number of the items in the stack. 
+
+        Valid values range between 1-255. 
+
+        The provided value will be clamped to the item's maximum stack size."""
+        item = self.__container.getItem(self.__slotId)
+        return item.amount if item else 0
+    
+    @amount.setter
+    def amount(self, value):
+        item = self.__container.getItem(self.__slotId)
+        if item:
+            item.amount = value
+            self.__container.setItem(self.__slotId, item)
+
+    @property
+    def isStackable(self):
+        """Returns whether the item is stackable. 
+        
+        An item is considered stackable if the item's maximum stack size is greater than 1 and the item does not contain any custom data or properties."""
+        item = self.__container.getItem(self.__slotId)
+        return item.isStackable if item else False
+    
+    @property
+    def isValid(self):
+        """Returns whether the ContainerSlot is valid. 
+        
+        The container slot is valid if the container exists and is loaded, and the slot index is valid."""
+        return self.__container.isValid and self.__container.getItem(self.__slotId) is not None
+    
+    def getItem(self):
+        """Gets an @minecraft/server.ItemStack of the item in this slot. 
+        
+        If the slot is empty, returns undefined."""
+        return self.__container.getItem(self.__slotId)
+    
+    def setItem(self, itemStack):
+        """Sets an @minecraft/server.ItemStack of the item in this slot."""
+        return self.__container.setItem(self.__slotId, itemStack)
