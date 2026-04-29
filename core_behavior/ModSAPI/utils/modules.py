@@ -21,3 +21,8 @@ class Modules(ServerSystem):
         from ..modules.server_ui.FormData import Observable as o
         return o
     
+    @property
+    def MolangVariableMap(self):
+        from ..modules.server.MolangVariableMap import MolangVariableMap as m
+        return m
+    

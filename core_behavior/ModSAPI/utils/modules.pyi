@@ -2,6 +2,7 @@
 import mod.server.extraServerApi as serverApi
 from ..modules.server.ItemStack import ItemStack
 from ..modules.server_ui.FormData import CustomForm, Observable
+from ..modules.server.MolangVariableMap import MolangVariableMap
 ServerSystem = serverApi.GetServerSystemCls()
 
 class Modules:
@@ -16,4 +17,5 @@ class Modules:
     @property
     def Observable(self) -> Observable: ...
 
-    
+    @property
+    def MolangVariableMap(self) -> MolangVariableMap: ...

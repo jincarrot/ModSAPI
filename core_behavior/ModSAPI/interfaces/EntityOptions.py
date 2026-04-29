@@ -154,7 +154,7 @@ class EntityQueryOptions(EntityFilter):
     def selfCheck(self):
         # type: () -> bool
         """检查数据是否合法"""
-        if type(self.data) == dict and set(self.data.keys()).issubset(set(EntityQueryOptionsProperties)):
+        if type(self.data) == dict:
             if self.farthest >= 0 and self.closest >= 0:
                 return False
             for key in self.data:
@@ -195,7 +195,7 @@ class EntityQueryOptions(EntityFilter):
                     location[2] - self.location.z, 2)))
         for i in range(0, num):
             checkOuts.append(entityIds[distances.index(op(distances))])
-        return checkOuts
+        return list(set(checkOuts))
 
     def checkVolume(self, entityIds):
         # type: (list[str]) -> list[str]
@@ -216,12 +216,12 @@ class EntityQueryOptions(EntityFilter):
     
     def checkProperties(self, entityIds):
         # type: (list[str]) -> list[str]
-        checkOuts = []
+        checkOuts = list(set(entityIds))
         for entityId in entityIds:
             # types
             entityType = comp.CreateEngineType(entityId).GetEngineTypeStr()
-            if (not self.type or entityType == self.type) and entityType not in self.excludeTypes:
-                checkOuts.append(entityId)
+            if not ((not self.type or entityType == self.type) and entityType not in self.excludeTypes):
+                checkOuts.remove(entityId)
             # families
             families = comp.CreateAttr(entityId).GetTypeFamily()
             if self.families:
@@ -230,20 +230,20 @@ class EntityQueryOptions(EntityFilter):
                     if family not in families or family in self.excludeFamilies:
                         temp = 0
                         break
-                if temp:
-                    checkOuts.append(entityId)
+                if not temp:
+                    checkOuts.remove(entityId)
             # gameModes
             if self.gameMode:
                 if entityType == "minecraft:player":
                     gameMode = comp.CreateGame(serverApi.GetLevelId()).GetPlayerGameType(entityId)
-                    if gameMode == self.gameMode and gameMode not in self.excludeGameModes:
-                        checkOuts.append(entityId)
-            else:
-                checkOuts.append(entityId)
+                    if not (gameMode == self.gameMode and gameMode not in self.excludeGameModes):
+                        checkOuts.remove(entityId)
+                else:
+                    checkOuts.remove(entityId)
             # names
             name = comp.CreateName(entityId).GetName()
-            if (not self.name or name == self.name) and name not in self.excludeNames:
-                checkOuts.append(entityId)
+            if not((not self.name or name == self.name) and name not in self.excludeNames):
+                checkOuts.remove(entityId)
             # tags
             tags = comp.CreateTag(entityId).GetEntityTags()
             if self.tags:
@@ -252,34 +252,30 @@ class EntityQueryOptions(EntityFilter):
                     if tag not in tags or tag in self.excludeTags:
                         temp = 0
                         break
-                if temp:
-                    checkOuts.append(entityId)
+                if not temp:
+                    checkOuts.remove(entityId)
             # level
             if self.minLevel is not None or self.maxLevel is not None:
                 if entityType == "minecraft:player":
                     level = comp.CreateLv(entityId).GetPlayerLevel()
                     minLevel = self.minLevel if self.minLevel is not None else 0
                     maxLevel = self.maxLevel if self.maxLevel is not None else 2147483647
-                    if minLevel <= level <= maxLevel:
-                        checkOuts.append(entityId)
-            else:
-                checkOuts.append(entityId)
+                    if not (minLevel <= level <= maxLevel):
+                        checkOuts.remove(entityId)
+                else:
+                    checkOuts.remove(entityId)
             # direction
             rot = comp.CreateRot(entityId).GetRot()
             if self.minHorizontalRotation is not None or self.maxHorizontalRotation is not None:
                 minH = self.minHorizontalRotation if self.minHorizontalRotation is not None else 0
                 maxH = self.maxHorizontalRotation if self.maxHorizontalRotation is not None else 360
-                if minH <= rot[0] <= maxH:
-                    checkOuts.append(entityId)
-            else:
-                checkOuts.append(entityId)
+                if not (minH <= rot[0] <= maxH):
+                    checkOuts.remove(entityId)
             if self.minVerticalRotation is not None or self.maxVerticalRotation is not None:
                 minV = self.minVerticalRotation if self.minVerticalRotation is not None else 0
                 maxV = self.maxVerticalRotation if self.maxVerticalRotation is not None else 360
-                if minV <= rot[1] <= maxV:
-                    checkOuts.append(entityId)
-            else:
-                checkOuts.append(entityId)
+                if not (minV <= rot[1] <= maxV):
+                    checkOuts.remove(entityId)
             # property
             if self.propertyOptions:
                 for propertyOption in self.propertyOptions:
@@ -291,12 +287,12 @@ class EntityQueryOptions(EntityFilter):
                     if not scoreboard:
                         continue
                     score = scoreboard.getScore(systems.world.getEntity(entityId))
-                    if not scoreOption.exclude:
+                    if scoreOption.exclude:
                         if scoreOption.minScore <= score <= scoreOption.maxScore:
-                            checkOuts.append(entityId)
+                            checkOuts.remove(entityId)
                     else:
                         if not (scoreOption.minScore <= score <= scoreOption.maxScore):
-                            checkOuts.append(entityId)
+                            checkOuts.remove(entityId)
             return checkOuts
 
     def check(self, entityIds):

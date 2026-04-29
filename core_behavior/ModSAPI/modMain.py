@@ -29,4 +29,4 @@ class ModSAPI(object):
 
     @Mod.DestroyServer()
     def ModSAPIUtilsDestory(self):
-        Destroy()
+        pass

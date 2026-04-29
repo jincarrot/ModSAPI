@@ -5,9 +5,7 @@ from ModSAPI.serverui.beta import *
 def onChatSend(arg):
     # type: (ChatSendAfterEvent) -> None
     print("ChatSend event in 'example_use_file', sender: %s" % str(arg.sender))
-    print(arg.sender.dimension.spawnItem(ItemStack("minecraft:diamond", 1), arg.sender.location))
-    print(world.getAllPlayers())
-    print(arg.sender.dimension.runCommand("say t"))
+    print(world.getPlayers({"tags": ["test"], "location": {"x": 83, "y": 64, "z": 255}, "maxDistance": 5}))
 
 world.afterEvents.chatSend.subscribe(onChatSend) # 监听事件
 
