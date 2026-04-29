@@ -3,6 +3,7 @@ from ..modules.server.World import World
 from ..modules.server.System import System
 from modules import Modules
 from enums import Enums
+from components import Components
 
 class systems:
 
@@ -21,3 +22,7 @@ class systems:
     @property
     def enums() -> Enums:
         """Enums"""
+
+    @property
+    def components() -> Components: 
+        """Components"""

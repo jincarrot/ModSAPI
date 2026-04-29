@@ -8,6 +8,7 @@ class Systems:
     _system = None
     _enums = None
     _core = None
+    _components = None
 
     @property
     def world(self):
@@ -48,5 +49,13 @@ class Systems:
         enums = serverApi.GetSystem("ModSAPI", "enums")
         self._enums = enums
         return enums
+    
+    @property
+    def components(self):
+        if self._components:
+            return self._components
+        components = serverApi.GetSystem("ModSAPI", "components")
+        self._components = components
+        return components
     
 systems = Systems()

@@ -93,6 +93,10 @@ class System(ServerSystem):
         else:
             self.NotifyToMultiClients(players, "serverSendToClient", {"eventName": eventName, "data": data})
 
+    def sendToAllClients(self, eventName, data):
+        """Send data to all clients."""
+        self.BroadcastToAllClient("serverSendToClient", {"eventName": eventName, "data": data})
+
     def runJob(self, generator):
         return self._scriptScheduler.addSuspendableTask('SchedulerTask', generator)
     

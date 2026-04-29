@@ -21,8 +21,8 @@ function transFile(path) {
                 content += line;
             })
             content += "\n";
-            appendFile("../../mod_behavior/scripts/ModSAPI/indexd.pyi", content, (err) => { })
-            appendFile("../../tutorial_behavior/scripts/ModSAPI/indexd.pyi", content, (err) => { })
+            appendFile("../../mod_behavior/Scripts_Sample/ModSAPI/indexd.pyi", content, (err) => { })
+            appendFile("../../tutorial_behavior/scripts_tutorial/ModSAPI/indexd.pyi", content, (err) => { })
         }
         /*let msg = back;
         msg.push({ role: "user", content: data.toString() })

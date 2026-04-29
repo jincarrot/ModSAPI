@@ -7,6 +7,7 @@ from ..client.Audio import *
 from ItemStack import *
 import mod.server.extraServerApi as serverApi
 from Container import Container
+from MolangVariableMap import MolangVariableMap
 
 class Player(Entity):
     """
@@ -72,4 +73,7 @@ class Player(Entity):
         """
         send a toast to player
         """
+
+    def spawnParticle(self, effectName: str, location: Vector3, molangVariables: MolangVariableMap = None):
+        """Creates a new particle emitter at a specified location in the world."""
 

@@ -4,7 +4,7 @@ from ..enums.Structure import *
 from ..enums.Entity import *
 ServerSystem = serverApi.GetServerSystemCls()
 
-class Enums(ServerSystem):
+class Enums:
     """Contains all enums of ModSAPI."""
 
     @property

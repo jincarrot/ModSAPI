@@ -5,16 +5,6 @@ import mod.client.extraClientApi as clientApi
 
 # from .architect.subsystem import SubsystemManager
 
-def Destroy():
-    from utils.expression import old
-    import math
-    math.sin = old.sin
-    math.cos = old.cos
-    math.pow = old.pow
-    abs = old.abs
-    max = old.max
-    min = old.min
-
 
 @Mod.Binding(name="ModSAPI", version="1.0.0")
 class ModSAPI(object):
@@ -25,6 +15,7 @@ class ModSAPI(object):
         serverApi.RegisterSystem("ModSAPI", "system", "ModSAPI.modules.server.System.System")
         serverApi.RegisterSystem("ModSAPI", "modules", "ModSAPI.utils.modules.Modules")
         serverApi.RegisterSystem("ModSAPI", "enums", "ModSAPI.utils.enums.Enums")
+        serverApi.RegisterSystem("ModSAPI", "components", "ModSAPI.utils.components.Components")
         
         """serverApi.RegisterSystem("SAPI", "system",
                                  "Scripts_SAPI.SAPI_S.System")

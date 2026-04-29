@@ -136,6 +136,11 @@ class Player(Entity):
         }
         world.NotifyToClient(self.__id, "sendToast", data)
 
+    def spawnParticle(self, effectName, location, molangVariables=None):
+        """Creates a new particle emitter at a specified location in the world."""
+        location = Vector3(location)
+        systems.system.sendToClient(self, "modsapi.dimension.spawnParticle", {"effectName": effectName, "location": location.getTuple(), "molangVariables": molangVariables.getData() if molangVariables else None})
+
     def showUI(self, customUI):
         # world = systems.world
         # Screens[id(customUI)] = customUI

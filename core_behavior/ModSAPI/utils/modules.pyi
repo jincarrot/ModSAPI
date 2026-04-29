@@ -4,7 +4,7 @@ from ..modules.server.ItemStack import ItemStack
 from ..modules.server_ui.FormData import CustomForm, Observable
 ServerSystem = serverApi.GetServerSystemCls()
 
-class Modules(ServerSystem):
+class Modules:
     """Contains all modules of ModSAPI."""
 
     @property

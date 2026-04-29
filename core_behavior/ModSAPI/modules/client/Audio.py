@@ -5,7 +5,7 @@ from ...interfaces.Vector import *
 
 CComp = clientApi.GetEngineCompFactory()
 
-class Audio(object):
+class Audio:
     "Contains a set of operations about audio (sounds and musics)"
 
     def __init__(self, playerId=clientApi.GetLocalPlayerId()):

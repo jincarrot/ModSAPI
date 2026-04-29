@@ -8,6 +8,7 @@ from ...utils.system import systems
 from ...interfaces.WorldOptions import *
 from Command import CommandResult
 from ...utils.block import BlockPaletteData
+from MolangVariableMap import MolangVariableMap
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -105,7 +106,6 @@ class Dimension(object):
         return players
 
     def getPlayer(self, playerId):
-        # type: (int | str) -> __e.Player
         """get player by id"""
         return systems.core.entities[systems.core.entities.index(playerId)]
 
@@ -172,6 +172,11 @@ class Dimension(object):
         location = Vector3(location) if type(location) == dict else location
         itemId = world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z))
         return systems.core.entities[systems.core.entities.index(itemId)]
+    
+    def spawnParticle(self, effectName, location, molangVariables=None):
+        """Creates a new particle emitter at a specified location in the world."""
+        location = Vector3(location)
+        systems.system.sendToAllClients("modsapi.dimension.spawnParticle", {"effectName": effectName, "location": location.getTuple(), "molangVariables": molangVariables.getData() if molangVariables else None})
 
     def createExplosion(self, location, radius, explosionOptions={}):
         # type: (Vector3 | dict, float, dict | ExplosionOptions) -> bool

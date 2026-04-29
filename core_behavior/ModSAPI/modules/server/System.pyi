@@ -42,7 +42,10 @@ class System(ServerSystem):
 
     def sendToClient(self, target: Player | str | list[Player], eventName: str, data: any):
         """Send data to client."""
-        
+
+    def sendToAllClients(self, eventName: str, data: any):
+        """Send data to all clients."""
+
     def runJob(self, generator):
         """"""
     

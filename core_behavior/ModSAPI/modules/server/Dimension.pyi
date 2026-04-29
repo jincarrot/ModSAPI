@@ -12,6 +12,7 @@ from Entity import Entity
 from ItemStack import ItemStack
 from Block import Block
 from Command import CommandResult
+from MolangVariableMap import MolangVariableMap
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -85,8 +86,8 @@ class Dimension(object):
         Returns a block instance at the given location.
         """
 
-    def getEntities(self, options=EntityQueryOptions):
-        # type: (dict | EntityQueryOptions) -> list[Entity]
+    def getEntities(self, options={}):
+        # type: (EntityQueryOptions) -> list[Entity]
         """
         Gets the entities in the dimension.
         """
@@ -97,14 +98,13 @@ class Dimension(object):
         Returns a set of entities at a particular location.
         """
 
-    def getPlayers(self, options=EntityQueryOptions):
-        # type: (dict | EntityQueryOptions) -> list[Player]
+    def getPlayers(self, options={}):
+        # type: (EntityQueryOptions) -> list[Player]
         """"""
 
     def getPlayer(self, playerId):
         # type: (int | str) -> Player
-        """get player by id"""
-        return self.e.Player(playerId)
+        """get player by id."""
     
     def runCommand(self, commandString):
         # type: (str) -> CommandResult
@@ -115,19 +115,24 @@ class Dimension(object):
         """
 
     def spawnEntity(self, identifier, location, options=SpawnEntityOptions):
-        # type: (str, Vector3,  SpawnEntityOptions) -> Dimension.__e.Entity
+        # type: (str, Vector3,  SpawnEntityOptions) -> Entity
         """
         Creates a new entity (e.g., a mob) at the specified location.
         """
 
+    def spawnParticle(self, effectName: str, location: Vector3, molangVariables: MolangVariableMap = None):
+        """
+        Creates a new particle emitter at a specified location in the world.
+        """
+
     def spawnItem(self, itemStack, location):
-        # type: (Dimension.__i.ItemStack, Vector3) -> Dimension.__e.Entity
+        # type: (ItemStack, Vector3) -> Entity
         """
         Creates a new item stack as an entity at the specified location.
         """
 
     def createExplosion(self, location, radius, explosionOptions={}):
-        # type: (Vector3, float, dict | ExplosionOptions) -> bool
+        # type: (Vector3, float, ExplosionOptions) -> bool
         """Creates an explosion at the specified location."""
 
     def fillBlocks(self, volume, block, options):
