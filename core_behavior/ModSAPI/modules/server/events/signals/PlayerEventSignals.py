@@ -20,7 +20,7 @@ class ChatSendAfterEventSignal(Events):
         Adds a callback that will be called when new chat messages are sent.
         """
         
-        self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, ChatSendAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, wrapper=ChatSendAfterEvent, waitOneTick=True)
 
 class ItemUseAfterEventSignal(Events):
     """

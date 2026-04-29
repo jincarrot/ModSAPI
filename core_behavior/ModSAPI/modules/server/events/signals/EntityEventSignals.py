@@ -2,7 +2,6 @@
 import types
 from ..EventBases import *
 from .....interfaces.EntityOptions import *
-import mod.server.extraServerApi as serverApi
 from ..core.EntityEvents import *
 
 class EntityEvents(Events):
@@ -165,10 +164,9 @@ class EntityHitEntityAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an entity hits another entity.
         """
-        
-        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", EntityHitEntityAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", EntityHitEntityAfterEvent, waitOneTick=True)
         # 实体与玩家分开
-        EventListener("PlayerAttackEntityEvent", callback, options, self._checkPlayer, "entityId", EntityHitEntityAfterEvent)
+        EventListener("PlayerAttackEntityEvent", callback, options, self._checkPlayer, "entityId", EntityHitEntityAfterEvent, waitOneTick=True)
 
 
 class EntityHurtAfterEventSignal(EntityEvents):
@@ -185,8 +183,7 @@ class EntityHurtAfterEventSignal(EntityEvents):
         """
         Adds a callback that will be called when an effect is added to an entity.
         """
-        
-        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", EntityHurtAfterEvent)
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, "entityId", EntityHurtAfterEvent, waitOneTick=True)
 
 
 class EntityLoadAfterEventSignal(EntityEvents):

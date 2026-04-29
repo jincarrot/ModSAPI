@@ -6,6 +6,7 @@ from ...interfaces.Vector import *
 from ...interfaces.EntityOptions import *
 from ...utils.system import systems
 from ...interfaces.WorldOptions import *
+from Command import CommandResult
 from ...utils.block import BlockPaletteData
 
 SComp = serverApi.GetEngineCompFactory()
@@ -14,10 +15,7 @@ class Dimension(object):
     """
     A class that represents a particular dimension (e.g., The End) within a world.
     """
-    import Entity as __e
-    import ItemStack as __i
     import Block as __b
-    import Command as __c
 
     def __init__(self, dimId):
         # type: (int | str) -> None
@@ -75,7 +73,7 @@ class Dimension(object):
                     entityIds.append(entityId)
             entityIds = options.check(entityIds)
             for entityId in entityIds:
-                entities.append(self.__e.Entity(entityId))
+                entities.append(systems.core.entities[systems.core.entities.index(entityId)])
         return entities
     
     def getEntitiesAtBlockLocation(self, location):
@@ -87,7 +85,7 @@ class Dimension(object):
         pos = Vector3(location) if type(location) == dict else location
         entityIds = SComp.CreateGame(serverApi.GetLevelId()).GetEntitiesInSquareArea(None, (int(pos.x), int(pos.y), int(pos.z)), (int(pos.x), int(pos.y), int(pos.z)), self.dimId)
         for entityId in entityIds:
-            result.append(self.__e.Entity(entityId))
+            result.append(systems.core.entities[systems.core.entities.index(entityId)])
         return result
 
     def getPlayers(self, options=EntityQueryOptions):
@@ -103,39 +101,50 @@ class Dimension(object):
                     playerIds.remove(playerId)
             playerIds = options.check(playerIds)
             for playerId in playerIds:
-                players.append(self.e.Player(playerId))
+                players.append(systems.core.entities[systems.core.entities.index(playerId)])
         return players
 
     def getPlayer(self, playerId):
         # type: (int | str) -> __e.Player
         """get player by id"""
-        return self.e.Player(playerId)
-    
+        return systems.core.entities[systems.core.entities.index(playerId)]
+
     def runCommand(self, commandString):
-        # type: (str) -> __c.CommandResult
+        # type: (str) -> CommandResult
         """
         Runs a command synchronously using the context of the broader dimenion.
 
         Note: this may return wrong message.
         """
-        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("execute in %s run %s" % (self.id, commandString))
-        index = commandString.find("@")
-        if index >= 0:
-            selector = ""
-            while index < len(commandString):
-                hasParam = False
-                if commandString[index] == "[":
-                    hasParam = True
-                if commandString[index] == "]":
-                    selector += commandString[index]
+        temp = SComp.CreateCommand(serverApi.GetLevelId()).SetCommand("execute in %s run %s" % (self.id.replace("minecraft:", ""), commandString))
+        if not temp:
+            raise Exception("Command execution failed! Command: %s" % commandString)
+        params = commandString.split(" ")
+        detectCommand = ""
+        selector = ""
+        if "run" in params:
+            lastIndex = len(params) - 1 - params[::-1].index("run")
+            for i in range(lastIndex, len(params)):
+                if params[i][0] == "@":
+                    selector = params[i]
+                    for j in range(lastIndex):
+                        detectCommand += params[j] + " "
+                    detectCommand += "run tag %s add __sapi_temp_detect_tag__" % selector
                     break
-                if commandString[index] == " " and not hasParam:
+        else:
+            for i in range(len(params)):
+                if params[i][0] == "@":
+                    selector = params[i]
+                    detectCommand = "tag %s add __sapi_temp_detect_tag__" % selector
                     break
-                selector += commandString[index]
-                index += 1
-            entityId = serverApi.GetPlayerList()[0]
-            return self.__c.CommandResult({"successCount": len(SComp.CreateEntityComponent(entityId).GetEntitiesBySelector(selector))})
-        return None
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(detectCommand)
+        entities = systems.core.entities # type: list[Dimension.__e.Entity]
+        successCount = 0
+        for entity in entities:
+            if entity.hasTag("__sapi_temp_detect_tag__"):
+                entity.removeTag("__sapi_temp_detect_tag__")
+                successCount += 1
+        return CommandResult({"successCount": successCount})
 
     def spawnEntity(self, identifier, location, options=SpawnEntityOptions):
         # type: (str, dict | Vector3, dict | SpawnEntityOptions) -> Dimension.__e.Entity
@@ -152,17 +161,17 @@ class Dimension(object):
             SComp.CreateEntityEvent(serverApi.GetLevelId()).TriggerCustomEvent(entityId, options.spawnEvent)
         if options.initialPersistence:
             SComp.CreateAttr(entityId).SetPersistent(options.initialPersistence)
-        return self.__e.Entity(entityId)
+        return systems.core.entities[systems.core.entities.index(entityId)]
 
     def spawnItem(self, itemStack, location):
-        # type: (Dimension.__i.ItemStack, Vector3 | dict) -> Dimension.__e.Entity
         """
         Creates a new item stack as an entity at the specified location.
         """
         world = systems.world
         itemDict = itemStack.getItemDict()
         location = Vector3(location) if type(location) == dict else location
-        return Dimension.__e.Entity(world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z)))
+        itemId = world.CreateEngineItemEntity(itemDict, self.__dimId, (location.x, location.y, location.z))
+        return systems.core.entities[systems.core.entities.index(itemId)]
 
     def createExplosion(self, location, radius, explosionOptions={}):
         # type: (Vector3 | dict, float, dict | ExplosionOptions) -> bool

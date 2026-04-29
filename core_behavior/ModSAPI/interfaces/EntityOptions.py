@@ -297,13 +297,14 @@ class EntityQueryOptions(EntityFilter):
                     else:
                         if not (scoreOption.minScore <= score <= scoreOption.maxScore):
                             checkOuts.append(entityId)
+            return checkOuts
 
     def check(self, entityIds):
         entityIds = self.checkProperties(entityIds)
         entityIds = self.checkVolume(entityIds)
         entityIds = self.checkLocation(entityIds)
         entityIds = self.checkDistance(entityIds)
-        return entityIds
+        return list(set(entityIds))
 
 
 class EntityEffectOptions(object):

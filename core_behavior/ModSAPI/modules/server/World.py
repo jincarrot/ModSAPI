@@ -11,9 +11,11 @@ from Container import *
 from managers.TickingAreaManager import *
 from managers.StructureManager import *
 # from decorators import *
+from ...utils.system import systems
 
 ServerSystem = serverApi.GetServerSystemCls()
 comp = serverApi.GetEngineCompFactory()
+core = systems.core
 
 class World(ServerSystem):
 
@@ -56,7 +58,13 @@ class World(ServerSystem):
         playerIds = serverApi.GetPlayerList()
         players = []
         for playerId in playerIds:
-            players.append(Player(playerId))
+            if playerId in core.entities:
+                player = core.entities[core.entities.index(playerId)]
+                players.append(player)
+            else:
+                player = Player(playerId)
+                core.entities.append(player)
+                players.append(player)
         return players
 
     @staticmethod
@@ -65,10 +73,9 @@ class World(ServerSystem):
         players = []
         playerIds = serverApi.GetPlayerList()
         if options.selfCheck():
-            playerIds = serverApi.GetPlayerList()
             playerIds = options.check(playerIds)
             for playerId in playerIds:
-                players.append(Player(playerId))
+                players.append(systems.core.entities[systems.core.entities.index(playerId)])
         return players
 
     @staticmethod
@@ -103,18 +110,8 @@ class World(ServerSystem):
         return count
     
     def getEntity(self, id):
-        if id in self.__entities:
-            entity = self.__entities[id]
-            if entity.isValid:
-                return entity
-            else:
-                del self.__entities[id]
-        if SComp.CreateGame(serverApi.GetLevelId()).IsEntityAlive(id):
-            entity = createEntity(id)
-            self.__entities[id] = entity
-            return entity
-        else:
-            return None
+        if id in core.entities:
+            return core.entities[core.entities.index(id)]
         
     @staticmethod
     def getTimeOfDay():

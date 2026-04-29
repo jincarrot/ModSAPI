@@ -34,6 +34,9 @@ class Entity(object):
             "typeId": self.typeId
         }
         return "<Entity> %s" % data
+    
+    def __eq__(self, other):
+        return id(self) == id(other) or other == self.__id
 
     @property
     def id(self):
@@ -618,23 +621,35 @@ class Entity(object):
 
         Note: it may return wrong message
         """
-        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString, self.__id)
-        index = commandString.find("@")
-        if index >= 0:
-            selector = ""
-            while index < len(commandString):
-                hasParam = False
-                if commandString[index] == "[":
-                    hasParam = True
-                if commandString[index] == "]":
-                    selector += commandString[index]
+        temp = SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(commandString, self.id)
+        if not temp:
+            raise Exception("Command execution failed! Command: %s" % commandString)
+        params = commandString.split(" ")
+        detectCommand = ""
+        selector = ""
+        if "run" in params:
+            lastIndex = len(params) - 1 - params[::-1].index("run")
+            for i in range(lastIndex, len(params)):
+                if params[i][0] == "@":
+                    selector = params[i]
+                    for j in range(lastIndex):
+                        detectCommand += params[j] + " "
+                    detectCommand += "tag %s add __sapi_temp_detect_tag__" % selector
                     break
-                if commandString[index] == " " and not hasParam:
+        else:
+            for i in range(len(params)):
+                if params[i][0] == "@":
+                    selector = params[i]
+                    detectCommand = "tag %s add __sapi_temp_detect_tag__" % selector
                     break
-                selector += commandString[index]
-                index += 1
-            return CommandResult({"successCount": len(SComp.CreateEntityComponent(self.__id).GetEntitiesBySelector(selector))})
-        return None
+        SComp.CreateCommand(serverApi.GetLevelId()).SetCommand(detectCommand)
+        entities = systems.core.entities # type: list[Dimension.__e.Entity]
+        successCount = 0
+        for entity in entities:
+            if entity.hasTag("__sapi_temp_detect_tag__"):
+                entity.removeTag("__sapi_temp_detect_tag__")
+                successCount += 1
+        return CommandResult({"successCount": successCount})
 
     def setDynamicProperty(self, identifier, value):
         """

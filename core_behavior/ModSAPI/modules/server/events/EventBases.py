@@ -56,8 +56,8 @@ class EventListener(object):
     process event
     """
 
-    def __init__(self, eventName, callback, options=None, detectFunc=None, valueName=None, wrapper=None, namespace=serverApi.GetEngineNamespace(), systemName=serverApi.GetEngineSystemName()):
-        # type: (str, types.FunctionType, 0, types.FunctionType, str, 0, str, str) -> None
+    def __init__(self, eventName, callback, options=None, detectFunc=None, valueName=None, wrapper=None, namespace=serverApi.GetEngineNamespace(), systemName=serverApi.GetEngineSystemName(), waitOneTick=False):
+        # type: (str, types.FunctionType, 0, types.FunctionType, str, 0, str, str, bool) -> None
         world = systems.world
         self.__eventName = eventName
         self.__callback = callback
@@ -65,6 +65,7 @@ class EventListener(object):
         self.__check = detectFunc
         self.__wrapper = wrapper
         self.__valueName = valueName
+        self.__waitOneTick = waitOneTick
         SComp.CreateItem(serverApi.GetLevelId()).GetUserDataInEvent(eventName)
         event = listenerManager.get(eventName)
         if event.empty:
@@ -79,7 +80,10 @@ class EventListener(object):
     def listen(self, data):
         if (self.__check and self.__check(self, data, self.__valueName)) or not self.__check:
             value = self.__wrapper(data)
-            self.__callback(value)
+            if self.__waitOneTick:
+                SComp.CreateGame(serverApi.GetLevelId).AddTimer(0, self.__callback, value)
+            else:
+                self.__callback(value)
 
     def unListen(self):
         listenerManager.get(self.__wrapper.__name__).remove(self.listen)

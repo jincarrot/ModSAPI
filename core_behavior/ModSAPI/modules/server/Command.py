@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # from typing import Union, Dict
 
+
 class CommandResult(object):
     """
     Contains return data on the result of a command execution.
@@ -9,6 +10,9 @@ class CommandResult(object):
     def __init__(self, data):
         # type: (dict) -> None
         self.__successCount = data['successCount']
+
+    def __str__(self):
+        return "<CommandResult> {successCount: %s}" % self.successCount
 
     @property
     def successCount(self):
