@@ -294,8 +294,7 @@ class Block(object):
         blockData = SComp.CreateBlockInfo(serverApi.GetLevelId()).GetBlockNew((int(self.location.x), int(self.location.y), int(self.location.z)), self.dimension.dimId)
         if liquidData and liquidData['name'] != blockData['name']:
             return True
-        else:
-            return False
+        return False
         
     @property
     def permutation(self):
@@ -374,6 +373,16 @@ class Block(object):
         """
         SComp.CreateBlockState(serverApi.GetLevelId()).SetBlockStates((self.__location.x, self.__location.y, self.__location.z), permutation.getAllStates(), self.__dimension.dimId)
 
+    def setWaterlogged(self, waterlogged):
+        # type: (bool) -> None
+        """
+        Sets whether this block is waterlogged.
+        """
+        if waterlogged:
+            SComp.CreateBlockInfo(serverApi.GetLevelId()).SetLiquidBlock((self.__location.x, self.__location.y, self.__location.z), {"name": "minecraft:water", "aux": 0}, self.__dimension.dimId)
+        else:
+            SComp.CreateBlockInfo(serverApi.GetLevelId()).SetLiquidBlock((self.__location.x, self.__location.y, self.__location.z), {"name": "minecraft:air", "aux": 0}, self.__dimension.dimId)
+    
     def getTags(self):
         # type: () -> list[str]
         """
