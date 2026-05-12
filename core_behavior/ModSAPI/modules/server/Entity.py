@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from mod.common.minecraftEnum import EntityComponentType, RayFilterType
 from ...utils.system import systems
 from Effect import *
@@ -686,7 +686,7 @@ class Entity(object):
         """
         location = Vector3(location) 
         teleportOptions = TeleportOptions(teleportOptions if type(teleportOptions) == dict else {}) if type(teleportOptions) != TeleportOptions else teleportOptions
-        SComp.CreatePos(self.__id).SetFootPos((location.x, location.y, location.z))
+        SComp.CreateDimension(self.__id).ChangeEntityDimension(teleportOptions.dimension.dimId, location.getTuple())
 
     def triggerEvent(self, eventName):
         """

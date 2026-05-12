@@ -1,9 +1,10 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 
 from ..EventBases import *
 import mod.server.extraServerApi as serverApi
 from ..core.WorldEvents import *
 from .....interfaces.EventOptions import ScriptEventMessageFilterOptions
+from .....config import Namespace
 
 class ExplosionAfterEventSignal(Events):
     """
@@ -78,7 +79,7 @@ class ClientEventReceiveAfterEventSignal(Events):
         """
         Registers a new ScriptEvent handler.
         """
-        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, eventName, ClientEventReceiveAfterEvent, "ModSAPI", "client")
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, eventName, ClientEventReceiveAfterEvent, Namespace, "client")
 
 
 class ExplosionBeforeEventSignal(Events):

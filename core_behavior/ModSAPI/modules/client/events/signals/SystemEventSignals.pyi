@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from typing import Callable
 from ..EventBases import *
 import mod.server.extraServerApi as serverApi

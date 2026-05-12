@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
-from ...interfaces.EntityOptions import *
 from ...interfaces.Vector import *
 from ...interfaces.ParticleOptions import *
 
@@ -41,7 +40,7 @@ class Particle:
             entity.id, 
             options.get("bone", "body"), 
             options.get("offset", Vector3((0, 0, 0))).getTuple(), 
-            options.get("rotate", Vector3()).getTuple()
+            options.get("rotate", Vector3((0, 0, 0))).getTuple()
         )
     
     def getMolang(self, molangExpression):

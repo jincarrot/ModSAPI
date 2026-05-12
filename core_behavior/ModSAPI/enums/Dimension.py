@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ConstMeta import ConstMeta
 EntityQueryOptionsProperties = ["closest", "farthest", "location", "maxDistance", "minDistance", "volume"]
 MinecraftDimensionTypes = ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"]

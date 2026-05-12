@@ -1,7 +1,8 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from ..EventBases import *
 import mod.server.extraServerApi as serverApi
 from ..core.SystemEvents import *
+from .....config import Namespace
 
 class ServerEventReceiveAfterEventSignal(Events):
     """
@@ -23,4 +24,4 @@ class ServerEventReceiveAfterEventSignal(Events):
         """
         Registers a new ScriptEvent handler.
         """
-        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, eventName, ServerEventReceiveAfterEvent, "ModSAPI", "system")
+        self._events[id(callback)] = EventListener(self.__eventName, callback, options, self._check, eventName, ServerEventReceiveAfterEvent, Namespace, "system")

@@ -1,5 +1,5 @@
 from Entity import Entity
-from core_behavior.ModSAPI.modules.client.Screen import *
+from ..client.Screen import *
 from ..client.Camara import *
 from ..client.ClientSystemInfo import *
 from ...utils.system import *
@@ -8,6 +8,7 @@ from ItemStack import *
 import mod.server.extraServerApi as serverApi
 from Container import Container
 from MolangVariableMap import MolangVariableMap
+from ...enums.Player import *
 
 class Player(Entity):
     """
@@ -38,6 +39,10 @@ class Player(Entity):
     def selectedSlotIndex(self, slotId):
         # type: (int) -> None
         pass
+
+    @property
+    def playerPermissionLevel(self) -> PlayerPermissionLevel:
+        """"""
 
     @property
     def container(self):

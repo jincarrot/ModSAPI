@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
 from client import systems
 from ..interfaces.Vector import Vector3
@@ -24,6 +24,10 @@ class Core(ClientSystem):
         client.afterEvents.serverEventReceive.subscribe("closeMoreUI", self.closeMoreUI)
         client.afterEvents.serverEventReceive.subscribe("modsapi.dimension.spawnParticle", self.spawnParticle)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
+        self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.onPlayerSpawn)
+
+    def onPlayerSpawn(self, arg):
+        self.NotifyToServer("playerSpawn", {"playerId": clientApi.GetLocalPlayerId(), "initial": True})
 
     def spawnParticle(self, arg):
         data = arg.data

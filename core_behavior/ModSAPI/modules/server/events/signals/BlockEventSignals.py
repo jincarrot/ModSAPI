@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 
 from ..EventBases import *
 import mod.server.extraServerApi as serverApi

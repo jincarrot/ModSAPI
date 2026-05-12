@@ -6,7 +6,7 @@ class TickingArea:
 
     def __init__(self, data):
         # type: (dict[str, str]) -> None
-        from ..Classes.Dimension import Dimension
+        from ..modules.server.Dimension import Dimension
         from BlockBoundingBox import BlockBoundingBox
         self.dimension = data['dimension'] # type: Dimension
         """The dimension the ticking area is located."""

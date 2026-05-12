@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import types
 import mod.server.extraServerApi as serverApi
 
@@ -80,14 +81,14 @@ class TickingAreaManager:
             else:
                 promise.callback()
         minCorner = (
-            min(options._from.getTuple()[0], options.to.getTuple()[0]), 
-            min(options._from.getTuple()[1], options.to.getTuple()[1]), 
-            min(options._from.getTuple()[2], options.to.getTuple()[2])
+            int(min(options._from.getTuple()[0], options.to.getTuple()[0])), 
+            int(min(options._from.getTuple()[1], options.to.getTuple()[1])), 
+            int(min(options._from.getTuple()[2], options.to.getTuple()[2]))
         )
         maxCorner = (
-            max(options._from.getTuple()[0], options.to.getTuple()[0]), 
-            max(options._from.getTuple()[1], options.to.getTuple()[1]), 
-            max(options._from.getTuple()[2], options.to.getTuple()[2])
+            int(max(options._from.getTuple()[0], options.to.getTuple()[0])), 
+            int(max(options._from.getTuple()[1], options.to.getTuple()[1])), 
+            int(max(options._from.getTuple()[2], options.to.getTuple()[2]))
         )
         tickingArea = TickingArea(
             {

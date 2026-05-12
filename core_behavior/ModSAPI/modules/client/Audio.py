@@ -11,11 +11,9 @@ class Audio:
     def __init__(self, playerId=clientApi.GetLocalPlayerId()):
         self.__id = playerId
 
-    def playSound(self, soundId, soundOptions=PlayerSoundOptions):
+    def playSound(self, soundId, soundOptions={}):
         # type: (str, dict) -> None
         """播放音效"""
-        if soundOptions == PlayerSoundOptions:
-            soundOptions = {}
         if 'location' not in soundOptions:
             pos = CComp.CreatePos(self.__id).GetPos()
             soundOptions['location'] = Vector3({"x": pos[0], "y": pos[1], "z": pos[2]})

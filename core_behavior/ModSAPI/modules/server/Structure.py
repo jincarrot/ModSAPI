@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import types
 import mod.server.extraServerApi as serverApi
 from ..server.Block import BlockPermutation

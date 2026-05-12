@@ -2,6 +2,9 @@
 from ...Entity import *
 from ...Player import *
 
+class PlayerSpawnEvent(object):
+    pass
+
 class ChatSendAfterEvent(object):
     """
     An event that fires as players enter chat messages.

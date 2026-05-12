@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from ...Entity import *
 from .....modules.server.Player import *
 from .....enums.Dimension import *
@@ -327,10 +327,7 @@ class PlayerSpawnAfterEvent(object):
     def __init__(self, data):
         global eventData
         self.__player = Player(data['playerId'])
-        self.__initialSpawn = False
-        if data['playerId'] in eventData['playerSpawn']:
-            self.__initialSpawn = True
-            del eventData['playerSpawn'][data['playerId']]
+        self.__initialSpawn = data.get("initial", False)
 
     def __str__(self):
         data = {

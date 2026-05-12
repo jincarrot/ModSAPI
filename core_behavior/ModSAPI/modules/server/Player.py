@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 from Entity import *
-from ..client.Camara import *
-from ..client.ClientSystemInfo import *
+# from ..client.Camara import *
+# from ..client.ClientSystemInfo import *
 from ...utils.system import *
-from ..client.Audio import *
+# from ..client.Audio import *
 from ItemStack import *
 import mod.server.extraServerApi as serverApi
 
@@ -35,13 +36,13 @@ class Player(Entity):
 
     @property
     def camera(self):
-        # type: () -> Camera
+        # type: () -> any
         """
         The player's Camera.
 
         No use now.
         """
-        return Camera(self.__id)
+        return None # Camera(self.__id)
     
     @property
     def isFlying(self):
@@ -67,17 +68,17 @@ class Player(Entity):
     
     @property
     def clientSystemInfo(self):
-        # type: () -> ClientSystemInfo
         """
         Contains the player's device information.
         """
         # requestId = request.create(self.__id, "clientSystemInfo")
         # value = request.getValue(requestId)
         # return ClientSystemInfo(value)
+        return None
 
     @property
     def playerPermissionLevel(self):
-        return None
+        return SComp.CreatePlayer(self.__id).GetPlayerOperation()
 
     @property
     def container(self):
@@ -150,4 +151,9 @@ class Player(Entity):
     def popScreen(self):
         # world.NotifyToClient(self.id, "popScreen", {})
         pass
+
+    def teleport(self, location, teleportOptions = {}):
+        location = Vector3(location) 
+        teleportOptions = TeleportOptions(teleportOptions if type(teleportOptions) == dict else {}) if type(teleportOptions) != TeleportOptions else teleportOptions
+        SComp.CreateDimension(self.__id).ChangePlayerDimension(teleportOptions.dimension.dimId, location.getTuple())
 

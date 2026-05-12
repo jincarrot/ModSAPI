@@ -129,7 +129,7 @@ class Observable:
             if options['clientWritable']:
                 systems.system.afterEvents.clientEventRecieve.subscribe("updateObservable%s" % self._id, self._update)
         else:
-            raise TypeError("Create observable failed! Expected type int | float | str | bool, but got %s" % (type(self.__data).__name__, type(data).__name__))
+            raise TypeError("Create observable failed! Expected type int | float | str | bool, but got %s" % (type(self.__data).__name__))
 
     @property
     def typeId(self):
@@ -411,7 +411,7 @@ class CustomForm(DynamicForm):
             )
         if not isinstance(value, Observable):
             raise Exception(
-                "CustomForm create button failed! arg 1 expected type Observable<int>, but got %s" % type(toggled).__name__
+                "CustomForm create button failed! arg 1 expected type Observable<int>, but got %s" % type("").__name__
             )
         else:
             if not value._options['clientWritable']:
@@ -499,7 +499,7 @@ class CustomForm(DynamicForm):
             )
         if not isinstance(value, Observable):
             raise Exception(
-                "CustomForm create button failed! arg 1 expected type Observable<int>, but got %s" % type(toggled).__name__
+                "CustomForm create button failed! arg 1 expected type Observable<int>, but got %s" % type("").__name__
             )
         else:
             if not value._options['clientWritable']:

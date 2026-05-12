@@ -1,8 +1,9 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 
 from ..EventBases import *
 import mod.server.extraServerApi as serverApi
 from ..core.PlayerEvents import *
+from .....config import Namespace
 
 
 class ChatSendAfterEventSignal(Events):
@@ -140,6 +141,7 @@ class PlayerSpawnAfterEventSignal(Events):
         """
         Registers a new event receiver for this particular type of event.
         """
+        EventListener("playerSpawn", callback, None, None, None, PlayerSpawnAfterEvent, Namespace, "client_core")
         self._events[id(callback)] = EventListener(self.__eventName, callback, None, None, None, PlayerSpawnAfterEvent)
 
 class PlayerJoinAfterEventSignal(Events):

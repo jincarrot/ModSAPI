@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 def update(a, b):
     # type: (dict, dict) -> dict
     ori = a.copy()

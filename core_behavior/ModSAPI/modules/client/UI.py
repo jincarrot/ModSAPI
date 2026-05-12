@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
 
 class ScreenNode(clientApi.GetScreenNodeCls()):

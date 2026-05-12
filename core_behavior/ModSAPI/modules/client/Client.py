@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
 from ClientEvents import *
 from Player import *
@@ -57,7 +58,7 @@ class Client(ClientSystem):
         Spawns a client-side entity of the given type at the given location. 
         Returns the runtime identifier of the spawned entity.
         """
-        return self.getEntity(self.CreateClientEntityByTypeStr(typeId, location.getTuple()))
+        return self.getEntity(self.CreateClientEntityByTypeStr(typeId, location.getTuple(), (0, 0)))
     
     def spawnParticle(self, typeId, location, options={}):
         """Spawns a particle effect."""

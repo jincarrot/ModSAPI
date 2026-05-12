@@ -1,4 +1,4 @@
-# coding = utf-8
+# -*- coding: utf-8 -*-
 
 # from typing import Union, Dict, List
 from ...interfaces.Vector import *

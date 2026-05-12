@@ -375,10 +375,9 @@ class PlayerSoundOptions(object):
     """
 
     def __init__(self, data):
-        self.location = data['location'] if 'location' in data else None # type: Vector3
+        self.location = data['location'] if 'location' in data else (0, 0, 0) # type: Vector3
         """Location of the sound; if not specified, the sound is played near a player."""
-        if type(self.location) == dict:
-            self.location = Vector3(self.location)
+        self.location = Vector3(self.location)
         self.pitch = data['pitch'] if 'pitch' in data else 1.0
         """Optional pitch of the sound."""
         self.volume = data['volume'] if 'volume' in data else 1.0

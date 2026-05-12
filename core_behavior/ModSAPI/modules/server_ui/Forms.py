@@ -237,7 +237,8 @@ class CustomFormUI(ScreenNode):
 
     def close(self, data):
         if self.basePath:
-            self.sn.GetBaseUIControl(self.basePath).SetVisible(False)
+            clientApi.PopScreen()
+            # self.sn.GetBaseUIControl(self.basePath).SetVisible(False)
         else:
             clientApi.PopScreen()
 

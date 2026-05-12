@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 class GameMode(object):
     """
     Represents a game mode for the current world experience.

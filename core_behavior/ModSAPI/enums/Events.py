@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 class ScriptEventSource:
     """
     Describes where the script event originated from.

@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 class Counter:
 
     def __init__(self):

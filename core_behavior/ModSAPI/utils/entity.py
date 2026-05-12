@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ..interfaces.EntityOptions import EntityQueryOptions
 import random
 

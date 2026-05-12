@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import types
 from ....utils.client import systems
 import mod.client.extraClientApi as clientApi

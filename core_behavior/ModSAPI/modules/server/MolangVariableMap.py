@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from ...interfaces.Vector import Vector3
 
 class RGB:

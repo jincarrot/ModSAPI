@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import types
 from ..EventBases import *
 from .....interfaces.EntityOptions import *

@@ -192,7 +192,7 @@ class ControlData(object):
         """add a new control to current control"""
         if isinstance(controlData, ControlData):
             self.controls.append(controlData)
-            import behavior.ModSAPI.modules.server_ui.UI as custom_ui
+            import UI as custom_ui
             custom_ui.RefreshSigns[id(self.inst)] = True
         else:
             print("param error! Not a control.")
@@ -278,7 +278,7 @@ class ScrollPanelData(ControlData):
 class ButtonTouchCallbacks:
 
     def __init__(self):
-        from behavior.ModSAPI.modules.server_ui.UI import ButtonCallbackArgument
+        from UI import ButtonCallbackArgument
         def default(arg):
             # type: (ButtonCallbackArgument) -> None
             pass
@@ -498,7 +498,7 @@ class ScreenData(object):
         """add a new control to current control"""
         if isinstance(controlData, ControlData):
             self.controls.append(controlData)
-            import behavior.ModSAPI.modules.server_ui.UI as custom_ui
+            import UI as custom_ui
             custom_ui.RefreshSigns[id(self.inst)] = True
         else:
             print("[Error][ModSAPI] 添加控件失败！")

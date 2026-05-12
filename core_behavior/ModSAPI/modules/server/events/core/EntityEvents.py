@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 from ...Entity import *
 from .....interfaces.Sources import *
 from mod.common.minecraftEnum import *

@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 
 class PlayerPermissionLevel:
     """The player permission level."""

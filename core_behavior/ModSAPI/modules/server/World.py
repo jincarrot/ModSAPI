@@ -1,3 +1,4 @@
+# # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
 
 from Entity import *
