@@ -3,7 +3,7 @@ import mod.server.extraServerApi as serverApi
 
 ServerSystem = serverApi.GetServerSystemCls()
 
-class Components:
+class Components(ServerSystem):
     """Contains all components of ModSAPI."""
 
     @property

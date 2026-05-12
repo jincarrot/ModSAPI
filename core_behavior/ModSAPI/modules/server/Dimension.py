@@ -152,7 +152,7 @@ class Dimension(object):
         Creates a new entity (e.g., a mob) at the specified location.
         """
         world = systems.world
-        pos = Vector3(location) if type(location) == dict else location
+        pos = Vector3(location)
         if options == SpawnEntityOptions:
             options = {}
         options = SpawnEntityOptions(options) if type(options) == dict else options

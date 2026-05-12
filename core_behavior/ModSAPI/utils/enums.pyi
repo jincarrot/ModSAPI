@@ -2,6 +2,7 @@
 import mod.server.extraServerApi as serverApi
 from ..enums.Structure import *
 from ..enums.Entity import *
+from ..enums.Player import *
 ServerSystem = serverApi.GetServerSystemCls()
 
 class Enums:
@@ -21,4 +22,7 @@ class Enums:
     
     @property
     def EquipmentSlot(self) -> EquipmentSlot: ...
+
+    @property
+    def PlayerPermissionLevel(self) -> PlayerPermissionLevel: ...
     

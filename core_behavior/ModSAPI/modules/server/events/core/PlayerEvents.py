@@ -1,6 +1,7 @@
 # coding=utf-8
 from ...Entity import *
 from .....modules.server.Player import *
+from .....enums.Dimension import *
 eventData = {
     "playerInteractWithEntity": {},
     "playerSpawn": {}
@@ -110,6 +111,8 @@ class ItemStartUseOnAfterEvent(object):
         itemData = data['itemDict']
         self.__itemStack = createItemStack(itemData)
         self.__source = Player(data['entityId'])
+        self.__block = Block({"dimension": Dimension(data['dimensionId']), "location": Vector3((data['x'], data['y'], data['z']))})
+        self.__blockFace = Direction_ModSDK[data['face']]
 
     def __str__(self):
         data = {
@@ -117,7 +120,7 @@ class ItemStartUseOnAfterEvent(object):
             "source": str(self.__source)
         }
         return "<ItemUseAfterEvent> %s" % data
-
+    
     @property
     def itemStack(self):
         # type: () -> ItemStack
@@ -133,6 +136,14 @@ class ItemStartUseOnAfterEvent(object):
         Returns the source entity that triggered this item event.
         """
         return self.__source
+    
+    @property
+    def block(self):
+        return self.__block
+    
+    @property
+    def blockFace(self):
+        return self.__blockFace
     
 class ItemCompleteUseAfterEvent(object):
     """

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
+from ..config import Namespace
 
 class Systems:
 
@@ -14,7 +15,7 @@ class Systems:
     def world(self):
         if self._world:
             return self._world
-        world = serverApi.GetSystem("ModSAPI", "world")
+        world = serverApi.GetSystem(Namespace, "world")
         self._world = world
         return world
     
@@ -22,7 +23,7 @@ class Systems:
     def system(self):
         if self._system:
             return self._system
-        system = serverApi.GetSystem("ModSAPI", "system")
+        system = serverApi.GetSystem(Namespace, "system")
         self._system = system
         return system
     
@@ -30,7 +31,7 @@ class Systems:
     def core(self):
         if self._core:
             return self._core
-        core = serverApi.GetSystem("ModSAPI", "core")
+        core = serverApi.GetSystem(Namespace, "core")
         self._core = core
         return core
     
@@ -38,7 +39,7 @@ class Systems:
     def modules(self):
         if self._modules:
             return self._modules
-        modules = serverApi.GetSystem("ModSAPI", "modules")
+        modules = serverApi.GetSystem(Namespace, "modules")
         self._modules = modules
         return modules
     
@@ -46,7 +47,7 @@ class Systems:
     def enums(self):
         if self._enums:
             return self._enums
-        enums = serverApi.GetSystem("ModSAPI", "enums")
+        enums = serverApi.GetSystem(Namespace, "enums")
         self._enums = enums
         return enums
     
@@ -54,7 +55,7 @@ class Systems:
     def components(self):
         if self._components:
             return self._components
-        components = serverApi.GetSystem("ModSAPI", "components")
+        components = serverApi.GetSystem(Namespace, "components")
         self._components = components
         return components
     

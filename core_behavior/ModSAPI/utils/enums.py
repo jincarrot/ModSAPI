@@ -30,3 +30,8 @@ class Enums(ServerSystem):
     def EquipmentSlot(self):
         from ..enums.Entity import EquipmentSlot as e
         return e()
+    
+    @property
+    def PlayerPermissionLevel(self):
+        from ..enums.Player import PlayerPermissionLevel as p
+        return p()

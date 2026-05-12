@@ -43,6 +43,7 @@ class WorldAfterEvents(object):
         self.__playerInventoryItemChange = PlayerInventoryItemChangeAfterEventSignal()
         self.__playerBreakBlock = PlayerBreakBlockAfterEventSignal()
         self.__playerPlaceBlock = PlayerPlaceBlockAfterEventSignal()
+        self.__playerInteractWithEntity = PlayerInteractWithEntityAfterEventSignal()
 
     @property
     def dataDrivenEntityTrigger(self):
@@ -201,6 +202,11 @@ class WorldAfterEvents(object):
     def playerPlaceBlock(self):
         """This event fires for a block that is placed by a player."""
         return self.__playerPlaceBlock
+    
+    @property
+    def playerInteractWithEntity(self):
+        """This event fires when a player interacts with an entity."""
+        return self.__playerInteractWithEntity
     
 class WorldBeforeEvents(object):
     """

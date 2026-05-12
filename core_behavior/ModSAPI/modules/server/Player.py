@@ -64,10 +64,6 @@ class Player(Entity):
     def selectedSlotIndex(self, slotId):
         # type: (int) -> None
         SComp.CreatePlayer(self.__id).ChangeSelectSlot(slotId)
-
-    @property
-    def client(self):
-        pass
     
     @property
     def clientSystemInfo(self):
@@ -78,6 +74,10 @@ class Player(Entity):
         # requestId = request.create(self.__id, "clientSystemInfo")
         # value = request.getValue(requestId)
         # return ClientSystemInfo(value)
+
+    @property
+    def playerPermissionLevel(self):
+        return None
 
     @property
     def container(self):

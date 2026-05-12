@@ -34,4 +34,10 @@ class Particle:
     
     def remove(self):
         """Remove this particle effect."""
+
+    def pause(self):
+        """Pause this particle effect."""
+
+    def resume(self):
+        """Resume this particle effect."""
         

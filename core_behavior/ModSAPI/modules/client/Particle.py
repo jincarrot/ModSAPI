@@ -52,6 +52,14 @@ class Particle:
         """Set value of molang."""
         particleComp.SetVariable(self.__id, molang, value)
 
+    def pause(self):
+        """Pause this particle effect."""
+        particleComp.Pause(self.__id)
+
+    def resume(self):
+        """Resume this particle effect."""
+        particleComp.Resume(self.__id)
+
     def remove(self):
         """Remove this particle effect."""
         particleComp.Remove(self.__id)

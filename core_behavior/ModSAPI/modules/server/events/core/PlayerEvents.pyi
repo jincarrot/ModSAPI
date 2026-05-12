@@ -71,6 +71,20 @@ class ItemStartUseOnAfterEvent(object):
         """
         Returns the source entity that triggered this item event.
         """
+
+    @property
+    def block(self):
+        # type: () -> Block
+        """
+        The block that the item is used on.
+        """
+
+    @property
+    def blockFace(self):
+        # type: () -> Direction
+        """
+        The face of the block that an item is being used on.
+        """
     
 class ItemCompleteUseAfterEvent(object):
     """

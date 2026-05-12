@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import mod.server.extraServerApi as serverApi
+from ItemStack import *
 
 SComp = serverApi.GetEngineCompFactory()
 
@@ -182,19 +183,19 @@ class Container(object):
             itemDict = comp.GetPlayerItem(0, slot, True)
             if not itemDict:
                 return None
-            item = self.i.createItemStack(itemDict)
+            item = createItemStack(itemDict)
             return item
         elif self.__entityId:
             itemDict = comp.GetEntityItem(0, slot, True)
             if not itemDict:
                 return None
-            item = self.i.createItemStack(itemDict)
+            item = createItemStack(itemDict)
             return item
         elif self.__location:
             itemDict = comp.GetContainerItem(self.__location, slot, self.__dimId, True)
             if not itemDict:
                 return None
-            item = self.i.createItemStack(itemDict)
+            item = createItemStack(itemDict)
             return item
         return None
 

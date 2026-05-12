@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
+from ..config import Namespace
 
 class Systems:
 
@@ -9,7 +10,7 @@ class Systems:
     def client(self):
         if self._client:
             return self._client
-        client = clientApi.GetSystem("ModSAPI", "client")
+        client = clientApi.GetSystem(Namespace, "client")
         self._client = client
         return client
 

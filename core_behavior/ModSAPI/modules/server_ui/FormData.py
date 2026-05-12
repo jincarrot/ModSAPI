@@ -798,14 +798,15 @@ class MoreUI:
     _ID = 0
     
     def __init__(self, player, layout={}):
-        if not isinstance(player, self.__e.Player):
+        from ..server.Player import Player
+        if not isinstance(player, Player):
             raise Exception("Create MoreUI failed! arg 0 excepted type Player.")
         if not isinstance(layout, dict):
             raise Exception("Create MoreUI failed! arg 1 excepted type dict, but got type %s" % layout)
         self.__id = MoreUI._ID
         self.__forms = [] # type: list[MoreUICustomData]
         self.__layout = MoreUILayout(layout)
-        if not isinstance(player, self.__e.Player):
+        if not isinstance(player, Player):
             raise Exception("Create MoreUI failed! arg 0 excepted type <Player>, but got %s" % type(player).__name__)
         self.__player = player
         MoreUI._ID += 1
@@ -878,3 +879,11 @@ class MoreUI:
         updateForm(self.__player, "sendMore", layout)
         for formData in self.__forms:
             updateForm(formData.form, "combine")
+
+    def close(self):
+        systems.system.sendToClient(
+            self.__player.id, 
+            "closeMoreUI", 
+            {"formId": self.__id}
+        )
+        return self

@@ -684,7 +684,7 @@ class Entity(object):
         """
         Teleports the selected entity to a new location
         """
-        location = Vector3(location if type(location) == dict else {}) if type(location) != Vector3 else location
+        location = Vector3(location) 
         teleportOptions = TeleportOptions(teleportOptions if type(teleportOptions) == dict else {}) if type(teleportOptions) != TeleportOptions else teleportOptions
         SComp.CreatePos(self.__id).SetFootPos((location.x, location.y, location.z))
 

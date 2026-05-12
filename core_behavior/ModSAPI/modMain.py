@@ -2,20 +2,20 @@
 from mod.common.mod import Mod
 import mod.server.extraServerApi as serverApi
 import mod.client.extraClientApi as clientApi
-
-# from .architect.subsystem import SubsystemManager
+from .config import Namespace
 
 
 @Mod.Binding(name="ModSAPI", version="1.0.0")
 class ModSAPI(object):
     @Mod.InitServer()
     def ModSAPIServerInit(self):
-        serverApi.RegisterSystem("ModSAPI", "core", "ModSAPI.utils.core.CoreSystem")
-        serverApi.RegisterSystem("ModSAPI", "world", "ModSAPI.modules.server.World.World")
-        serverApi.RegisterSystem("ModSAPI", "system", "ModSAPI.modules.server.System.System")
-        serverApi.RegisterSystem("ModSAPI", "modules", "ModSAPI.utils.modules.Modules")
-        serverApi.RegisterSystem("ModSAPI", "enums", "ModSAPI.utils.enums.Enums")
-        serverApi.RegisterSystem("ModSAPI", "components", "ModSAPI.utils.components.Components")
+        basePath = self.__class__.__module__.split(".")[0]
+        serverApi.RegisterSystem(Namespace, "core", "%s.utils.core.CoreSystem" % basePath)
+        serverApi.RegisterSystem(Namespace, "world", "%s.modules.server.World.World" % basePath)
+        serverApi.RegisterSystem(Namespace, "system", "%s.modules.server.System.System" % basePath)
+        serverApi.RegisterSystem(Namespace, "modules", "%s.utils.modules.Modules" % basePath)
+        serverApi.RegisterSystem(Namespace, "enums", "%s.utils.enums.Enums" % basePath)
+        serverApi.RegisterSystem(Namespace, "components", "%s.utils.components.Components" % basePath)
         
         """serverApi.RegisterSystem("SAPI", "system",
                                  "Scripts_SAPI.SAPI_S.System")
@@ -23,8 +23,9 @@ class ModSAPI(object):
 
     @Mod.InitClient()
     def ModSAPIClientInit(self):
-        clientApi.RegisterSystem("ModSAPI", "client", "ModSAPI.modules.client.Client.Client")
-        clientApi.RegisterSystem("ModSAPI", "client_core", "ModSAPI.utils.client_core.Core")
+        basePath = self.__class__.__module__.split(".")[0]
+        clientApi.RegisterSystem(Namespace, "client", "%s.modules.client.Client.Client" % basePath)
+        clientApi.RegisterSystem(Namespace, "client_core", "%s.utils.client_core.Core" % basePath)
         """ SubsystemManager.createClientSystem('SAPI', 'SAPI_C', 'Scripts_SAPI.SAPI_C.SAPI_C')"""
 
     @Mod.DestroyServer()
