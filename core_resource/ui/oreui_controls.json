@@ -1589,11 +1589,14 @@
         "$pressed_button_name": "%netease_editor_template_namespace.click",
         "$pressed_texture": "textures/netease/common/button/pressed",
         "$texture_layer": 2,
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
+        "anchor_from": "top_right",
+        "anchor_to": "top_right",
         "size": [
             "100%-4px",
             "30px"
+        ],
+        "offset": [
+            -2, 0
         ],
         "layer": 2,
         "button_mappings": [],
@@ -1947,6 +1950,20 @@
                             }
                         }
                     ]
+                }
+            },
+            {
+                "icon": {
+                    "type": "image",
+                    "anchor_from": "left_middle",
+                    "anchor_to": "right_middle",
+                    "size": [
+                        30,
+                        30
+                    ],
+                    "offset": [-4, 0],
+                    "visible": false,
+                    "texture": ""
                 }
             }
         ]

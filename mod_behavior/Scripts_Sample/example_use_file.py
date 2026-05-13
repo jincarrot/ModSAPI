@@ -4,7 +4,13 @@ from ModSAPI.serverui.beta import *
 
 def onChatSend(arg):
     # type: (ChatSendAfterEvent) -> None
-    print("ChatSend event in 'example_use_file', sender: %s" % str(arg.sender))
+    form = ModalFormData()
+    form.title("测试")
+    form.slider("滑动条", 0, 10, 1)
+    form.textField("222", "???")
+    form.toggle("开关")
+    form.dropdown("下拉框", ["选项1", "选项2", "选项3"])
+    form.show(arg.sender).then(lambda res: arg.sender.sendMessage(str(res)))
 
 world.afterEvents.chatSend.subscribe(onChatSend) # 监听事件
 

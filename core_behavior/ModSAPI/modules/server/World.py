@@ -31,6 +31,11 @@ class World(ServerSystem):
         self.__structureManager = StructureManager()
 
     @property
+    def levelId(self):
+        """Runtime identifier of the current level."""
+        return serverApi.GetLevelId()
+    
+    @property
     def afterEvents(self):
         return self.__afterEvents
 

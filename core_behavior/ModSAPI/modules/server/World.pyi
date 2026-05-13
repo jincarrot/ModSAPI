@@ -16,6 +16,10 @@ comp = serverApi.GetEngineCompFactory()
 class World(ServerSystem):
 
     @property
+    def levelId(self) -> str:
+        """Runtime identifier of the current level."""
+
+    @property
     def afterEvents(self) -> WorldAfterEvents:
         """
         Contains a set of events that are applicable to the entirety of the world.

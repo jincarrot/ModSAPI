@@ -22,9 +22,17 @@ class Core(ClientSystem):
         client.afterEvents.serverEventReceive.subscribe("combineCustomForm", self.combineCustomForm)
         client.afterEvents.serverEventReceive.subscribe("sendMoreCustomForm", self.sendMoreCustomForm)
         client.afterEvents.serverEventReceive.subscribe("closeMoreUI", self.closeMoreUI)
+        client.afterEvents.serverEventReceive.subscribe("showActionForm", self.showActionForm)
+        client.afterEvents.serverEventReceive.subscribe("showModalForm", self.showModalForm)
         client.afterEvents.serverEventReceive.subscribe("modsapi.dimension.spawnParticle", self.spawnParticle)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "UiInitFinished", self, self.initUI)
         self.ListenForEvent(clientApi.GetEngineNamespace(), clientApi.GetEngineSystemName(), "OnLocalPlayerStopLoading", self, self.onPlayerSpawn)
+
+    def showActionForm(self, data):
+        clientApi.PushScreen("server_ui", "ActionForm", data)
+
+    def showModalForm(self, data):
+        clientApi.PushScreen("server_ui", "ModalForm", data)
 
     def onPlayerSpawn(self, arg):
         self.NotifyToServer("playerSpawn", {"playerId": clientApi.GetLocalPlayerId(), "initial": True})
@@ -58,6 +66,8 @@ class Core(ClientSystem):
                 particle.setMolang("%s.z" % molang, value['value'][2])
 
     def initUI(self, data):
+        clientApi.RegisterUI("server_ui", "ActionForm", "%s.modules.server_ui.Forms.ActionForm" % self.__module__.split(".")[0], "server_forms.action_form")
+        clientApi.RegisterUI("server_ui", "ModalForm", "%s.modules.server_ui.Forms.ModalForm" % self.__module__.split(".")[0], "server_forms.modal_form")
         clientApi.RegisterUI("server_ui", "CustomForm", "%s.modules.server_ui.Forms.CustomFormUI" % self.__module__.split(".")[0], "server_forms.custom_form")
         clientApi.RegisterUI("server_ui", "MoreUI", "%s.modules.server_ui.Forms.More" % self.__module__.split(".")[0], "server_forms.moreui")
         clientApi.RegisterUI("ModSAPI", "CustomUI", "%s.modules.server_ui.UI._CustomUI" % self.__module__.split(".")[0], "server_forms.custom_ui")

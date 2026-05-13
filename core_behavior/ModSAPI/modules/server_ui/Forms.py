@@ -232,15 +232,16 @@ class CustomFormUI(ScreenNode):
         self.height = 0
 
     @ViewBinder.binding(ViewBinder.BF_ButtonClickUp, '#custom_form_close')
-    def Close(self, args):
+    def Close(self, args=None):
         clientApi.PopScreen()
+        client.sendToServer("closeCustomForm%s" % self.formId, None)
 
     def close(self, data):
         if self.basePath:
-            clientApi.PopScreen()
+            self.Close()
             # self.sn.GetBaseUIControl(self.basePath).SetVisible(False)
         else:
-            clientApi.PopScreen()
+            self.Close()
 
     def Create(self):
         self.panel = self.sn.GetBaseUIControl(self.basePath + "/panel")
@@ -370,6 +371,14 @@ class CustomFormUI(ScreenNode):
                 control.GetChildByPath("/default/button_label").asLabel().SetText(controlData['label'])
                 control.GetChildByPath("/hover/button_label").asLabel().SetText(controlData['label'])
                 control.GetChildByPath("/pressed/button_label").asLabel().SetText(controlData['label'])
+                # Update icon.
+                if controlData['icon']:
+                    control.GetChildByPath("/icon").asImage().SetSprite(controlData['icon'])
+                    control.GetChildByPath("/icon").SetVisible(True)
+                    control.SetFullSize("x", {"absoluteValue": -38, "relativeValue": 1.0, "followType": "parent"})
+                else:
+                    control.GetChildByPath("/icon").SetVisible(False)
+                    control.SetFullSize("x", {"absoluteValue": -4, "relativeValue": 1.0, "followType": "parent"})
             elif controlData['type'] == 'label':
                 if control:
                     if control.asLabel():

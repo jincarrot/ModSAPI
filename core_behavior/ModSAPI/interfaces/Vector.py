@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 # from typing import List, Dict, Union
-
-import mod.server.extraServerApi as serverApi
 import math
-comp = serverApi.GetEngineCompFactory()
-
 
 class Vector3(object):
 

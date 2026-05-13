@@ -30,5 +30,5 @@ class Client(ClientSystem):
                 return
             clientApi.ImportModule("%s.%s" % (BASE_PATH, ENTRY_PATH_CLIENT))
             print("[Info][ModSAPI][Client] Load entry file '%s' successfully." % ENTRY_PATH_CLIENT)
-        except Exception as e:
-            print("[Error][ModSAPI][Client] Load scripts failed! Cannot find entry file '%s'." % ENTRY_PATH_CLIENT)
+        finally:
+            pass

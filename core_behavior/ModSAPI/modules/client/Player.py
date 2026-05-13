@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
+from ...interfaces.Vector import Vector3
 CComp = clientApi.GetEngineCompFactory()
 
 class ClientPlayer:
@@ -24,4 +25,9 @@ class ClientPlayer:
     def name(self):
         """Name of this player."""
         return self.__name
+    
+    @property
+    def location(self):
+        """Location of this player."""
+        return Vector3(CComp.CreatePos(self.__id).GetFootPos())
     

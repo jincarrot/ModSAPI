@@ -1,9 +1,61 @@
 # -*- coding: utf-8 -*-
 from typing import Callable, TypeVar, Generic, TypedDict, overload
 from server.Player import Player
+from .FormResponse import ActionFormResponse, ModalFormResponse
 
 T = TypeVar("T")
 U = TypeVar("U")
+
+class Promise(Generic[T]):
+
+    def then(self, callback: Callable[[T], None]) -> None:
+        """1"""
+
+class ActionFormData(object):
+    """Builds a simple player form with buttons that let the player take action."""
+
+    def title(self, titleText):
+        # type: (str) -> ActionFormData
+        """This builder method sets the title for the modal dialog."""
+    
+    def body(self, bodyText):
+        # type: (str) -> ActionFormData
+        """Method that sets the body text for the modal form."""
+    
+    def button(self, text, icon=None):
+        # type: (str, str) -> None
+        """Adds a button to this form with an icon from a resource pack."""
+    
+    def show(self, player: Player) -> Promise[ActionFormResponse]:
+        """Creates and shows this modal popup form. Returns asynchronously when the player confirms or cancels the dialog."""
+
+class ModalFormData(object):
+    """Used to create a fully customizable pop-up form for a player."""
+    def title(self, titleText):
+        # type: (str) -> ModalFormData
+        """This builder method sets the title for the modal dialog."""
+    
+    def toggle(self, label, defaultValue=False):
+        # type: (str, bool) -> ModalFormData
+        """Adds a toggle checkbox button to the form."""
+
+    def dropdown(self, label, items, dropdownOptions={"defaultValueIndex": 0}):
+        # type: (str, list[str], dict) -> ModalFormData
+        """The default selected item index. It will be zero in case of not setting this value."""
+    
+    def textField(self, label, placeholderText, defaultValue=""):
+        # type: (str, str, str) -> ModalFormData
+        """Adds a textbox to the form."""
+    
+    def slider(self, label, mininumValue, maxinumValue, valueStep, defaultValue=0):
+        # type: (str, int, int, int, int) -> ModalFormData
+        """Adds a numeric slider to the form."""
+    
+    def show(self, player: Player) -> Promise[ModalFormResponse]:
+        """Creates and shows this modal popup form. Returns asynchronously when the player confirms or cancels the dialog."""
+        """id = random.randint(0, 32767)
+        systems.system.sendToClient(player.id, "showModalForm", {"formId": id, "title": self.__title, "elements": self.__elements})
+        return self.fr.Promise(id)"""
 
 class ObservableOptions(TypedDict):
     clientWritable: bool | Observable[bool]
@@ -52,7 +104,9 @@ class Observable(Generic[T]):
 class Options(TypedDict):
     visible: bool | Observable[bool]
 
-class ButtonOptions(Options): ...
+class ButtonOptions(Options): 
+    icon: str | Observable[str]
+    """Icon of this button. Set to a empty string to hide this icon."""
 
 class DividerOptions(Options): ...
 

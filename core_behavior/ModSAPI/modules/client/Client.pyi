@@ -14,6 +14,10 @@ class Client(ClientSystem):
     """Client system of ModSAPI"""
 
     @property
+    def levelId(self) -> str:
+        """Runtime identifier of the current level."""
+
+    @property
     def localPlayer(self) -> ClientPlayer: ...
 
     @property

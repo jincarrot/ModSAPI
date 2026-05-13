@@ -31,3 +31,13 @@ class Modules(ServerSystem):
         from ..modules.server.MolangVariableMap import MolangVariableMap as m
         return m
     
+    @property
+    def ActionFormData(self):
+        from ..modules.server_ui.FormData import ActionFormData as a
+        return a
+    
+    @property
+    def ModalFormData(self):
+        from ..modules.server_ui.FormData import ModalFormData as m
+        return m
+    

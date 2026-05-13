@@ -9,6 +9,20 @@ from ...utils.system import systems
 Observables = []
 CustomForms = {} # type: dict[int, dict[str, list]]
 
+class Promise:
+    def __init__(self, argType=None):
+        self.__arg = argType
+
+    def then(self, callback):
+        self.__callback = callback
+
+    def onClick(self, btnId, data=None):
+        result = []
+        if data:
+            for d in data:
+                result.append(d.getData())
+        self.__callback(self.__arg({"buttonId": btnId, "canceled": btnId == -1, "data": result}))
+
 class ActionFormData(object):
     """Builds a simple player form with buttons that let the player take action."""
     import FormResponse as fr
@@ -38,9 +52,20 @@ class ActionFormData(object):
     
     def show(self, player):
         """Creates and shows this modal popup form. Returns asynchronously when the player confirms or cancels the dialog."""
-        id = random.randint(0, 32767)
+        """id = random.randint(0, 32767)
         systems.system.sendToClient(player.id, "showActionForm", {"formId": id, "title": self.__title, "body": self.__body, "button": self.__button})
-        return self.fr.Promise(id)
+        return self.fr.Promise(id)"""
+        promise = Promise(self.fr.ActionFormResponse)
+        form = CustomForm.create(player, self.__title)
+        form.label()
+        form.label(self.__body)
+        index = 0
+        for button in self.__button:
+            form.button(button[0], lambda idx=index: (form.close(), promise.onClick(idx)), {"icon": button[1]})
+            index += 1
+        systems.system.afterEvents.clientEventRecieve.subscribe("closeCustomForm%s" % form.formId, lambda a: promise.onClick(-1))
+        form.show()
+        return promise
 
 class ModalFormData(object):
     """Used to create a fully customizable pop-up form for a player."""
@@ -61,15 +86,10 @@ class ModalFormData(object):
         """Adds a toggle checkbox button to the form."""
         data = {
             "type": "toggle",
-            "label": label
+            "label": label,
+            "defaultValue": defaultValue
         }
         self.__elements.append(data)
-        return self
-    
-    def title(self, titleText):
-        # type: (str) -> None
-        """This builder method sets the title for the modal dialog."""
-        self.__title = titleText
         return self
     
     def textField(self, label, placeholderText, defaultValue=""):
@@ -77,7 +97,9 @@ class ModalFormData(object):
         """Adds a textbox to the form."""
         data = {
             "type": "input",
-            "label": label
+            "label": label,
+            "placeholder": placeholderText,
+            "defaultValue": defaultValue
         }
         self.__elements.append(data)
         return self
@@ -87,16 +109,61 @@ class ModalFormData(object):
         """Adds a numeric slider to the form."""
         data = {
             "type": "step_slider",
-            "label": label
+            "label": label,
+            "mininumValue": mininumValue,
+            "maxinumValue": maxinumValue,
+            "valueStep": valueStep,
+            "defaultValue": defaultValue
         }
         self.__elements.append(data)
         return self
     
+    def dropdown(self, label, items, dropdownOptions={"defaultValueIndex": 0}):
+        # type: (str, list[str], dict) -> ModalFormData
+        """The default selected item index. It will be zero in case of not setting this value."""
+        data = {
+            "type": "dropdown",
+            "label": label,
+            "items": items,
+            "defaultValueIndex": dropdownOptions.get("defaultValueIndex", 0)
+        }
+        self.__elements.append(data)
+        return self
+
     def show(self, player):
         """Creates and shows this modal popup form. Returns asynchronously when the player confirms or cancels the dialog."""
-        id = random.randint(0, 32767)
+        """id = random.randint(0, 32767)
         systems.system.sendToClient(player.id, "showModalForm", {"formId": id, "title": self.__title, "elements": self.__elements})
-        return self.fr.Promise(id)
+        return self.fr.Promise(id)"""
+        promise = Promise(self.fr.ModalFormResponse)
+        form = CustomForm.create(player, self.__title)
+        values = []
+        for el in self.__elements:
+            if el['type'] == 'toggle':
+                obs = Observable.create(el.get('defaultValue', False), {"clientWritable": True})
+                form.toggle(el['label'], obs)
+            elif el['type'] == 'input':
+                obs = Observable.create(el.get('defaultValue', ""), {"clientWritable": True})
+                form.textField(el['label'], obs)
+            elif el['type'] == 'step_slider':
+                obs = Observable.create(el.get('defaultValue', 0), {"clientWritable": True})
+                form.slider(el['label'], obs, el.get('mininumValue', 0), el.get('maxinumValue', 1))
+            elif el['type'] == 'dropdown':
+                items = []
+                index = 0
+                for item in el['items']:
+                    items.append({
+                        "value": index,
+                        "label": item
+                    })
+                    index += 1
+                obs = Observable.create(el.get('defaultValueIndex', 0), {"clientWritable": True})
+                form.dropdown(el['label'], obs, items)
+            values.append(obs)
+        form.button("提交", lambda: (form.close(), promise.onClick(0, values)))
+        systems.system.afterEvents.clientEventRecieve.subscribe("closeCustomForm%s" % form.formId, lambda a: promise.onClick(-1))
+        form.show()
+        return promise
 
 def checkType(var, type, T=None):
     """Check type."""
@@ -213,6 +280,7 @@ def updateForm(form, mode="update", options={}):
         # Generate data.
         if control['type'] == 'button':
             temp["label"] = control['label'].getData() if hasattr(control['label'], "getData") else control['label']
+            temp['icon'] = control['icon'].getData() if hasattr(control['icon'], "getData") else control['icon']
         elif control['type'] == 'label':
             temp["text"] = control['text'].getData() if hasattr(control['text'], "getData") else control['text']
         elif control['type'] == 'textField':
@@ -332,7 +400,7 @@ class CustomForm(DynamicForm):
                 selected['callback']()
                 updateForm(self)
 
-    def button(self, label, onClick, options={"visible": True}):
+    def button(self, label, onClick, options={"visible": True, "icon": ""}):
         # type: (str | Observable, types.FunctionType, dict) -> CustomForm
         # Type checking.
         label_value = label.getData() if hasattr(label, "getData") else label
@@ -351,19 +419,24 @@ class CustomForm(DynamicForm):
         else:
             if "visible" not in options:
                 options['visible'] = True
+            if "icon" not in options:
+                options['icon'] = ""
         # Data store.
         self._data.append(
             {
                 "type": "button",
                 "label": label,
                 "callback": onClick,
-                "visible": options['visible']
+                "visible": options['visible'],
+                "icon": options['icon']
             }
         )
         if isinstance(label, Observable):
             CustomForms[self._formId]['obs'].append(label._id)
         if isinstance(options['visible'], Observable):
             CustomForms[self._formId]['obs'].append(options['visible']._id)
+        if isinstance(options['icon'], Observable):
+            CustomForms[self._formId]['obs'].append(options['icon']._id)
         updateForm(self)
         return self
     

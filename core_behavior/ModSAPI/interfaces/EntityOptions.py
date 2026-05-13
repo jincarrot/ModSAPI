@@ -88,13 +88,11 @@ class EntityEventOptions(object):
 
     @property
     def entities(self):
-        # type: () -> list[Entity]
         """If this value is set, this event will only fire for entities that match the entities within this collection."""
         return self.__entities
 
     @entities.setter
     def entities(self, data):
-        # type: (list[Entity]) -> None
         self.__entities = data
 
     @property

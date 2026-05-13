@@ -22,6 +22,11 @@ class Client(ClientSystem):
         self.__audio = Audio()
 
     @property
+    def levelId(self):
+        """Runtime identifier of the current level."""
+        return clientApi.GetLevelId()
+    
+    @property
     def localPlayer(self):
         """The local player."""
         return self.__localPlayer

@@ -8,6 +8,9 @@ comp = serverApi.GetEngineCompFactory()
 
 
 class Vector3:
+    """
+    Contains a description of a vector.
+    """
 
     x: float
     y: float
