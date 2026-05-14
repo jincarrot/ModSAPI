@@ -41,3 +41,8 @@ class Modules(ServerSystem):
         from ..modules.server_ui.FormData import ModalFormData as m
         return m
     
+    @property
+    def Vector3(self):
+        from ..interfaces.Vector import Vector3 as v
+        return v
+    

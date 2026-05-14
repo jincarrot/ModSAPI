@@ -8,6 +8,7 @@ system = systems.system
 
 ItemStack = systems.modules.ItemStack
 MolangVariableMap = systems.modules.MolangVariableMap
+Vector3 = systems.modules.Vector3
 
 
 StructureSaveMode = systems.enums.StructureSaveMode
